@@ -11,6 +11,13 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import joblib
 
+# Import configuration
+from config import (
+    SIGNAL_LENGTH, FS, NUM_PARAMS, PARAM_KEYS, LEARNING_RATE, 
+    PARAM_LOSS_WEIGHT, EPOCHS, BATCH_SIZE, NUM_SAMPLES,
+    MODEL_WEIGHTS_PATH, INPUT_SCALER_PATH, OUTPUT_SCALER_PATH
+)
+
 # Suppress TensorFlow logging
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -18,23 +25,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from ecg_generator import generate_ecg, default_params
 
 # --- 1. Constants and Configuration ---
-NUM_SAMPLES = 2000
-SIGNAL_LENGTH = 2500
-FS = 500
-NUM_PARAMS = 16
-PARAM_KEYS = [
-    'HR', 'A_p', 'μ_p', 'σ_p', 'A_q', 'μ_q', 'σ_q', 'A_r',
-    'μ_r', 'σ_r', 'A_s', 'μ_s', 'σ_s', 'A_t', 'μ_t', 'σ_t'
-]
 INPUT_SHAPE = (SIGNAL_LENGTH, 1)
-EPOCHS = 40
-BATCH_SIZE = 16
-LEARNING_RATE = 1e-4
-PARAM_LOSS_WEIGHT = 0.3
-
-MODEL_WEIGHTS_PATH = 'best_ecg_model.weights.h5'
-INPUT_SCALER_PATH = 'input_scaler.joblib'
-OUTPUT_SCALER_PATH = 'output_scaler.joblib'
 
 # --- 2. Data Generation and Preprocessing ---
 def create_dataset():
@@ -84,6 +75,8 @@ def create_dataset():
 
     X_scaled = X_scaled.reshape((-1, SIGNAL_LENGTH, 1))
 
+    # Ensure the models directory exists before saving scalers
+    os.makedirs(os.path.dirname(INPUT_SCALER_PATH), exist_ok=True)
     joblib.dump(input_scaler, INPUT_SCALER_PATH)
     joblib.dump(output_scaler, OUTPUT_SCALER_PATH)
     print(f"Saved scalers to {INPUT_SCALER_PATH} and {OUTPUT_SCALER_PATH}")
@@ -227,38 +220,54 @@ def plot_training_history(history):
 
     plt.subplot(1, 2, 2)
     # With list outputs, Keras labels them as output_1, output_2, etc.
-    # Check available keys to determine the correct names
     available_keys = list(history.history.keys())
     print(f"Available keys in history: {available_keys}")
     
-    # Try different possible key names based on Keras version
-    recon_key = 'output_1_loss'
-    val_recon_key = 'val_output_1_loss' 
-    param_key = 'output_2_loss'
-    val_param_key = 'val_output_2_loss'
+    # For list outputs, Keras typically labels them as 'output_1_loss', 'output_2_loss', etc.
+    # Try to find the correct keys
+    recon_key = None
+    param_key = None
+    val_recon_key = None
+    val_param_key = None
     
-    # For older Keras versions or different configurations, it might be named differently
-    if recon_key not in history.history:
-        recon_key = 'output_1_loss' if 'output_1_loss' in history.history else 'decoder_loss'
-        val_recon_key = 'val_output_1_loss' if 'val_output_1_loss' in history.history else 'val_decoder_loss'
-        param_key = 'output_2_loss' if 'output_2_loss' in history.history else 'encoder_loss'
-        val_param_key = 'val_output_2_loss' if 'val_output_2_loss' in history.history else 'val_encoder_loss'
+    # Look for the keys in the history
+    for key in history.history.keys():
+        if 'output_1_loss' in key and not key.startswith('val_'):
+            recon_key = key
+        elif 'output_2_loss' in key and not key.startswith('val_'):
+            param_key = key
+        elif 'output_1_loss' in key and key.startswith('val_'):
+            val_recon_key = key
+        elif 'output_2_loss' in key and key.startswith('val_'):
+            val_param_key = key
     
-    # If we still can't find them, use whatever is available
-    if recon_key not in history.history:
-        output_keys = [k for k in history.history.keys() if k.endswith('_loss') and not k.startswith('val')]
-        val_output_keys = [k for k in history.history.keys() if k.startswith('val_') and k.endswith('_loss') and 'val_loss' not in k]
+    # Fallback if we can't find the standard keys
+    if not all([recon_key, param_key, val_recon_key, val_param_key]):
+        # Try to identify them by pattern matching
+        loss_keys = [k for k in available_keys if k.endswith('_loss') and not k.startswith('val_') and k != 'loss']
+        val_loss_keys = [k for k in available_keys if k.startswith('val_') and k.endswith('_loss') and k != 'val_loss']
         
-        if len(output_keys) >= 2 and len(val_output_keys) >= 2:
-            recon_key = output_keys[0]  # First output loss (reconstruction)
-            param_key = output_keys[1]  # Second output loss (parameter prediction)
-            val_recon_key = val_output_keys[0]
-            val_param_key = val_output_keys[1]
+        if len(loss_keys) >= 2:
+            recon_key = loss_keys[0]  # First output loss (reconstruction)
+            param_key = loss_keys[1]  # Second output loss (parameter prediction)
+            
+        if len(val_loss_keys) >= 2:
+            val_recon_key = val_loss_keys[0]  # First validation output loss
+            val_param_key = val_loss_keys[1]  # Second validation output loss
 
-    plt.plot(history.history[recon_key], label='Reconstruction Loss')
-    plt.plot(history.history[val_recon_key], label='Val Recon. Loss')
-    plt.plot(history.history[param_key], label='Parameter Loss')
-    plt.plot(history.history[val_param_key], label='Val Param. Loss')
+    # Plot the losses if we found the keys
+    if all([recon_key, param_key, val_recon_key, val_param_key]):
+        plt.plot(history.history[recon_key], label='Reconstruction Loss')
+        plt.plot(history.history[val_recon_key], label='Val Recon. Loss')
+        plt.plot(history.history[param_key], label='Parameter Loss')
+        plt.plot(history.history[val_param_key], label='Val Param. Loss')
+    else:
+        # Fallback to generic plotting if we can't identify the specific keys
+        print("Could not identify specific loss keys, plotting available losses:")
+        for key in available_keys:
+            if key.endswith('_loss') and key not in ['loss']:
+                plt.plot(history.history[key], label=key)
+                
     plt.title('Component Losses')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
@@ -296,8 +305,14 @@ def plot_reconstruction_results(encoder, decoder, x_test, input_scaler, num_to_p
 if __name__ == '__main__':
     X_scaled, y_scaled, X_raw, input_scaler, output_scaler = create_dataset()
     
-    X_train, X_val, y_train, y_val, X_train_raw, X_val_raw = train_test_split(
-        X_scaled, y_scaled, X_raw, test_size=0.2, random_state=42
+    # Split the data properly
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_scaled, y_scaled, test_size=0.2, random_state=42
+    )
+    
+    # Also split the raw data
+    X_train_raw, X_val_raw = train_test_split(
+        X_raw, test_size=0.2, random_state=42
     )
 
     training_model, encoder, decoder = build_autoencoder(output_scaler)
@@ -336,6 +351,10 @@ if __name__ == '__main__':
 
     print("\nPhase 2 script completed successfully.")
     print("The model weights have been saved to", MODEL_WEIGHTS_PATH)
+    print("To reuse the trained model:")
+    print("1. Load the scalers: input_scaler = joblib.load(INPUT_SCALER_PATH); output_scaler = joblib.load(OUTPUT_SCALER_PATH)")
+    print("2. Re-instantiate the model: training_model, _, _ = build_autoencoder(output_scaler)")
+    print(f"3. Load the saved weights: training_model.load_weights('{MODEL_WEIGHTS_PATH}')")
     print("To reuse the trained model:")
     print("1. Load the scalers: input_scaler = joblib.load(INPUT_SCALER_PATH); output_scaler = joblib.load(OUTPUT_SCALER_PATH)")
     print("2. Re-instantiate the model: training_model, _, _ = build_autoencoder(output_scaler)")
