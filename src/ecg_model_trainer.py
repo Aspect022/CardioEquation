@@ -96,68 +96,92 @@ class Decoder(tf.keras.layers.Layer):
         self.t = tf.constant(np.arange(0, self.signal_length / self.fs, 1/self.fs).astype(np.float32))
 
     def call(self, params_scaled):
-        # Use Keras backend operations instead of py_function for better compatibility
-        # Calculate the inverse transform manually using stored min/max values from the scaler
-        # This avoids the AddN error that can occur with py_function operations
+        # Calculate the inverse transform using stored scaler parameters
         if hasattr(self.output_scaler, 'scale_') and hasattr(self.output_scaler, 'min_'):
             # Calculate inverse transform using stored scaler parameters
             params_unscaled = params_scaled * (1.0 / self.output_scaler.scale_) + self.output_scaler.min_
         else:
             # Fallback if scaler parameters aren't accessible
-            # Using a direct tensor operation to avoid py_function
-            params_unscaled = params_scaled  # This is a simplified approach
+            params_unscaled = params_scaled
 
-        # Create tensors for each parameter
-        HR = params_unscaled[:, 0]  # Shape: [batch_size]
+        # Get the batch size
+        batch_size = tf.shape(params_scaled)[0]
+        
+        # Create the time vector for the entire signal length
+        t = tf.range(0, self.signal_length, dtype=tf.float32) / self.fs  # [signal_length]
+        t_expanded = tf.reshape(t, [1, -1])  # [1, signal_length]
+        
+        # Initialize ECG signal [batch_size, signal_length]
+        ecg_signal = tf.zeros((batch_size, self.signal_length), dtype=tf.float32)
+        
+        # Extract parameters for each sample in the batch
+        HR = params_unscaled[:, 0]  # [batch_size]
+        A_p, mu_p, sigma_p = params_unscaled[:, 1], params_unscaled[:, 2], params_unscaled[:, 3]
+        A_q, mu_q, sigma_q = params_unscaled[:, 4], params_unscaled[:, 5], params_unscaled[:, 6]
+        A_r, mu_r, sigma_r = params_unscaled[:, 7], params_unscaled[:, 8], params_unscaled[:, 9]
+        A_s, mu_s, sigma_s = params_unscaled[:, 10], params_unscaled[:, 11], params_unscaled[:, 12]
+        A_t, mu_t, sigma_t = params_unscaled[:, 13], params_unscaled[:, 14], params_unscaled[:, 15]
         
         # Calculate beat duration for each sample in the batch
-        beat_duration = 60.0 / HR  # Shape: [batch_size]
+        beat_duration = 60.0 / HR  # [batch_size]
         
-        # Expand dimensions for broadcasting: time vector [signal_length]
-        t_expanded = tf.reshape(self.t, [1, -1])  # Shape: [1, signal_length]
+        # Reshape for broadcasting: [batch_size, 1]
+        beat_duration = tf.expand_dims(beat_duration, axis=1)
+        A_p = tf.expand_dims(A_p, axis=1)
+        mu_p = tf.expand_dims(mu_p, axis=1)
+        sigma_p = tf.expand_dims(sigma_p, axis=1)
+        A_q = tf.expand_dims(A_q, axis=1)
+        mu_q = tf.expand_dims(mu_q, axis=1)
+        sigma_q = tf.expand_dims(sigma_q, axis=1)
+        A_r = tf.expand_dims(A_r, axis=1)
+        mu_r = tf.expand_dims(mu_r, axis=1)
+        sigma_r = tf.expand_dims(sigma_r, axis=1)
+        A_s = tf.expand_dims(A_s, axis=1)
+        mu_s = tf.expand_dims(mu_s, axis=1)
+        sigma_s = tf.expand_dims(sigma_s, axis=1)
+        A_t = tf.expand_dims(A_t, axis=1)
+        mu_t = tf.expand_dims(mu_t, axis=1)
+        sigma_t = tf.expand_dims(sigma_t, axis=1)
+
+        # For each wave type, add its contribution to the signal
+        waves = [
+            ('p', A_p, mu_p, sigma_p),
+            ('q', A_q, mu_q, sigma_q), 
+            ('r', A_r, mu_r, sigma_r),
+            ('s', A_s, mu_s, sigma_s),
+            ('t', A_t, mu_t, sigma_t)
+        ]
         
-        # Calculate the time within each beat using modulo operation
-        # beat_duration needs to be [batch_size, 1] for broadcasting with [1, signal_length]
-        beat_duration_expanded = tf.expand_dims(beat_duration, -1)  # Shape: [batch_size, 1]
-        t_beat = tf.math.floormod(t_expanded, beat_duration_expanded)  # Shape: [batch_size, signal_length]
-        
-        # Initialize the ECG signal
-        ecg_signal = tf.zeros_like(t_beat)  # Shape: [batch_size, signal_length]
-        
-        # Process each type of wave
-        # For each wave, we extract its parameters and compute its contribution to the signal
-        wave_indices = {
-            'p': 1, 'q': 4, 'r': 7, 's': 10, 't': 13
-        }
-        
-        for wave in ['p', 'q', 'r', 's', 't']:
-            idx = wave_indices[wave]
-            A = params_unscaled[:, idx]  # Amplitude [batch_size]
-            mu = params_unscaled[:, idx+1]  # Position [batch_size]
-            sigma = params_unscaled[:, idx+2]  # Width [batch_size]
+        # Calculate wave contributions for each wave type
+        for wave_name, A, mu, sigma in waves:
+            # Calculate wave positions in continuous time based on HR
+            # For each point in time, determine where it falls in the beat cycle
+            # Use modulo to handle multiple beats
             
-            # Reshape for broadcasting
-            A = tf.expand_dims(A, -1)  # [batch_size, 1]
-            mu = tf.expand_dims(mu, -1)  # [batch_size, 1]
-            sigma = tf.expand_dims(sigma, -1)  # [batch_size, 1]
+            # The modulo operation should be based on the actual beat duration, not HR*t
+            # For each time point, determine where it is within the current beat cycle
+            # We'll calculate time within each beat by using floor mod of time by beat duration
+            t_beat_position = tf.math.floormod(t_expanded, beat_duration)  # Time within current beat: [batch_size, signal_length]
             
-            # Calculate the wave component
-            # t_beat: [batch_size, signal_length]
-            # mu_duration: [batch_size, 1] - position scaled by beat duration
-            mu_duration = mu * beat_duration_expanded  # [batch_size, 1]
-            centered = t_beat - mu_duration  # Broadcasting: [batch_size, signal_length] - [batch_size, 1] -> [batch_size, signal_length]
-            squared = tf.square(centered)  # [batch_size, signal_length]
-            denom = 2 * tf.square(sigma)  # [batch_size, 1]
+            # Calculate where wave should occur in the beat cycle (based on mu and beat duration)
+            expected_wave_time = mu * beat_duration  # [batch_size, 1] - where wave should be in beat
             
-            # Broadcasting for division: squared [batch_size, signal_length] / denom [batch_size, 1] -> [batch_size, signal_length]
-            exp_arg = -squared / denom  # Broadcasting: [batch_size, signal_length] / [batch_size, 1] -> [batch_size, signal_length]
-            wave_component = A * tf.exp(exp_arg)  # Broadcasting: [batch_size, 1] * [batch_size, signal_length] -> [batch_size, signal_length]
+            # Calculate the time difference from expected wave position
+            time_diff = t_beat_position - expected_wave_time  # [batch_size, signal_length]
             
-            # Add to the main signal
+            # Calculate the Gaussian component
+            squared_diff = tf.square(time_diff)  # [batch_size, signal_length]
+            denominator = 2.0 * tf.square(sigma)  # [batch_size, 1]
+            
+            # Calculate wave component: A * exp(-diff^2 / (2*sigma^2))
+            exp_term = -squared_diff / denominator  # Broadcasting: [batch_size, signal_length]
+            wave_component = A * tf.exp(exp_term)  # [batch_size, signal_length]
+            
+            # Add this wave's contribution to the signal
             ecg_signal = ecg_signal + wave_component
 
-        # Add a dimension for the channel
-        return tf.expand_dims(ecg_signal, axis=-1)  # [batch_size, signal_length, 1]
+        # Add channel dimension: [batch_size, signal_length, 1]
+        return tf.expand_dims(ecg_signal, axis=-1)
 
     def get_config(self):
         config = super().get_config()
