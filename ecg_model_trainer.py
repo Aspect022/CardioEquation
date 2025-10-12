@@ -227,10 +227,38 @@ def plot_training_history(history):
 
     plt.subplot(1, 2, 2)
     # With list outputs, Keras labels them as output_1, output_2, etc.
-    plt.plot(history.history['output_1_loss'], label='Reconstruction Loss')
-    plt.plot(history.history['val_output_1_loss'], label='Val Recon. Loss')
-    plt.plot(history.history['output_2_loss'], label='Parameter Loss')
-    plt.plot(history.history['val_output_2_loss'], label='Val Param. Loss')
+    # Check available keys to determine the correct names
+    available_keys = list(history.history.keys())
+    print(f"Available keys in history: {available_keys}")
+    
+    # Try different possible key names based on Keras version
+    recon_key = 'output_1_loss'
+    val_recon_key = 'val_output_1_loss' 
+    param_key = 'output_2_loss'
+    val_param_key = 'val_output_2_loss'
+    
+    # For older Keras versions or different configurations, it might be named differently
+    if recon_key not in history.history:
+        recon_key = 'output_1_loss' if 'output_1_loss' in history.history else 'decoder_loss'
+        val_recon_key = 'val_output_1_loss' if 'val_output_1_loss' in history.history else 'val_decoder_loss'
+        param_key = 'output_2_loss' if 'output_2_loss' in history.history else 'encoder_loss'
+        val_param_key = 'val_output_2_loss' if 'val_output_2_loss' in history.history else 'val_encoder_loss'
+    
+    # If we still can't find them, use whatever is available
+    if recon_key not in history.history:
+        output_keys = [k for k in history.history.keys() if k.endswith('_loss') and not k.startswith('val')]
+        val_output_keys = [k for k in history.history.keys() if k.startswith('val_') and k.endswith('_loss') and 'val_loss' not in k]
+        
+        if len(output_keys) >= 2 and len(val_output_keys) >= 2:
+            recon_key = output_keys[0]  # First output loss (reconstruction)
+            param_key = output_keys[1]  # Second output loss (parameter prediction)
+            val_recon_key = val_output_keys[0]
+            val_param_key = val_output_keys[1]
+
+    plt.plot(history.history[recon_key], label='Reconstruction Loss')
+    plt.plot(history.history[val_recon_key], label='Val Recon. Loss')
+    plt.plot(history.history[param_key], label='Parameter Loss')
+    plt.plot(history.history[val_param_key], label='Val Param. Loss')
     plt.title('Component Losses')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
