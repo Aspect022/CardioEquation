@@ -7,6 +7,8 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Active%20Development-yellow.svg)](#)
 
+> 📘 **New to the project?** Read the [Complete Project Overview](PROJECT_OVERVIEW.md) for an in-depth understanding of everything from inception to current state.
+
 ---
 
 ## 📑 Table of Contents
@@ -23,7 +25,17 @@
 - [🛠️ Tech Stack](#️-tech-stack)
 - [🧪 Development Phases](#-development-phases)
 - [🚀 Future Extensions](#-future-extensions)
+- [🤝 Contributing](#-contributing)
+- [📖 Citing CardioEquation](#-citing-cardioequation)
 - [📜 References](#-references)
+- [📄 License](#-license)
+
+**📚 Documentation Hub**
+- 📘 [Complete Project Overview](PROJECT_OVERVIEW.md) - Everything about the project journey
+- 🚀 [Quick Start Guide](docs/QUICKSTART.md) - Get started in 30 seconds
+- 📋 [Contributing Guidelines](CONTRIBUTING.md) - How to contribute
+- 🔒 [Security Policy](SECURITY.md) - Reporting vulnerabilities
+- 📝 [Changelog](CHANGELOG.md) - Version history
 
 ---
 
