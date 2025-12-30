@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/Aspect022/CardioEquation/discussions
+    about: Ask questions, share ideas, and discuss with the community
+  - name: 📚 Documentation
+    url: https://github.com/Aspect022/CardioEquation#readme
+    about: Read the project documentation and guides
+  - name: 🔒 Security Issue
+    url: https://github.com/Aspect022/CardioEquation/security/advisories/new
+    about: Report a security vulnerability (private reporting)
