@@ -408,7 +408,19 @@ CardioEquation/
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [contribution guidelines](CONTRIBUTING.md) for details.
+We welcome contributions from everyone! CardioEquation thrives on community collaboration.
+
+**Ways to Contribute:**
+- 🐛 Report bugs and issues
+- ✨ Suggest new features
+- 📚 Improve documentation
+- 🔬 Add tests
+- 💻 Submit code improvements
+
+**Getting Started:**
+- Read our [Contributing Guidelines](CONTRIBUTING.md)
+- Check our [Code of Conduct](CODE_OF_CONDUCT.md)
+- Browse [Good First Issues](https://github.com/Aspect022/CardioEquation/labels/good%20first%20issue)
 
 ### Development Setup
 ```bash
@@ -420,12 +432,45 @@ cd CardioEquation
 python -m venv cardio_env
 source cardio_env/bin/activate  # On Windows: cardio_env\Scripts\activate
 
-# Install development dependencies
-pip install -r requirements-dev.txt
+# Install dependencies
+pip install -r requirements.txt
 
-# Run tests
+# Run tests (if available)
 python -m pytest tests/
 ```
+
+### Quick Links
+- 📋 [Contributing Guidelines](CONTRIBUTING.md) - How to contribute
+- 📜 [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
+- 🔒 [Security Policy](SECURITY.md) - Reporting vulnerabilities
+- 📝 [Changelog](CHANGELOG.md) - Version history
+- 📖 [Citation Guide](CITATION.cff) - How to cite this project
+
+---
+
+## 📖 Citing CardioEquation
+
+If you use CardioEquation in your research or project, please cite it:
+
+**BibTeX:**
+```bibtex
+@software{CardioEquation2025,
+  title = {CardioEquation: AI-Generated Personalized ECG Equation System},
+  author = {CardioEquation Team},
+  year = {2025},
+  url = {https://github.com/Aspect022/CardioEquation},
+  version = {1.0.0}
+}
+```
+
+**APA Style:**
+```
+CardioEquation Team. (2025). CardioEquation: AI-Generated Personalized ECG 
+Equation System (Version 1.0.0) [Computer software]. 
+https://github.com/Aspect022/CardioEquation
+```
+
+For more citation formats, see [CITATION.cff](CITATION.cff).
 
 ---
 
