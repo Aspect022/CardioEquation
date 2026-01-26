@@ -7,6 +7,8 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Active%20Development-yellow.svg)](#)
 
+> 📘 **New to the project?** Read the [Complete Project Overview](PROJECT_OVERVIEW.md) for an in-depth understanding of everything from inception to current state.
+
 ---
 
 ## 📑 Table of Contents
@@ -23,7 +25,17 @@
 - [🛠️ Tech Stack](#️-tech-stack)
 - [🧪 Development Phases](#-development-phases)
 - [🚀 Future Extensions](#-future-extensions)
+- [🤝 Contributing](#-contributing)
+- [📖 Citing CardioEquation](#-citing-cardioequation)
 - [📜 References](#-references)
+- [📄 License](#-license)
+
+**📚 Documentation Hub**
+- 📘 [Complete Project Overview](PROJECT_OVERVIEW.md) - Everything about the project journey
+- 🚀 [Quick Start Guide](docs/QUICKSTART.md) - Get started in 30 seconds
+- 📋 [Contributing Guidelines](CONTRIBUTING.md) - How to contribute
+- 🔒 [Security Policy](SECURITY.md) - Reporting vulnerabilities
+- 📝 [Changelog](CHANGELOG.md) - Version history
 
 ---
 
@@ -371,6 +383,7 @@ CardioEquation/
 
 ## 🚀 Running the Project
 
+<<<<<<< HEAD
 ### 1. Denoising (End-to-End)
 To clean a real PDF from the `Dataset/` folder:
 ```bash
@@ -382,6 +395,95 @@ To train the personalized model (Overnight):
 ```bash
 python src/training/train_forecasting.py
 ```
+=======
+### Near-term Enhancements
+- ✅ **Symbolic Regression**: Discover new ECG functional forms automatically *(Framework ready)*
+- ⏱️ **Real-time Processing**: Live ECG-to-equation conversion *(In progress)*
+- 🎯 **Pathology Modeling**: Disease-specific equation variations *(Planned)*
+- 📱 **Mobile Integration**: Wearable device compatibility *(Planned)*
+
+### Advanced Research Directions
+- 🔐 **Biometric Authentication**: Cardiac equation-based identity verification *(Research phase)*
+- 🧠 **Digital Twin Integration**: Comprehensive physiological modeling *(Framework established)*
+- ⚛️ **Quantum Neural ODEs**: Next-generation cardiac dynamics modeling *(Future research)*
+- 🌐 **Federated Learning**: Privacy-preserving multi-institutional training *(Planned)*
+
+### Clinical Applications
+- 🏥 **Personalized Diagnostics**: Individual-specific anomaly detection *(Ready for validation)*
+- 💊 **Drug Response Modeling**: Medication effect simulation *(Framework ready)*
+- 🔬 **Clinical Decision Support**: AI-assisted cardiac assessment *(Integration planned)*
+- 📈 **Longitudinal Monitoring**: Disease progression tracking *(Ready for implementation)*
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from everyone! CardioEquation thrives on community collaboration.
+
+**Ways to Contribute:**
+- 🐛 Report bugs and issues
+- ✨ Suggest new features
+- 📚 Improve documentation
+- 🔬 Add tests
+- 💻 Submit code improvements
+
+**Getting Started:**
+- Read our [Contributing Guidelines](CONTRIBUTING.md)
+- Check our [Code of Conduct](CODE_OF_CONDUCT.md)
+- Browse [Good First Issues](https://github.com/Aspect022/CardioEquation/labels/good%20first%20issue)
+
+### Development Setup
+```bash
+# Fork and clone the repository
+git clone https://github.com/yourusername/CardioEquation.git
+cd CardioEquation
+
+# Create development environment
+python -m venv cardio_env
+source cardio_env/bin/activate  # On Windows: cardio_env\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run tests (if available)
+python -m pytest tests/
+```
+
+### Quick Links
+- 📋 [Contributing Guidelines](CONTRIBUTING.md) - How to contribute
+- 📜 [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
+- 🔒 [Security Policy](SECURITY.md) - Reporting vulnerabilities
+- 📝 [Changelog](CHANGELOG.md) - Version history
+- 📖 [Citation Guide](CITATION.cff) - How to cite this project
+
+---
+
+## 📖 Citing CardioEquation
+
+If you use CardioEquation in your research or project, please cite it:
+
+**BibTeX:**
+```bibtex
+@software{CardioEquation2025,
+  title = {CardioEquation: AI-Generated Personalized ECG Equation System},
+  author = {CardioEquation Team},
+  year = {2025},
+  url = {https://github.com/Aspect022/CardioEquation},
+  version = {1.0.0}
+}
+```
+
+**APA Style:**
+```
+CardioEquation Team. (2025). CardioEquation: AI-Generated Personalized ECG 
+Equation System (Version 1.0.0) [Computer software]. 
+https://github.com/Aspect022/CardioEquation
+```
+
+For more citation formats, see [CITATION.cff](CITATION.cff).
+
+---
+>>>>>>> 60a0e502667d8c0904c32b4d71148fb6cb07521b
 
 To verify the "3-Track" Digital Twin output:
 ```bash
