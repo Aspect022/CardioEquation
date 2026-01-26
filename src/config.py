@@ -18,13 +18,18 @@ PARAM_KEYS = [
 # Training parameters
 LEARNING_RATE = 1e-4
 PARAM_LOSS_WEIGHT = 0.3
-EPOCHS = 40
+EPOCHS = 5
 BATCH_SIZE = 16
 
 # Data generation parameters
 NUM_SAMPLES = 2000
 
+import os
+
+# Base directory (project root)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # File paths
-MODEL_WEIGHTS_PATH = '../models/best_ecg_model.weights.h5'
-INPUT_SCALER_PATH = '../models/input_scaler.joblib'
-OUTPUT_SCALER_PATH = '../models/output_scaler.joblib'
+MODEL_WEIGHTS_PATH = os.path.join(BASE_DIR, 'models', 'best_ecg_model.weights.h5')
+INPUT_SCALER_PATH = os.path.join(BASE_DIR, 'models', 'input_scaler.joblib')
+OUTPUT_SCALER_PATH = os.path.join(BASE_DIR, 'models', 'output_scaler.joblib')
