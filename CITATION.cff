@@ -1,0 +1,92 @@
+cff-version: 1.2.0
+message: "If you use this software in your research, please cite it as below."
+type: software
+title: "CardioEquation: AI-Generated Personalized ECG Equation System"
+abstract: >
+  CardioEquation is an innovative AI-driven system that generates 
+  individual-specific mathematical equations to accurately reproduce 
+  a person's unique ECG waveform patterns. Using deep learning and 
+  biophysical modeling, it creates personalized cardiac equations 
+  that can be used for digital twin applications, personalized 
+  medicine, and cardiac research.
+authors:
+  - family-names: "CardioEquation"
+    given-names: "Team"
+    # Add individual authors as they contribute
+    # Example:
+    # - family-names: "Doe"
+    #   given-names: "John"
+    #   orcid: "https://orcid.org/0000-0000-0000-0000"
+    #   affiliation: "University Name"
+repository-code: "https://github.com/Aspect022/CardioEquation"
+url: "https://github.com/Aspect022/CardioEquation"
+keywords:
+  - ECG
+  - electrocardiogram
+  - artificial intelligence
+  - deep learning
+  - personalized medicine
+  - digital twin
+  - cardiac modeling
+  - biophysical modeling
+  - neural networks
+  - TensorFlow
+  - biomedical signal processing
+  - parameter estimation
+  - synthetic ECG
+  - McSharry model
+  - cardiology
+  - machine learning
+  - healthcare AI
+license: MIT
+version: 1.0.0
+date-released: 2025-01-15
+references:
+  - type: article
+    authors:
+      - family-names: "McSharry"
+        given-names: "Patrick E."
+      - family-names: "Clifford"
+        given-names: "Gari D."
+      - family-names: "Tarassenko"
+        given-names: "Lionel"
+      - family-names: "Smith"
+        given-names: "Leonard A."
+    title: "A dynamical model for generating synthetic electrocardiogram signals"
+    journal: "IEEE Transactions on Biomedical Engineering"
+    volume: 50
+    issue: 3
+    year: 2003
+    start: 289
+    end: 294
+    doi: "10.1109/TBME.2003.808805"
+  - type: article
+    authors:
+      - family-names: "Goldberger"
+        given-names: "Ary L."
+      - family-names: "Amaral"
+        given-names: "Luis A.N."
+      - family-names: "Glass"
+        given-names: "Leon"
+      - family-names: "Hausdorff"
+        given-names: "Jeffrey M."
+      - family-names: "Ivanov"
+        given-names: "Plamen Ch."
+      - family-names: "Mark"
+        given-names: "Roger G."
+      - family-names: "Mietus"
+        given-names: "Joseph E."
+      - family-names: "Moody"
+        given-names: "George B."
+      - family-names: "Peng"
+        given-names: "Chung-Kang"
+      - family-names: "Stanley"
+        given-names: "H. Eugene"
+    title: "PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals"
+    journal: "Circulation"
+    volume: 101
+    issue: 23
+    year: 2000
+    start: e215
+    end: e220
+    doi: "10.1161/01.CIR.101.23.e215"
