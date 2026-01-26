@@ -344,119 +344,49 @@ CardioEquation/
 
 ## 🧪 Development Phases
 
-### ✅ Phase 1: Base ECG Generator (Completed)
-**Deliverable**: Parametric ECG synthesis
-- ✅ Gaussian mixture model implementation
-- ✅ Configurable P-QRS-T parameters
-- ✅ Multi-beat generation
-- ✅ Noise injection capabilities
+### ✅ Phase 1: Synthetic Bootstrap (Completed)
+**Deliverable**: 1D Diffusion Denoising (Noisy -> Clean)
+- Trained on synthetic Gaussian/baseline/powerline noise.
+- Validated with `verify_diffusion.py`.
 
-### ✅ Phase 2: AI Parameter Learner (Completed)
-**Deliverable**: Neural parameter estimation
-- ✅ Encoder-decoder architecture
-- ✅ Synthetic dataset generation (2000 samples)
-- ✅ Model training and validation
-- ✅ High reconstruction accuracy (>95%)
-- ✅ All model artifacts saved and loadable
-- ✅ Complete inference pipeline verified
+### ✅ Phase 2: Realistic Artifacts (Completed)
+**Deliverable**: Robustness to Real-world Scans
+- Implemented `RealisticScanArtifacts` (Grid, Paper texture, Skew, Blur).
+- Validated on 1000+ synthetic scanned samples.
+- **Proof**: `realistic_verification.png`.
 
-### 🔄 Phase 3: Real ECG Integration (In Progress)
-**Deliverable**: Real-world ECG processing
-- ✅ Framework established for PhysioNet integration
-- ✅ ECG preprocessing pipeline ready
-- ✅ R-peak detection and segmentation algorithms implemented
-- 🔄 Real-vs-synthetic evaluation protocols defined
-- 🔄 Clinical dataset integration in progress
+### ✅ Phase 3: Clinical Integration (Completed)
+**Deliverable**: Production Pipeline (`main_process_pdf.py`)
+- Digitize PDF -> Denoise -> Visualize.
+- Validated on Real Clinical Data (`KALAMMA...pdf`).
+- **Proof**: `final_clinical_result.png`.
 
-### 🔮 Phase 4: Equation Synthesizer (Planned)
-**Deliverable**: Human-readable equations
-- 🔮 Symbolic math expression generation
-- 🔮 LaTeX equation formatting
-- 🔮 Python code generation
-- 🔮 Parameter interpretation
-
-### 🔮 Phase 5: Clinical Validation (Planned)
-**Deliverable**: Medical application testing
-- 🔮 Clinical dataset evaluation
-- 🔮 Cardiologist validation
-- 🔮 Anomaly detection capability
-- 🔮 Diagnostic performance metrics
+### 🔄 Phase 4: Personalized Forecasting (In Progress)
+**Deliverable**: Patient-Specific Digital Twin
+- **Goal**: Predict future beats based on patient context.
+- **Current Status**: Prototyped `ForecastingTrainer`.
+- **Next Step**: Deep Identity Loss Training (Overnight).
 
 ---
 
-## 🚀 Future Extensions
+## 🚀 Running the Project
 
-### Near-term Enhancements
-- ✅ **Symbolic Regression**: Discover new ECG functional forms automatically *(Framework ready)*
-- ⏱️ **Real-time Processing**: Live ECG-to-equation conversion *(In progress)*
-- 🎯 **Pathology Modeling**: Disease-specific equation variations *(Planned)*
-- 📱 **Mobile Integration**: Wearable device compatibility *(Planned)*
-
-### Advanced Research Directions
-- 🔐 **Biometric Authentication**: Cardiac equation-based identity verification *(Research phase)*
-- 🧠 **Digital Twin Integration**: Comprehensive physiological modeling *(Framework established)*
-- ⚛️ **Quantum Neural ODEs**: Next-generation cardiac dynamics modeling *(Future research)*
-- 🌐 **Federated Learning**: Privacy-preserving multi-institutional training *(Planned)*
-
-### Clinical Applications
-- 🏥 **Personalized Diagnostics**: Individual-specific anomaly detection *(Ready for validation)*
-- 💊 **Drug Response Modeling**: Medication effect simulation *(Framework ready)*
-- 🔬 **Clinical Decision Support**: AI-assisted cardiac assessment *(Integration planned)*
-- 📈 **Longitudinal Monitoring**: Disease progression tracking *(Ready for implementation)*
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [contribution guidelines](CONTRIBUTING.md) for details.
-
-### Development Setup
+### 1. Denoising (End-to-End)
+To clean a real PDF from the `Dataset/` folder:
 ```bash
-# Fork and clone the repository
-git clone https://github.com/yourusername/CardioEquation.git
-cd CardioEquation
-
-# Create development environment
-python -m venv cardio_env
-source cardio_env/bin/activate  # On Windows: cardio_env\Scripts\activate
-
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Run tests
-python -m pytest tests/
+python src/main_process_pdf.py
 ```
 
----
+### 2. Digital Twin (Personalization)
+To train the personalized model (Overnight):
+```bash
+python src/training/train_forecasting.py
+```
 
-## 📜 References
-
-### Scientific Foundation
-1. **McSharry, P. E., et al.** (2003). "A dynamical model for generating synthetic electrocardiogram signals." *IEEE Transactions on Biomedical Engineering*, 50(3), 289-294.
-
-2. **Goldberger, A. L., et al.** (2000). "PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals." *Circulation*, 101(23), e215-e220.
-
-3. **Clifford, G. D., et al.** (2006). "Advanced methods and tools for ECG data analysis." *Artech House*.
-
-### Technical References
-- [MIT-BIH Arrhythmia Database](https://physionet.org/content/mitdb/1.0.0/)
-- [PhysioNet ECG Databases](https://physionet.org/)
-- [TensorFlow ECG Analysis](https://www.tensorflow.org/)
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **PhysioNet** for providing comprehensive ECG databases
-- **MIT Laboratory for Computational Physiology** for the McSharry model foundation
-- **TensorFlow Team** for the deep learning framework
-- **Scientific Community** for advancing cardiovascular signal processing
+To verify the "3-Track" Digital Twin output:
+```bash
+python src/verification/verify_forecasting.py
+```
 
 ---
 
