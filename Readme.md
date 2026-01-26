@@ -111,33 +111,30 @@ R-peak       Segmentation    Parameter Prediction   Code Generation   Error Anal
 
 ### 🔧 Core Components
 
-#### 1. **ECG Generator** (`ecg_generator.py`)
-- **Purpose**: Synthetic ECG generation using parameterized Gaussian mixture model
+#### 1. **ECG Digitizer** (`src/ecg_digitizer.py`)
+- **Purpose**: Extract raw ECG signals from clinical PDF reports
 - **Features**:
-  - Configurable P-QRS-T wave parameters
-  - Realistic heart rate variations (60-100 BPM)
-  - Noise injection capabilities
-  - Multi-beat signal generation
+  - Lead II / Rhythm strip extraction
+  - Visual-to-signal conversion (Digitization)
+  - Resampling and normalization
 
-#### 2. **AI Parameter Learner** (`ecg_model_trainer.py`)
-- **Purpose**: Train neural networks to predict ECG equation parameters
-- **Architecture**: 
-  - **Encoder**: Conv1D + GlobalAveragePooling → Parameter prediction
-  - **Decoder**: Parameter-to-ECG reconstruction using differentiable Gaussian synthesis
-  - **Loss Function**: Reconstruction MSE + Parameter prediction MSE
+#### 2. **Feature Extractor** (`src/models/feature_extractor.py`)
+- **Purpose**: Extract patient-specific "identity" features
+- **Architecture**: 1D ResNet-18 backbone
+- **Output**: 512-dimensional latent feature vector
 
-#### 3. **Trained Models** (`.h5`, `.keras`, `.weights.h5`)
-- Pre-trained neural networks for immediate parameter estimation
-- Scalers for input/output normalization
-- Ready-to-use inference pipeline
+#### 3. **Conditional Diffusion U-Net** (`src/models/diffusion_unet.py`)
+- **Purpose**: Denoising and personalized forecasting
+- **Architecture**: U-Net with time embedding and identity conditioning
+- **Technique**: Conditional Score-based Diffusion
 
 ### 🧮 Mathematical Model Details
 
-Our ECG generation is based on a **modified McSharry model**:
+Our ECG modeling is based on a **modified McSharry Gaussian mixture model**, controlled by parameters $\theta$:
 
 ```python
-ECG(t) = Σ A_wave · exp(-((t - μ_wave · beat_duration)²)/(2σ_wave²))
-         wave∈{p,q,r,s,t}
+ECG(t; θ) = Σ A_i · exp(-((t - μ_i · beat_duration)²)/(2σ_i²))
+             i∈{P,Q,R,S,T}
 ```
 
 **Parameters for each wave:**
@@ -204,67 +201,34 @@ This will:
 
 ## 💻 Usage Examples
 
-### Example 1: Custom ECG Generation
+### Example 1: Denoising a Clinical PDF
 
 ```python
-from ecg_generator import generate_ecg, plot_ecg
-
-# Define custom parameters for a specific "patient"
-custom_params = {
-    'HR': 85,        # Slightly elevated heart rate
-    'A_p': 0.3,      # Normal P-wave amplitude
-    'μ_p': 0.18,     # Early P-wave timing
-    'σ_p': 0.025,    # Standard P-wave width
-    'A_r': 1.1,      # Tall R-wave (athletic heart)
-    'μ_r': 0.40,     # Standard R-wave timing
-    'σ_r': 0.009,    # Sharp R-wave
-    # ... other parameters
-}
-
-# Generate personalized ECG
-ecg_signal = generate_ecg(custom_params, num_beats=10, fs=500)
-plot_ecg(ecg_signal, fs=500)
+from src.main_process_pdf.py import main
+# Processes a PDF from the Dataset/ folder and generates a clean Digital Twin
+main()
 ```
 
-### Example 2: AI Parameter Prediction
+### Example 2: Inference Pipeline
 
 ```python
-import joblib
-import numpy as np
-from ecg_model_trainer import build_autoencoder
+from src.inference.pipeline import ECGDenoisingPipeline
 
-# Load trained model and scalers
-input_scaler = joblib.load('input_scaler.joblib')
-output_scaler = joblib.load('output_scaler.joblib')
-
-# Build model and load weights
-training_model, encoder, decoder = build_autoencoder(output_scaler)
-training_model.load_weights('best_ecg_model.weights.h5')
-
-# Predict parameters for new ECG
-new_ecg = your_ecg_signal.reshape(1, 2500, 1)
-normalized_ecg = input_scaler.transform(new_ecg.reshape(1, -1)).reshape(1, 2500, 1)
-predicted_params = encoder.predict(normalized_ecg)
-real_params = output_scaler.inverse_transform(predicted_params)
-
-print(f"Predicted Heart Rate: {real_params[0][0]:.1f} BPM")
-print(f"R-wave amplitude: {real_params[0][7]:.3f}")
+pipeline = ECGDenoisingPipeline()
+clean_signal = pipeline.process_signal(noisy_input_2500_samples)
 ```
 
-### Example 3: ECG Reconstruction
+### Example 3: Personalized Forecasting (Phase 4)
 
 ```python
-# Use decoder to reconstruct ECG from parameters
-reconstructed_ecg = decoder.predict(predicted_params)
+from src.models.feature_extractor import FeatureExtractor
+from src.models.diffusion_unet import ConditionalDiffusionUNet
 
-# Compare original vs reconstructed
-import matplotlib.pyplot as plt
-plt.figure(figsize=(15, 5))
-plt.plot(new_ecg[0, :, 0], label='Original ECG', alpha=0.8)
-plt.plot(reconstructed_ecg[0, :, 0], label='Reconstructed ECG', linestyle='--')
-plt.legend()
-plt.title('ECG Reconstruction Comparison')
-plt.show()
+# Extract patient identity from context (e.g., first 10s)
+identity = feature_extractor(context_signal)
+
+# Generate Digital Twin forecast conditioned on identity
+predicted_beat = diffusion_unet.sample(conditioning=identity)
 ```
 
 ---
@@ -311,18 +275,16 @@ plt.show()
 
 ```
 CardioEquation/
-├── 📄 README.md                 # This comprehensive documentation
-├── 🐍 ecg_generator.py          # Phase 1: Synthetic ECG generation
-├── 🤖 ecg_model_trainer.py      # Phase 2: AI model training
-├── 🧠 best_ecg_model.h5         # Trained model (full)
-├── 🧠 best_ecg_model.keras      # Trained model (Keras format)
-├── ⚖️ best_ecg_model.weights.h5  # Model weights only
-├── 📊 input_scaler.joblib        # Input normalization scaler
-├── 📊 output_scaler.joblib       # Output normalization scaler
-├── 🗂️ __pycache__/              # Python cache files
-│   ├── ecg_generator.cpython-313.pyc
-│   └── ecg_model_trainer.cpython-313.pyc
-└── 📋 requirements.txt          # Python dependencies (to be added)
+├── 📁 outputs/                  # Phase verification images (v1_...)
+├── 📁 src/
+│   ├── 📁 models/               # ResNet and Diffusion U-Net
+│   ├── 📁 training/             # Phase-specific trainers
+│   ├── 📁 data/                 # Datasets and realistic artifacts
+│   ├── ecg_digitizer.py         # PDF processing
+│   └── main_process_pdf.py      # End-to-end pipeline
+├── 📁 Dataset/                  # Clinical ECG PDFs
+├── 📄 Readme.md                 # Project Master Doc
+└── 📋 requirements.txt          # Dependencies
 ```
 
 ### File Descriptions
@@ -360,30 +322,30 @@ CardioEquation/
 **Deliverable**: 1D Diffusion Denoising (Noisy -> Clean)
 - Trained on synthetic Gaussian/baseline/powerline noise.
 - Validated with `verify_diffusion.py`.
+- **Proof**: `outputs/v1_phase1_diffusion_verification.png`.
 
 ### ✅ Phase 2: Realistic Artifacts (Completed)
 **Deliverable**: Robustness to Real-world Scans
 - Implemented `RealisticScanArtifacts` (Grid, Paper texture, Skew, Blur).
 - Validated on 1000+ synthetic scanned samples.
-- **Proof**: `realistic_verification.png`.
+- **Proof**: `outputs/v1_phase2_realistic_verification.png`.
 
 ### ✅ Phase 3: Clinical Integration (Completed)
 **Deliverable**: Production Pipeline (`main_process_pdf.py`)
 - Digitize PDF -> Denoise -> Visualize.
-- Validated on Real Clinical Data (`KALAMMA...pdf`).
-- **Proof**: `final_clinical_result.png`.
+- Validated on Real Clinical Data.
+- **Proof**: `outputs/v1_phase3_clinical_result.png`.
 
 ### 🔄 Phase 4: Personalized Forecasting (In Progress)
 **Deliverable**: Patient-Specific Digital Twin
 - **Goal**: Predict future beats based on patient context.
-- **Current Status**: Prototyped `ForecastingTrainer`.
-- **Next Step**: Deep Identity Loss Training (Overnight).
+- **Current Status**: Minimizing "Identity Loss" for personalization.
+- **Proof**: `outputs/v1_phase4_forecasting_verification.png`.
 
 ---
 
 ## 🚀 Running the Project
 
-<<<<<<< HEAD
 ### 1. Denoising (End-to-End)
 To clean a real PDF from the `Dataset/` folder:
 ```bash
