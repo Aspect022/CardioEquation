@@ -86,9 +86,33 @@ else:
     print('   Check: nvidia-smi and CUDA installation')
 "
 
-# ── 2. Model Shape Check ─────────────────────────────────
+# ── 2. Download Datasets ──────────────────────────────────
 echo ""
-echo "🧪 Step 1: Verifying model shapes..."
+echo "============================================================"
+echo "📥 Step 1: Downloading Datasets"
+echo "============================================================"
+
+if [ "$SMOKE_MODE" = true ]; then
+    echo "   Smoke mode: using synthetic data, skipping downloads"
+else
+    python download_all_datasets.py
+fi
+
+# ── 3. Verify Datasets ───────────────────────────────────
+echo ""
+echo "============================================================"
+echo "🔍 Step 2: Verifying Datasets"
+echo "============================================================"
+python verify_datasets.py || {
+    if [ "$SMOKE_MODE" = false ]; then
+        echo "⚠️  Dataset verification has warnings/errors. Check above."
+        echo "   Continuing anyway (non-critical items may be missing)..."
+    fi
+}
+
+# ── 4. Model Shape Check ─────────────────────────────────
+echo ""
+echo "🧪 Step 3: Verifying model shapes..."
 python -c "
 import torch, sys
 sys.path.insert(0, '.')
