@@ -86,19 +86,16 @@ else:
     print('   Check: nvidia-smi and CUDA installation')
 "
 
-# ── 2. Download Datasets ──────────────────────────────────
+# ── 2. Download & Process Datasets ────────────────────────
 echo ""
 echo "============================================================"
-echo "📥 Step 1: Downloading Datasets"
+echo "📥 Step 1: Downloading & Processing Datasets"
 echo "============================================================"
 
 if [ "$SMOKE_MODE" = true ]; then
     echo "   Smoke mode: using synthetic data, skipping downloads"
-elif [ -f "data/mitbih_forecasting.npz" ]; then
-    echo "   ✅ MIT-BIH forecasting data already exists, skipping download."
-    echo "   (To re-download, delete data/mitbih_forecasting.npz and re-run)"
 else
-    # Download only MIT-BIH (primary dataset) and process it
+    # Download MIT-BIH if raw records missing (skips if already downloaded)
     python download_all_datasets.py --mitbih
 fi
 
