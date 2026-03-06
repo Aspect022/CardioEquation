@@ -121,6 +121,67 @@ class ECGDigitizer:
         
         return signal
 
+    # ── Adapter methods for clinical_validation.py ────────────
+    def load_pdf(self, pdf_path):
+        """
+        Load a PDF and return list of page images (numpy arrays).
+        This is the interface expected by clinical_validation.py.
+        """
+        try:
+            doc = fitz.open(pdf_path)
+            pages = []
+            for page_num in range(len(doc)):
+                page = doc.load_page(page_num)
+                pix = page.get_pixmap(dpi=300)
+                img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.h, pix.w, pix.n)
+                if pix.n == 4:
+                    img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+                pages.append(img)
+            doc.close()
+            return pages
+        except Exception as e:
+            print(f"   ⚠️ Failed to load PDF {pdf_path}: {e}")
+            return []
+
+    def extract_signal(self, page_image, target_length=2500):
+        """
+        Extract 1D ECG signal from a page image (numpy array).
+        Extracts the Lead II rhythm strip from the bottom of the page.
+        This is the interface expected by clinical_validation.py.
+
+        Args:
+            page_image: numpy array (H, W, 3) RGB image
+            target_length: target signal length (default 2500 = 5s at 500Hz)
+        Returns:
+            1D numpy array of the extracted signal, or None on failure
+        """
+        try:
+            h, w, _ = page_image.shape
+
+            # Rhythm strip is usually the bottom 15-20% of the page
+            crop_start_y = int(h * 0.80)
+            crop_img = page_image[crop_start_y:h - 50, 50:w - 50]
+
+            mask = self.preprocess_image(crop_img)
+            signal = self.extract_signal_from_mask(mask)
+
+            if signal is None or len(signal) < 100:
+                # Fallback: try full page extraction
+                mask = self.preprocess_image(page_image)
+                signal = self.extract_signal_from_mask(mask)
+
+            if signal is not None and len(signal) >= 100:
+                # Resample to target length
+                signal = scipy.signal.resample(signal, target_length)
+                # Normalize
+                signal = (signal - np.mean(signal)) / (np.std(signal) + 1e-8)
+                return signal.astype(np.float32)
+
+            return None
+        except Exception as e:
+            print(f"   ⚠️ Signal extraction failed: {e}")
+            return None
+
 if __name__ == '__main__':
     # Test on a file if it exists
     dataset_dir = r"d:\Projects\CardioEquation\Dataset"

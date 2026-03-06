@@ -19,6 +19,10 @@ wfdb>=4.0.0                   # PhysioNet WFDB for MIT-BIH, PTB-XL download
 pandas>=1.3.0
 scikit-learn>=1.0.0
 
+# ECG Digitizer (clinical validation)
+PyMuPDF>=1.22.0                 # PDF to image conversion (import fitz)
+opencv-python-headless>=4.6.0   # Image processing for ECG trace extraction
+
 # Visualization
 matplotlib>=3.5.0
 
