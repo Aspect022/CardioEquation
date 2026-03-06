@@ -20,7 +20,16 @@ env/
 *.swo
 *~
 
-# ── Training Artifacts (large files) ────────
+# ── Data (large, downloaded on GPU server) ──
+data/mitbih_raw/
+data/mitdb/
+data/ptbxl/
+data/cpsc2018/
+data/mitbih_forecasting.npz
+data/ptbxl_processed.npz
+data/real_ecg_dataset.npy
+data/realistic_train.npz
+data/verification_report.json
 checkpoints/
 *.pt
 *.pth
