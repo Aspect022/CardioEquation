@@ -127,19 +127,36 @@ def load_dataset(args):
         data_path = args.data_path
         if not os.path.exists(data_path):
             print(f"❌ Dataset not found at {data_path}")
-            print("   Run: python src/data/mitbih_long_loader.py to generate it")
+            print("   Run: python download_all_datasets.py --mitbih to generate it")
             print("   Falling back to synthetic dataset...")
             return create_synthetic_dataset(num_samples=500)
 
         print(f"📊 Loading MIT-BIH dataset from {data_path}")
         data = np.load(data_path)
-        # Expected shape: (N, 2500, 1) → convert to (N, 1, 2500) for PyTorch
+        # Expected shape: (N, T, 1) → convert to (N, 1, T) for PyTorch
         context = data['context']
         future = data['future']
 
         if context.shape[-1] == 1:
             context = context.transpose(0, 2, 1)  # (N, 1, T)
             future = future.transpose(0, 2, 1)
+
+        # ── Ensure signal length matches model (2500 samples = 5s at 500Hz) ──
+        signal_len = context.shape[-1]
+        target_len = 2500
+        if signal_len != target_len:
+            print(f"   ⚠️  Signal length is {signal_len}, model expects {target_len}")
+            if signal_len > target_len:
+                # Truncate: take first 5 seconds
+                context = context[:, :, :target_len]
+                future = future[:, :, :target_len]
+                print(f"   ✂️  Truncated to {target_len} samples (first 5s)")
+            else:
+                # Pad with zeros if shorter (shouldn't happen normally)
+                pad = target_len - signal_len
+                context = np.pad(context, ((0, 0), (0, 0), (0, pad)), mode='constant')
+                future = np.pad(future, ((0, 0), (0, 0), (0, pad)), mode='constant')
+                print(f"   📏 Padded to {target_len} samples")
 
         dataset = torch.utils.data.TensorDataset(
             torch.from_numpy(context).float(),
