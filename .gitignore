@@ -1,0 +1,51 @@
+# ── Python ──────────────────────────────────
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Virtual Environments ────────────────────
+venv/
+venv_v2/
+.venv/
+env/
+
+# ── IDE ─────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Training Artifacts (large files) ────────
+checkpoints/
+*.pt
+*.pth
+*.h5
+*.weights.h5
+*.ckpt
+
+
+
+# ── Model outputs ───────────────────────────
+outputs/
+*.png
+*.jpg
+
+# ── OS files ────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ────────────────────────────────────
+*.log
+wandb/
+
+# ── Keep tracked ────────────────────────────
+# NOTE: Dataset/ folder with hospital PDFs is tracked
+# NOTE: src/ code is tracked
+# NOTE: docs/ is tracked
+# NOTE: models/ (model architecture code) is tracked — NOT weights
