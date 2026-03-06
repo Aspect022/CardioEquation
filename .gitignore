@@ -30,19 +30,23 @@ data/ptbxl_processed.npz
 data/real_ecg_dataset.npy
 data/realistic_train.npz
 data/verification_report.json
-checkpoints/
-*.pt
-*.pth
+checkpoints/*.pt
+checkpoints/*.pth
 *.h5
 *.weights.h5
 *.ckpt
+# Keep training config and logs (small files)
+!checkpoints/train_config.json
+!checkpoints/training_log.txt
 
 
 
-# ── Model outputs ───────────────────────────
-outputs/
-*.png
-*.jpg
+# ── Model outputs (keep validation results) ──
+outputs/**/*.pt
+outputs/**/*.pth
+# Keep validation reports and plots
+!outputs/clinical_validation/
+!outputs/clinical_validation/**
 
 # ── OS files ────────────────────────────────
 .DS_Store

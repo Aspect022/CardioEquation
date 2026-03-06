@@ -208,25 +208,70 @@ if [ "$RUN_VALIDATION" = true ]; then
     echo "============================================================"
 
     if [ -d "Dataset" ]; then
+        set +e  # Don't exit on error for validation
         python src/evaluation/clinical_validation.py \
             --model_path checkpoints/dit_ecg_ema_final.pt \
             --fe_path checkpoints/feature_extractor_contrastive.pt \
             --dataset_dir Dataset \
-            --output_dir outputs/clinical_validation \
-            || echo "   ⚠️  Clinical validation had errors (ECGDigitizer may be missing)."
-            echo "   Training is complete — validation can be re-run later with:"
-            echo "   ./run_training.sh validate"
+            --output_dir outputs/clinical_validation
+        VALIDATION_EXIT=$?
+        set -e  # Restore exit-on-error
+        if [ $VALIDATION_EXIT -ne 0 ]; then
+            echo "   ⚠️  Clinical validation had errors but training is complete."
+            echo "   Re-run later with: ./run_training.sh validate"
+        fi
     else
         echo "   ⚠️  Dataset/ folder not found — skipping clinical validation"
         echo "   Copy hospital ECG PDFs to Dataset/ and re-run with: ./run_training.sh validate"
     fi
 fi
 
+# ── 6. Auto Git Push Results ──────────────────────────────
+echo ""
+echo "============================================================"
+echo "📤 Step 5: Pushing Results to GitHub"
+echo "============================================================"
+
+# Save a training summary log
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+echo "CardioEquation V2 Training Run" > checkpoints/training_log.txt
+echo "==============================" >> checkpoints/training_log.txt
+echo "Timestamp: $TIMESTAMP" >> checkpoints/training_log.txt
+echo "GPU: $(python -c 'import torch; print(torch.cuda.get_device_name(0))' 2>/dev/null || echo 'N/A')" >> checkpoints/training_log.txt
+echo "Smoke Mode: $SMOKE_MODE" >> checkpoints/training_log.txt
+echo "" >> checkpoints/training_log.txt
+echo "Files in checkpoints/:" >> checkpoints/training_log.txt
+ls -lh checkpoints/ >> checkpoints/training_log.txt 2>/dev/null
+echo "" >> checkpoints/training_log.txt
+echo "Files in outputs/:" >> checkpoints/training_log.txt
+ls -lhR outputs/ >> checkpoints/training_log.txt 2>/dev/null
+
+# Git add, commit, and push
+set +e  # Don't fail if git push has issues
+git add checkpoints/train_config.json checkpoints/training_log.txt 2>/dev/null
+git add outputs/clinical_validation/ 2>/dev/null
+git add -u  # Stage any modified tracked files
+
+COMMIT_MSG="🏁 Training complete ($TIMESTAMP) — $(python -c 'import torch; print(torch.cuda.get_device_name(0))' 2>/dev/null || echo 'GPU')"
+git commit -m "$COMMIT_MSG" && {
+    echo "   📤 Pushing to GitHub..."
+    git push origin main
+    if [ $? -eq 0 ]; then
+        echo "   ✅ Results pushed to GitHub!"
+    else
+        echo "   ⚠️  Git push failed. You can push manually with: git push origin main"
+    fi
+} || echo "   ℹ️  Nothing new to commit."
+set -e
+
 # ── Done ──────────────────────────────────────────────────
 echo ""
 echo "============================================================"
 echo "  ✅ Pipeline Complete!"
+echo "  Timestamp: $TIMESTAMP"
 echo "  Checkpoints:  checkpoints/"
 echo "  Validation:   outputs/clinical_validation/"
+echo "  Training Log: checkpoints/training_log.txt"
+echo "  GitHub:       Check your repo for pushed results!"
 echo "  Deactivate:   deactivate"
 echo "============================================================"
