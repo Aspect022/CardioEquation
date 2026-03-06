@@ -38,33 +38,34 @@ class ECGAugmenter:
     def __call__(self, x):
         """Apply random augmentations. x: (1, T) tensor."""
         x = x.clone()
+        device = x.device
 
         # 1. Amplitude scaling (preserves morphology shape)
-        if torch.rand(1) < 0.8:
-            scale = torch.empty(1).uniform_(0.5, 2.0)
+        if torch.rand(1).item() < 0.8:
+            scale = torch.empty(1, device=device).uniform_(0.5, 2.0)
             x = x * scale
 
         # 2. Temporal shift (small jitter)
-        if torch.rand(1) < 0.7:
+        if torch.rand(1).item() < 0.7:
             shift = torch.randint(-250, 250, (1,)).item()  # ±0.5s at 500Hz
             x = torch.roll(x, shift, dims=-1)
 
         # 3. Gaussian noise (recording artifacts)
-        if torch.rand(1) < 0.8:
-            sigma = torch.empty(1).uniform_(0.0, 0.02)
+        if torch.rand(1).item() < 0.8:
+            sigma = torch.empty(1, device=device).uniform_(0.0, 0.02)
             x = x + torch.randn_like(x) * sigma
 
         # 4. Baseline wander (low-frequency artifact)
-        if torch.rand(1) < 0.5:
+        if torch.rand(1).item() < 0.5:
             T = x.shape[-1]
-            t = torch.linspace(0, 2 * 3.14159, T)
-            freq = torch.empty(1).uniform_(0.05, 0.5)
-            amplitude = torch.empty(1).uniform_(0.0, 0.1)
+            t = torch.linspace(0, 2 * 3.14159, T, device=device)
+            freq = torch.empty(1, device=device).uniform_(0.05, 0.5)
+            amplitude = torch.empty(1, device=device).uniform_(0.0, 0.1)
             wander = amplitude * torch.sin(freq * t)
             x = x + wander.unsqueeze(0)
 
         # 5. Random crop and resize
-        if torch.rand(1) < 0.5:
+        if torch.rand(1).item() < 0.5:
             T = x.shape[-1]
             crop_ratio = torch.empty(1).uniform_(0.7, 1.0).item()
             crop_len = int(T * crop_ratio)
