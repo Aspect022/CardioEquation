@@ -94,8 +94,12 @@ echo "============================================================"
 
 if [ "$SMOKE_MODE" = true ]; then
     echo "   Smoke mode: using synthetic data, skipping downloads"
+elif [ -f "data/mitbih_forecasting.npz" ]; then
+    echo "   ✅ MIT-BIH forecasting data already exists, skipping download."
+    echo "   (To re-download, delete data/mitbih_forecasting.npz and re-run)"
 else
-    python download_all_datasets.py
+    # Download only MIT-BIH (primary dataset) and process it
+    python download_all_datasets.py --mitbih
 fi
 
 # ── 3. Verify Datasets ───────────────────────────────────
@@ -208,7 +212,10 @@ if [ "$RUN_VALIDATION" = true ]; then
             --model_path checkpoints/dit_ecg_ema_final.pt \
             --fe_path checkpoints/feature_extractor_contrastive.pt \
             --dataset_dir Dataset \
-            --output_dir outputs/clinical_validation
+            --output_dir outputs/clinical_validation \
+            || echo "   ⚠️  Clinical validation had errors (ECGDigitizer may be missing)."
+            echo "   Training is complete — validation can be re-run later with:"
+            echo "   ./run_training.sh validate"
     else
         echo "   ⚠️  Dataset/ folder not found — skipping clinical validation"
         echo "   Copy hospital ECG PDFs to Dataset/ and re-run with: ./run_training.sh validate"
