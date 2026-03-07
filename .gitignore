@@ -6,7 +6,10 @@ __pycache__/
 dist/
 build/
 *.egg
-
+data/
+*.npz
+*.pth
+checkpoints/
 # ── Virtual Environments ────────────────────
 venv/
 venv_v2/
