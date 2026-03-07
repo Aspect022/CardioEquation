@@ -162,12 +162,20 @@ def load_dataset(args):
             print(f"   + Loading PTB-XL from {ptbxl_path}")
             ptbxl = np.load(ptbxl_path)
             ptbxl_signals = ptbxl['signals']  # (N, 1, 2500)
-            # For DiT: use PTB-XL signals as both context and future
-            # (self-reconstruction objective for learning ECG structure)
             context = np.concatenate([context, ptbxl_signals], axis=0)
             future = np.concatenate([future, ptbxl_signals], axis=0)
-            print(f"   = Combined dataset: {len(context)} samples "
-                  f"(MIT-BIH: {len(data['context'])}, PTB-XL: {len(ptbxl_signals)})")
+
+        # ── Combine with Chapman-Shaoxing if available ──
+        chapman_path = 'data/chapman_processed.npz'
+        if os.path.exists(chapman_path):
+            print(f"   + Loading Chapman-Shaoxing from {chapman_path}")
+            chapman = np.load(chapman_path)
+            chapman_signals = chapman['signals']  # (N, 1, 2500)
+            context = np.concatenate([context, chapman_signals], axis=0)
+            future = np.concatenate([future, chapman_signals], axis=0)
+
+        n_mitbih = len(data['context'])
+        print(f"   = Combined dataset: {len(context)} samples (MIT-BIH: {n_mitbih})")
 
         dataset = torch.utils.data.TensorDataset(
             torch.from_numpy(context).float(),

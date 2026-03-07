@@ -86,28 +86,26 @@ else:
     print('   Check: nvidia-smi and CUDA installation')
 "
 
-# ── 2. Download & Process Datasets ────────────────────────
+# ── 2. Download & Process ALL Datasets ────────────────────
 echo ""
 echo "============================================================"
-echo "📥 Step 1: Downloading & Processing Datasets"
+echo "📥 Step 1: Downloading & Processing ALL Datasets"
 echo "============================================================"
 
 if [ "$SMOKE_MODE" = true ]; then
     echo "   Smoke mode: using synthetic data, skipping downloads"
 else
-    # Download MIT-BIH if raw records missing (skips if already downloaded)
+    # Download and process ALL datasets (MIT-BIH + PTB-XL + Chapman-Shaoxing)
+    # Each download function skips if data already exists
+    echo "📦 Downloading MIT-BIH + PTB-XL + Chapman-Shaoxing..."
     python download_all_datasets.py --mitbih
+    python download_all_datasets.py --ptbxl
+    python download_all_datasets.py --chapman
 
-    # Process PTB-XL if raw data exists but not yet processed
-    if [ -d "data/ptbxl" ] && [ ! -f "data/ptbxl_processed.npz" ]; then
-        echo ""
-        echo "📊 Processing PTB-XL dataset (this takes ~20 min)..."
-        python download_all_datasets.py --process
-    elif [ -f "data/ptbxl_processed.npz" ]; then
-        echo "   ✅ PTB-XL already processed, skipping."
-    else
-        echo "   ⚠️  PTB-XL raw data not found. Training with MIT-BIH only."
-    fi
+    # Process all downloaded datasets
+    echo ""
+    echo "⚙️  Processing all datasets into training format..."
+    python download_all_datasets.py --process
 fi
 
 # ── 3. Verify Datasets ───────────────────────────────────

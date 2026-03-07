@@ -33,7 +33,8 @@ data/ptbxl_processed.npz
 data/real_ecg_dataset.npy
 data/realistic_train.npz
 data/verification_report.json
-data/ptbxl_processed.npz
+data/chapman_processed.npz
+data/chapman_shaoxing/
 checkpoints/*.pt
 checkpoints/*.pth
 *.h5

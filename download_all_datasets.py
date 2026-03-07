@@ -10,15 +10,17 @@ Usage:
     python download_all_datasets.py              # Download everything
     python download_all_datasets.py --mitbih      # Only MIT-BIH
     python download_all_datasets.py --ptbxl       # Only PTB-XL
+    python download_all_datasets.py --chapman     # Only Chapman-Shaoxing
     python download_all_datasets.py --cpsc        # Only CPSC2018
     python download_all_datasets.py --process     # Only process (skip download)
 
 Estimated Download Sizes:
-    MIT-BIH:    ~100 MB  (48 records, 30 min each, 360 Hz, 2 leads)
-    PTB-XL:     ~2.5 GB  (21,837 records, 10s each, 500 Hz, 12 leads)
-    CPSC2018:   ~4.0 GB  (6,877 records, 10s each, 500 Hz, 12 leads)
+    MIT-BIH:          ~100 MB  (48 records, 30 min each, 360 Hz, 2 leads)
+    PTB-XL:           ~2.5 GB  (21,837 records, 10s each, 500 Hz, 12 leads)
+    Chapman-Shaoxing: ~1.0 GB  (10,646 records, 10s each, 500 Hz, 12 leads)
+    CPSC2018:         ~4.0 GB  (6,877 records, 10s each, 500 Hz, 12 leads)
 
-Total: ~6.6 GB disk space needed
+Total: ~7.6 GB disk space needed
 """
 
 import os
@@ -42,6 +44,7 @@ MITBIH_RECORDS = [
 
 MITBIH_DIR = os.path.join(DATA_DIR, 'mitbih_raw')
 PTBXL_DIR = os.path.join(DATA_DIR, 'ptbxl')
+CHAPMAN_DIR = os.path.join(DATA_DIR, 'chapman_shaoxing')
 CPSC_DIR = os.path.join(DATA_DIR, 'cpsc2018')
 
 
@@ -113,13 +116,53 @@ def download_ptbxl():
 
     try:
         print("   Downloading full database (this may take 10-30 minutes)...")
-        wfdb.dl_database('ptb-xl', PTBXL_DIR)
+        # Try versioned path first, then unversioned
+        try:
+            wfdb.dl_database('ptb-xl/1.0.3', PTBXL_DIR)
+        except Exception:
+            print("   Retrying with alternate path...")
+            wfdb.dl_database('ptb-xl', PTBXL_DIR)
         print("   ✅ PTB-XL download complete!")
         return True
     except Exception as e:
         print(f"   ❌ Download failed: {e}")
         print(f"   Manual download: https://physionet.org/content/ptb-xl/1.0.3/")
         print(f"   Extract to: {PTBXL_DIR}")
+        return False
+
+
+def download_chapman():
+    """
+    Download Chapman-Shaoxing 12-lead ECG database (10,646 records).
+    Source: PhysioNet (physionet.org/content/ecg-arrhythmia/1.0.0/)
+
+    Adds morphological diversity — different patient population and
+    ECG recording equipment for better generalization.
+    """
+    import wfdb
+
+    os.makedirs(CHAPMAN_DIR, exist_ok=True)
+    print("=" * 60)
+    print("📥 Downloading Chapman-Shaoxing ECG Database")
+    print(f"   Target: {CHAPMAN_DIR}")
+    print(f"   Size: ~1 GB (10,646 records, 12-lead, 500Hz)")
+    print("=" * 60)
+
+    # Check if already downloaded by looking for .hea files
+    existing_hea = [f for f in os.listdir(CHAPMAN_DIR) if f.endswith('.hea')] if os.path.exists(CHAPMAN_DIR) else []
+    if len(existing_hea) > 5000:
+        print(f"   ✅ Chapman-Shaoxing already downloaded ({len(existing_hea)} records), skipping.")
+        return True
+
+    try:
+        print("   Downloading (this may take 10-30 minutes)...")
+        wfdb.dl_database('ecg-arrhythmia/1.0.0', CHAPMAN_DIR)
+        print("   ✅ Chapman-Shaoxing download complete!")
+        return True
+    except Exception as e:
+        print(f"   ❌ Download failed: {e}")
+        print(f"   Manual download: https://physionet.org/content/ecg-arrhythmia/1.0.0/")
+        print(f"   Extract to: {CHAPMAN_DIR}")
         return False
 
 
@@ -340,17 +383,111 @@ def process_ptbxl():
     return True
 
 
+def process_chapman():
+    """
+    Process Chapman-Shaoxing into patient-indexed segments for training.
+    Outputs: data/chapman_processed.npz — {signals, patient_ids}
+    """
+    import wfdb
+    from scipy.signal import resample as scipy_resample
+
+    output_file = os.path.join(DATA_DIR, 'chapman_processed.npz')
+
+    if os.path.exists(output_file):
+        existing = np.load(output_file)
+        print(f"   ✅ Chapman already processed ({len(existing['signals'])} records), skipping.")
+        return True
+
+    if not os.path.exists(CHAPMAN_DIR):
+        print("   ❌ Chapman-Shaoxing not downloaded yet.")
+        return False
+
+    print("=" * 60)
+    print("⚙️  Processing Chapman-Shaoxing")
+    print(f"   Output: {output_file}")
+    print("=" * 60)
+
+    # Find all .hea files in the directory (records may be in subdirectories)
+    hea_files = []
+    for root, dirs, files in os.walk(CHAPMAN_DIR):
+        for f in files:
+            if f.endswith('.hea'):
+                hea_files.append(os.path.join(root, f))
+
+    print(f"   Found {len(hea_files)} records")
+
+    signals = []
+    patient_ids = []
+    failed = 0
+
+    for i, hea_path in enumerate(hea_files):
+        try:
+            rec_path = hea_path[:-4]  # Remove .hea extension
+            record = wfdb.rdrecord(rec_path)
+            sig = record.p_signal  # (T, num_leads)
+
+            # Use Lead I (column 0)
+            lead_I = sig[:, 0].astype(np.float64)
+
+            if np.isnan(lead_I).any():
+                lead_I = np.nan_to_num(lead_I, nan=0.0)
+
+            std = lead_I.std()
+            if std < 1e-6:
+                failed += 1
+                continue
+            lead_I = (lead_I - lead_I.mean()) / (std + 1e-8)
+
+            # Resample to 2500 samples (5s at 500Hz)
+            fs = record.fs
+            five_sec_samples = int(5 * fs)
+            lead_5s = lead_I[:min(five_sec_samples, len(lead_I))]
+
+            if len(lead_5s) < 100:  # Too short
+                failed += 1
+                continue
+
+            if len(lead_5s) != 2500:
+                lead_5s = scipy_resample(lead_5s, 2500)
+
+            signals.append(lead_5s.astype(np.float32))
+            # Use record index as patient ID (one record per patient for Chapman)
+            patient_ids.append(i)
+
+            if (i + 1) % 2000 == 0:
+                print(f"   Processed {i + 1}/{len(hea_files)} records... "
+                      f"({len(signals)} ok, {failed} failed)")
+
+        except Exception:
+            failed += 1
+            continue
+
+    if len(signals) == 0:
+        print("   ❌ No valid signals found!")
+        return False
+
+    signals = np.array(signals)[:, np.newaxis, :]  # (N, 1, 2500)
+    patient_ids = np.array(patient_ids)
+
+    print(f"   ✅ Processed {len(signals)} records")
+    print(f"   ⚠️  {failed} records failed/skipped")
+    np.savez_compressed(output_file, signals=signals, patient_ids=patient_ids)
+    print(f"   💾 Saved: {output_file}")
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser(description='Download CardioEquation datasets')
     parser.add_argument('--mitbih', action='store_true', help='Download MIT-BIH only')
     parser.add_argument('--ptbxl', action='store_true', help='Download PTB-XL only')
+    parser.add_argument('--chapman', action='store_true', help='Download Chapman-Shaoxing only')
     parser.add_argument('--cpsc', action='store_true', help='Download CPSC2018 only')
     parser.add_argument('--process', action='store_true', help='Only process (skip download)')
     parser.add_argument('--all', action='store_true', help='Download everything (default)')
     args = parser.parse_args()
 
     # If no specific flag, download all
-    download_all = not (args.mitbih or args.ptbxl or args.cpsc or args.process)
+    download_all = not (args.mitbih or args.ptbxl or args.chapman or args.cpsc or args.process)
 
     os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -368,6 +505,9 @@ def main():
         if download_all or args.ptbxl:
             results['ptbxl_download'] = download_ptbxl()
 
+        if download_all or args.chapman:
+            results['chapman_download'] = download_chapman()
+
         if download_all or args.cpsc:
             results['cpsc_download'] = download_cpsc2018()
 
@@ -379,6 +519,10 @@ def main():
     if download_all or args.ptbxl or args.process:
         print()
         results['ptbxl_process'] = process_ptbxl()
+
+    if download_all or args.chapman or args.process:
+        print()
+        results['chapman_process'] = process_chapman()
 
     # Summary
     elapsed = time.time() - start
@@ -392,7 +536,7 @@ def main():
         print("\n✅ All datasets ready! You can start training.")
     else:
         print("\n⚠️  Some downloads failed. Check errors above.")
-        print("   You can retry individual datasets with --mitbih, --ptbxl, --cpsc")
+        print("   You can retry individual datasets with --mitbih, --ptbxl, --chapman, --cpsc")
 
     print(f"\n   Next step: python verify_datasets.py")
 

@@ -109,11 +109,23 @@ def create_contrastive_dataset(data_path, ptbxl_path='data/ptbxl_processed.npz',
             if context.shape[-1] > signal_length:
                 context = context[:, :, :signal_length]
             # MIT-BIH patient IDs: offset to avoid collision
-            max_ptbxl_pid = patient_ids.max() + 1
-            mitbih_pids = np.arange(len(context)) // 3 + max_ptbxl_pid
+            max_pid = patient_ids.max() + 1
+            mitbih_pids = np.arange(len(context)) // 3 + max_pid
             segments = np.concatenate([segments, context], axis=0)
             patient_ids = np.concatenate([patient_ids, mitbih_pids], axis=0)
-            print(f"   = Combined: {len(segments)} segments, {len(np.unique(patient_ids))} patients")
+
+        # Also load Chapman-Shaoxing if available
+        chapman_path = 'data/chapman_processed.npz'
+        if os.path.exists(chapman_path):
+            print(f"   + Combining with Chapman-Shaoxing from {chapman_path}")
+            chapman = np.load(chapman_path)
+            chapman_sigs = chapman['signals']
+            max_pid = patient_ids.max() + 1
+            chapman_pids = chapman['patient_ids'] + max_pid
+            segments = np.concatenate([segments, chapman_sigs], axis=0)
+            patient_ids = np.concatenate([patient_ids, chapman_pids], axis=0)
+
+        print(f"   = Total: {len(segments)} segments, {len(np.unique(patient_ids))} patients")
 
         return torch.from_numpy(segments).float(), torch.from_numpy(patient_ids).long()
 
