@@ -1,0 +1,21 @@
+{
+  "epochs": 200,
+  "batch_size": 32,
+  "accum_steps": 8,
+  "lr": 0.0001,
+  "warmup_steps": 5000,
+  "ema_decay": 0.9999,
+  "cfg_dropout": 0.1,
+  "guidance_scale": 3.0,
+  "grad_clip": 1.0,
+  "model_size": "B",
+  "dataset": "mitbih",
+  "data_path": "data/mitbih_forecasting.npz",
+  "output_dir": "checkpoints",
+  "save_every": 10,
+  "use_identity_loss": true,
+  "resume": null,
+  "num_workers": 4,
+  "seed": 42,
+  "use_bf16": true
+}

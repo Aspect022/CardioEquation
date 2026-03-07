@@ -1,0 +1,52 @@
+CardioEquation V2 Training Run
+==============================
+Timestamp: 2026-03-07 06:15:54
+GPU: NVIDIA A100 80GB PCIe
+Smoke Mode: false
+
+Files in checkpoints/:
+total 92G
+-rw-rw-r-- 1 user04 user04  2.0G Mar  7 06:10 dit_ecg_best.pt
+-rw-rw-r-- 1 user04 user04 1012M Mar  7 06:10 dit_ecg_ema_final.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  6 22:31 dit_ecg_epoch_001.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  6 22:32 dit_ecg_epoch_002.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 02:37 dit_ecg_epoch_010.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 02:48 dit_ecg_epoch_020.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 02:59 dit_ecg_epoch_030.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 03:10 dit_ecg_epoch_040.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 03:22 dit_ecg_epoch_050.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 03:34 dit_ecg_epoch_060.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 03:45 dit_ecg_epoch_070.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 03:56 dit_ecg_epoch_080.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 04:07 dit_ecg_epoch_090.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 04:18 dit_ecg_epoch_100.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 04:30 dit_ecg_epoch_110.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 04:41 dit_ecg_epoch_120.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 04:52 dit_ecg_epoch_130.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 05:03 dit_ecg_epoch_140.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 05:14 dit_ecg_epoch_150.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 05:25 dit_ecg_epoch_160.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 05:36 dit_ecg_epoch_170.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 05:47 dit_ecg_epoch_180.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 05:59 dit_ecg_epoch_190.pt
+-rw-rw-r-- 1 user04 user04  4.1G Mar  7 06:10 dit_ecg_epoch_200.pt
+-rw-rw-r-- 1 user04 user04   34M Mar  7 02:23 feature_extractor_contrastive.pt
+-rw-rw-r-- 1 user04 user04   431 Mar  7 06:10 train_config.json
+-rw-rw-r-- 1 user04 user04   162 Mar  7 06:15 training_log.txt
+
+Files in outputs/:
+outputs/:
+total 636K
+drwxrwxr-x 2 user04 user04 4.0K Mar  7 06:15 clinical_validation
+-rw-rw-r-- 1 user04 user04  91K Mar  6 22:12 legacy_sim_test_pre.png
+-rw-rw-r-- 1 user04 user04  26K Mar  6 22:12 legacy_sim_test_signal.png
+-rw-rw-r-- 1 user04 user04  91K Mar  6 22:12 v1_phase1_diffusion_verification.png
+-rw-rw-r-- 1 user04 user04 113K Mar  6 22:12 v1_phase2_realistic_verification.png
+-rw-rw-r-- 1 user04 user04 156K Mar  6 22:12 v1_phase3_clinical_result.png
+-rw-rw-r-- 1 user04 user04 148K Mar  6 22:12 v1_phase4_forecasting_verification.png
+
+outputs/clinical_validation:
+total 1.1M
+-rw-rw-r-- 1 user04 user04 878K Mar  7 06:15 clinical_comparison.png
+-rw-rw-r-- 1 user04 user04 218K Mar  7 06:15 clinical_ecg_digitized.npz
+-rw-rw-r-- 1 user04 user04  504 Mar  7 06:15 clinical_results.json
