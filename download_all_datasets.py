@@ -91,15 +91,25 @@ def download_mitbih():
     return len(failed) == 0
 
 
+def _count_hea_files(directory):
+    """Count .hea files recursively in a directory."""
+    count = 0
+    if os.path.exists(directory):
+        for root, dirs, files in os.walk(directory):
+            count += sum(1 for f in files if f.endswith('.hea'))
+    return count
+
+
 def download_ptbxl():
     """
     Download PTB-XL dataset (21,837 12-lead ECGs, 18,885 patients).
     Source: PhysioNet (physionet.org/content/ptb-xl/1.0.3/)
 
-    Strategy:
-    - Download 100Hz LR records via wfdb (sufficient for our use)
-    - Manually download the CSV metadata (wfdb skips non-record files)
+    Uses wget (not wfdb) for reliable downloads. Only downloads:
+    - ptbxl_database.csv (metadata)
+    - records100/ (100Hz LR records — sufficient for training)
     """
+    import subprocess
     import urllib.request
 
     os.makedirs(PTBXL_DIR, exist_ok=True)
@@ -112,7 +122,7 @@ def download_ptbxl():
     csv_path = os.path.join(PTBXL_DIR, 'ptbxl_database.csv')
     success = True
 
-    # Step 1: Download CSV metadata (wfdb doesn't do this)
+    # Step 1: Download CSV metadata
     if not os.path.exists(csv_path):
         print("   📝 Downloading ptbxl_database.csv...")
         csv_url = 'https://physionet.org/files/ptb-xl/1.0.3/ptbxl_database.csv'
@@ -121,40 +131,36 @@ def download_ptbxl():
             print(f"   ✅ CSV downloaded ({os.path.getsize(csv_path) // 1024} KB)")
         except Exception as e:
             print(f"   ❌ CSV download failed: {e}")
-            print(f"   Manual: wget {csv_url} -O {csv_path}")
             success = False
     else:
         print("   ✅ CSV already exists, skipping.")
 
-    # Step 2: Download LR (100Hz) records via wfdb
-    # Check if LR records already exist
+    # Step 2: Download LR (100Hz) records via wget
     lr_dir = os.path.join(PTBXL_DIR, 'records100')
-    existing_count = 0
-    if os.path.exists(lr_dir):
-        for root, dirs, files in os.walk(lr_dir):
-            existing_count += sum(1 for f in files if f.endswith('.hea'))
+    existing_count = _count_hea_files(lr_dir)
 
     if existing_count > 20000:
         print(f"   ✅ LR records already downloaded ({existing_count} records), skipping.")
     else:
-        print(f"   📦 Downloading LR (100Hz) records... (found {existing_count} existing)")
+        print(f"   📦 Downloading LR records via wget... (found {existing_count} existing)")
         print(f"   This may take 30-60 minutes...")
-        try:
-            import wfdb
-            # Use just 'ptb-xl' - wfdb handles the versioning internally
-            wfdb.dl_database('ptb-xl', PTBXL_DIR)
-            print("   ✅ LR records download complete!")
-        except Exception as e:
-            # wfdb may crash at the LR/HR boundary but LR records are fine
-            lr_count = 0
-            if os.path.exists(lr_dir):
-                for root, dirs, files in os.walk(lr_dir):
-                    lr_count += sum(1 for f in files if f.endswith('.hea'))
-            if lr_count > 15000:
-                print(f"   ⚠️  Download had errors but got {lr_count} LR records (sufficient)")
-            else:
-                print(f"   ❌ Download failed ({lr_count} records): {e}")
-                success = False
+        # wget -r: recursive, -N: timestamping, -c: continue partial,
+        # -np: no parent, -nH: no host dir, --cut-dirs=3: skip physionet.org/files/ptb-xl/1.0.3/
+        result = subprocess.run([
+            'wget', '-r', '-N', '-c', '-np', '-nH',
+            '--cut-dirs=3',
+            '-P', PTBXL_DIR,
+            '-e', 'robots=off',
+            '--no-verbose',
+            'https://physionet.org/files/ptb-xl/1.0.3/records100/'
+        ])
+
+        lr_count = _count_hea_files(lr_dir)
+        if lr_count > 15000:
+            print(f"   ✅ Downloaded {lr_count} LR records")
+        else:
+            print(f"   ❌ Only got {lr_count} records (wget exit: {result.returncode})")
+            success = False
 
     return success
 
@@ -164,10 +170,9 @@ def download_chapman():
     Download Chapman-Shaoxing 12-lead ECG database (10,646 records).
     Source: PhysioNet (physionet.org/content/ecg-arrhythmia/1.0.0/)
 
-    Adds morphological diversity — different patient population and
-    ECG recording equipment for better generalization.
+    Uses wget (not wfdb) for reliable downloads.
     """
-    import wfdb
+    import subprocess
 
     os.makedirs(CHAPMAN_DIR, exist_ok=True)
     print("=" * 60)
@@ -176,27 +181,33 @@ def download_chapman():
     print(f"   Size: ~1 GB (10,646 records, 12-lead, 500Hz)")
     print("=" * 60)
 
-    # Check if already downloaded by looking for .hea files
-    existing_hea = [f for f in os.listdir(CHAPMAN_DIR) if f.endswith('.hea')] if os.path.exists(CHAPMAN_DIR) else []
-    if len(existing_hea) > 5000:
-        print(f"   ✅ Chapman-Shaoxing already downloaded ({len(existing_hea)} records), skipping.")
+    # Check if already downloaded by looking for .hea files recursively
+    existing_count = _count_hea_files(CHAPMAN_DIR)
+    if existing_count > 5000:
+        print(f"   ✅ Chapman already downloaded ({existing_count} records), skipping.")
         return True
 
-    try:
-        print("   Downloading (this may take 10-30 minutes)...")
-        import wfdb
-        # wfdb appends version automatically — do NOT include /1.0.0
-        try:
-            wfdb.dl_database('ecg-arrhythmia', CHAPMAN_DIR)
-        except Exception:
-            print("   Retrying with versioned path...")
-            wfdb.dl_database('ecg-arrhythmia/1.0.0', CHAPMAN_DIR)
-        print("   ✅ Chapman-Shaoxing download complete!")
+    print(f"   📦 Downloading via wget... (found {existing_count} existing)")
+    print(f"   This may take 10-30 minutes...")
+    # wget -r: recursive, -N: timestamping, -c: continue partial,
+    # -np: no parent, -nH: no host dir, --cut-dirs=3: skip physionet.org/files/ecg-arrhythmia/1.0.0/
+    result = subprocess.run([
+        'wget', '-r', '-N', '-c', '-np', '-nH',
+        '--cut-dirs=3',
+        '-P', CHAPMAN_DIR,
+        '-e', 'robots=off',
+        '--no-verbose',
+        '--accept', '*.hea,*.dat',
+        'https://physionet.org/files/ecg-arrhythmia/1.0.0/'
+    ])
+
+    final_count = _count_hea_files(CHAPMAN_DIR)
+    if final_count > 5000:
+        print(f"   ✅ Downloaded {final_count} Chapman records")
         return True
-    except Exception as e:
-        print(f"   ❌ Download failed: {e}")
-        print(f"   Manual download: https://physionet.org/content/ecg-arrhythmia/1.0.0/")
-        print(f"   Extract to: {CHAPMAN_DIR}")
+    else:
+        print(f"   ❌ Only got {final_count} records (wget exit: {result.returncode})")
+        print(f"   Manual: wget -r -c -np https://physionet.org/files/ecg-arrhythmia/1.0.0/")
         return False
 
 
