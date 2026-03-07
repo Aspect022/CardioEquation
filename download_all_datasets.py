@@ -96,39 +96,67 @@ def download_ptbxl():
     Download PTB-XL dataset (21,837 12-lead ECGs, 18,885 patients).
     Source: PhysioNet (physionet.org/content/ptb-xl/1.0.3/)
 
-    This is the LARGEST labeled ECG dataset — essential for:
-    - Contrastive pre-training (18K unique patients)
-    - Conditional generation with diagnostic labels (71 SCP codes)
+    Strategy:
+    - Download 100Hz LR records via wfdb (sufficient for our use)
+    - Manually download the CSV metadata (wfdb skips non-record files)
     """
-    import wfdb
+    import urllib.request
 
     os.makedirs(PTBXL_DIR, exist_ok=True)
     print("=" * 60)
     print("📥 Downloading PTB-XL Dataset")
     print(f"   Target: {PTBXL_DIR}")
-    print(f"   Size: ~2.5 GB (21,837 records, 12-lead, 500Hz)")
+    print(f"   Size: ~800 MB (21,837 records, 12-lead, 100Hz LR)")
     print("=" * 60)
 
-    # Check if already downloaded
-    if os.path.exists(os.path.join(PTBXL_DIR, 'ptbxl_database.csv')):
-        print("   ✅ PTB-XL already downloaded, skipping.")
-        return True
+    csv_path = os.path.join(PTBXL_DIR, 'ptbxl_database.csv')
+    success = True
 
-    try:
-        print("   Downloading full database (this may take 10-30 minutes)...")
-        # Try versioned path first, then unversioned
+    # Step 1: Download CSV metadata (wfdb doesn't do this)
+    if not os.path.exists(csv_path):
+        print("   📝 Downloading ptbxl_database.csv...")
+        csv_url = 'https://physionet.org/files/ptb-xl/1.0.3/ptbxl_database.csv'
         try:
+            urllib.request.urlretrieve(csv_url, csv_path)
+            print(f"   ✅ CSV downloaded ({os.path.getsize(csv_path) // 1024} KB)")
+        except Exception as e:
+            print(f"   ❌ CSV download failed: {e}")
+            print(f"   Manual: wget {csv_url} -O {csv_path}")
+            success = False
+    else:
+        print("   ✅ CSV already exists, skipping.")
+
+    # Step 2: Download LR (100Hz) records via wfdb
+    # Check if LR records already exist
+    lr_dir = os.path.join(PTBXL_DIR, 'records100')
+    existing_count = 0
+    if os.path.exists(lr_dir):
+        for root, dirs, files in os.walk(lr_dir):
+            existing_count += sum(1 for f in files if f.endswith('.hea'))
+
+    if existing_count > 20000:
+        print(f"   ✅ LR records already downloaded ({existing_count} records), skipping.")
+    else:
+        print(f"   📦 Downloading LR (100Hz) records... (found {existing_count} existing)")
+        print(f"   This may take 30-60 minutes...")
+        try:
+            import wfdb
             wfdb.dl_database('ptb-xl/1.0.3', PTBXL_DIR)
-        except Exception:
-            print("   Retrying with alternate path...")
-            wfdb.dl_database('ptb-xl', PTBXL_DIR)
-        print("   ✅ PTB-XL download complete!")
-        return True
-    except Exception as e:
-        print(f"   ❌ Download failed: {e}")
-        print(f"   Manual download: https://physionet.org/content/ptb-xl/1.0.3/")
-        print(f"   Extract to: {PTBXL_DIR}")
-        return False
+            print("   ✅ LR records download complete!")
+        except Exception as e:
+            # wfdb may crash at the LR/HR boundary but LR records are fine
+            # Check if we got enough records
+            lr_count = 0
+            if os.path.exists(lr_dir):
+                for root, dirs, files in os.walk(lr_dir):
+                    lr_count += sum(1 for f in files if f.endswith('.hea'))
+            if lr_count > 15000:
+                print(f"   ⚠️  Download had errors but got {lr_count} LR records (sufficient)")
+            else:
+                print(f"   ❌ Download failed ({lr_count} records): {e}")
+                success = False
+
+    return success
 
 
 def download_chapman():
@@ -156,7 +184,13 @@ def download_chapman():
 
     try:
         print("   Downloading (this may take 10-30 minutes)...")
-        wfdb.dl_database('ecg-arrhythmia/1.0.0', CHAPMAN_DIR)
+        import wfdb
+        # wfdb appends version automatically — do NOT include /1.0.0
+        try:
+            wfdb.dl_database('ecg-arrhythmia', CHAPMAN_DIR)
+        except Exception:
+            print("   Retrying with versioned path...")
+            wfdb.dl_database('ecg-arrhythmia/1.0.0', CHAPMAN_DIR)
         print("   ✅ Chapman-Shaoxing download complete!")
         return True
     except Exception as e:
