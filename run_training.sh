@@ -97,6 +97,17 @@ if [ "$SMOKE_MODE" = true ]; then
 else
     # Download MIT-BIH if raw records missing (skips if already downloaded)
     python download_all_datasets.py --mitbih
+
+    # Process PTB-XL if raw data exists but not yet processed
+    if [ -d "data/ptbxl" ] && [ ! -f "data/ptbxl_processed.npz" ]; then
+        echo ""
+        echo "📊 Processing PTB-XL dataset (this takes ~20 min)..."
+        python download_all_datasets.py --process
+    elif [ -f "data/ptbxl_processed.npz" ]; then
+        echo "   ✅ PTB-XL already processed, skipping."
+    else
+        echo "   ⚠️  PTB-XL raw data not found. Training with MIT-BIH only."
+    fi
 fi
 
 # ── 3. Verify Datasets ───────────────────────────────────
@@ -159,7 +170,7 @@ if [ "$RUN_CONTRASTIVE" = true ]; then
             --output_dir checkpoints
     else
         python src/training/train_contrastive.py \
-            --epochs 100 \
+            --epochs 200 \
             --batch_size 64 \
             --lr 3e-4 \
             --output_dir checkpoints

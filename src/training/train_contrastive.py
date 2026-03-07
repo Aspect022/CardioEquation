@@ -78,45 +78,82 @@ class ECGAugmenter:
         return x
 
 
-def create_contrastive_dataset(data_path, signal_length=2500):
+def create_contrastive_dataset(data_path, ptbxl_path='data/ptbxl_processed.npz', signal_length=2500):
     """
-    Create pairs for contrastive learning.
-    Each sample is a segment; positive pairs are adjacent segments
-    from the same recording (same patient).
-    """
-    if not os.path.exists(data_path):
-        print(f"Dataset not found at {data_path}, generating synthetic")
-        # Synthetic fallback: 200 "patients" × 10 segments each
-        all_segments = []
-        patient_ids = []
-        for pid in range(200):
-            hr = np.random.uniform(60, 100)
-            amplitude_scale = np.random.uniform(0.5, 1.5)
-            t = np.linspace(0, 5, signal_length)
-            for seg in range(10):
-                signal = np.zeros(signal_length)
-                beat_dur = 60.0 / hr
-                for bs in np.arange(0, 5, beat_dur):
-                    signal += amplitude_scale * np.exp(-((t - bs - 0.22)**2) / (2 * 0.008**2))
-                    signal += 0.2 * amplitude_scale * np.exp(-((t - bs - 0.1)**2) / (2 * 0.02**2))
-                    signal += 0.3 * amplitude_scale * np.exp(-((t - bs - 0.4)**2) / (2 * 0.04**2))
-                signal += np.random.normal(0, 0.01 * seg, signal_length)
-                signal = (signal - signal.mean()) / (signal.std() + 1e-8)
-                all_segments.append(signal.astype(np.float32))
-                patient_ids.append(pid)
+    Create dataset for contrastive learning.
 
-        segments = np.array(all_segments)[:, np.newaxis, :]
-        patient_ids = np.array(patient_ids)
-    else:
+    Priority:
+      1. PTB-XL (if available) — 18K+ patients with real patient IDs
+      2. MIT-BIH forecasting data — 48 patients with approximate IDs
+      3. Synthetic fallback — 200 fake patients
+
+    Returns:
+        segments: (N, 1, signal_length) tensor
+        patient_ids: (N,) long tensor
+    """
+    # ── Try PTB-XL first (best: real patient IDs) ──
+    if os.path.exists(ptbxl_path):
+        print(f"📊 Loading PTB-XL contrastive data from {ptbxl_path}")
+        data = np.load(ptbxl_path)
+        segments = data['signals']  # (N, 1, 2500)
+        patient_ids = data['patient_ids']  # (N,) real patient IDs
+
+        # Also load MIT-BIH and combine if available
+        if os.path.exists(data_path):
+            print(f"   + Combining with MIT-BIH from {data_path}")
+            mitbih = np.load(data_path)
+            context = mitbih['context']
+            if context.shape[-1] == 1:
+                context = context.transpose(0, 2, 1)  # (N, 1, T)
+            # Truncate to signal_length if needed
+            if context.shape[-1] > signal_length:
+                context = context[:, :, :signal_length]
+            # MIT-BIH patient IDs: offset to avoid collision
+            max_ptbxl_pid = patient_ids.max() + 1
+            mitbih_pids = np.arange(len(context)) // 3 + max_ptbxl_pid
+            segments = np.concatenate([segments, context], axis=0)
+            patient_ids = np.concatenate([patient_ids, mitbih_pids], axis=0)
+            print(f"   = Combined: {len(segments)} segments, {len(np.unique(patient_ids))} patients")
+
+        return torch.from_numpy(segments).float(), torch.from_numpy(patient_ids).long()
+
+    # ── Fallback: MIT-BIH only ──
+    if os.path.exists(data_path):
+        print(f"📊 Loading MIT-BIH contrastive data from {data_path}")
+        print(f"   ⚠️  PTB-XL not found at {ptbxl_path} — using MIT-BIH only")
         data = np.load(data_path)
         context = data['context']
         if context.shape[-1] == 1:
             context = context.transpose(0, 2, 1)
+        # Truncate to signal_length if needed
+        if context.shape[-1] > signal_length:
+            context = context[:, :, :signal_length]
         segments = context
-        # For MIT-BIH: approximate patient IDs based on ordering
-        # Each record ~3 segments, so group by record
         patient_ids = np.arange(len(segments)) // 3
+        return torch.from_numpy(segments).float(), torch.from_numpy(patient_ids).long()
 
+    # ── Synthetic fallback ──
+    print("📊 No real data found, generating synthetic contrastive data")
+    all_segments = []
+    patient_ids_list = []
+    for pid in range(200):
+        hr = np.random.uniform(60, 100)
+        amplitude_scale = np.random.uniform(0.5, 1.5)
+        t = np.linspace(0, 5, signal_length)
+        for seg in range(10):
+            signal = np.zeros(signal_length)
+            beat_dur = 60.0 / hr
+            for bs in np.arange(0, 5, beat_dur):
+                signal += amplitude_scale * np.exp(-((t - bs - 0.22)**2) / (2 * 0.008**2))
+                signal += 0.2 * amplitude_scale * np.exp(-((t - bs - 0.1)**2) / (2 * 0.02**2))
+                signal += 0.3 * amplitude_scale * np.exp(-((t - bs - 0.4)**2) / (2 * 0.04**2))
+            signal += np.random.normal(0, 0.01 * seg, signal_length)
+            signal = (signal - signal.mean()) / (signal.std() + 1e-8)
+            all_segments.append(signal.astype(np.float32))
+            patient_ids_list.append(pid)
+
+    segments = np.array(all_segments)[:, np.newaxis, :]
+    patient_ids = np.array(patient_ids_list)
     return torch.from_numpy(segments).float(), torch.from_numpy(patient_ids).long()
 
 

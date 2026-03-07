@@ -147,16 +147,27 @@ def load_dataset(args):
         if signal_len != target_len:
             print(f"   ⚠️  Signal length is {signal_len}, model expects {target_len}")
             if signal_len > target_len:
-                # Truncate: take first 5 seconds
                 context = context[:, :, :target_len]
                 future = future[:, :, :target_len]
                 print(f"   ✂️  Truncated to {target_len} samples (first 5s)")
             else:
-                # Pad with zeros if shorter (shouldn't happen normally)
                 pad = target_len - signal_len
                 context = np.pad(context, ((0, 0), (0, 0), (0, pad)), mode='constant')
                 future = np.pad(future, ((0, 0), (0, 0), (0, pad)), mode='constant')
                 print(f"   📏 Padded to {target_len} samples")
+
+        # ── Combine with PTB-XL if available ──
+        ptbxl_path = 'data/ptbxl_processed.npz'
+        if os.path.exists(ptbxl_path):
+            print(f"   + Loading PTB-XL from {ptbxl_path}")
+            ptbxl = np.load(ptbxl_path)
+            ptbxl_signals = ptbxl['signals']  # (N, 1, 2500)
+            # For DiT: use PTB-XL signals as both context and future
+            # (self-reconstruction objective for learning ECG structure)
+            context = np.concatenate([context, ptbxl_signals], axis=0)
+            future = np.concatenate([future, ptbxl_signals], axis=0)
+            print(f"   = Combined dataset: {len(context)} samples "
+                  f"(MIT-BIH: {len(data['context'])}, PTB-XL: {len(ptbxl_signals)})")
 
         dataset = torch.utils.data.TensorDataset(
             torch.from_numpy(context).float(),

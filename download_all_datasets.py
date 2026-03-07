@@ -232,16 +232,21 @@ def process_ptbxl():
     Process PTB-XL into patient-indexed segments for contrastive learning
     and conditional generation training.
 
+    Uses LR (100Hz) records preferentially since HR download may be incomplete.
+    All signals are resampled to 2500 samples (5s at 500Hz).
+
     Outputs:
-        data/ptbxl_processed.npz — {signals, patient_ids, labels}
+        data/ptbxl_processed.npz — {signals, patient_ids}
     """
     import pandas as pd
     import wfdb
+    from scipy.signal import resample as scipy_resample
 
     output_file = os.path.join(DATA_DIR, 'ptbxl_processed.npz')
 
     if os.path.exists(output_file):
-        print("   ✅ PTB-XL already processed, skipping.")
+        existing = np.load(output_file)
+        print(f"   ✅ PTB-XL already processed ({len(existing['signals'])} records), skipping.")
         return True
 
     csv_path = os.path.join(PTBXL_DIR, 'ptbxl_database.csv')
@@ -256,53 +261,79 @@ def process_ptbxl():
 
     # Load metadata
     df = pd.read_csv(csv_path)
-    print(f"   Records: {len(df)}")
-    print(f"   Patients: {df['patient_id'].nunique()}")
+    total_records = len(df)
+    unique_patients = df['patient_id'].nunique()
+    print(f"   Records: {total_records}")
+    print(f"   Patients: {unique_patients}")
 
     signals = []
     patient_ids = []
-    record_count = 0
+    failed = 0
 
     for idx, row in df.iterrows():
         try:
-            # PTB-XL stores records in subfolders like records500/00000/00001_hr
-            filename = row['filename_hr']  # 500Hz version
-            rec_path = os.path.join(PTBXL_DIR, filename)
+            # Prefer LR (100Hz) since HR download may be incomplete
+            rec_path = None
 
-            if not os.path.exists(rec_path + '.hea'):
-                # Try without the _hr suffix or different path
-                filename = row.get('filename_lr', filename)
-                rec_path = os.path.join(PTBXL_DIR, filename)
+            # Try LR first (100Hz, 1000 samples for 10s)
+            if 'filename_lr' in row and pd.notna(row['filename_lr']):
+                lr_path = os.path.join(PTBXL_DIR, row['filename_lr'])
+                if os.path.exists(lr_path + '.hea'):
+                    rec_path = lr_path
+
+            # Fallback to HR (500Hz, 5000 samples for 10s)
+            if rec_path is None and 'filename_hr' in row and pd.notna(row['filename_hr']):
+                hr_path = os.path.join(PTBXL_DIR, row['filename_hr'])
+                if os.path.exists(hr_path + '.hea'):
+                    rec_path = hr_path
+
+            if rec_path is None:
+                failed += 1
+                continue
 
             record = wfdb.rdrecord(rec_path)
-            sig = record.p_signal  # (T, 12)
+            sig = record.p_signal  # (T, num_leads)
 
-            # Use Lead I for single-lead training (column 0)
-            lead_I = sig[:, 0]
+            # Use Lead I (column 0) for single-lead training
+            lead_I = sig[:, 0].astype(np.float64)
+
+            # Handle NaNs
+            if np.isnan(lead_I).any():
+                lead_I = np.nan_to_num(lead_I, nan=0.0)
 
             # Normalize
-            lead_I = (lead_I - lead_I.mean()) / (lead_I.std() + 1e-8)
+            std = lead_I.std()
+            if std < 1e-6:
+                failed += 1
+                continue
+            lead_I = (lead_I - lead_I.mean()) / (std + 1e-8)
 
-            # Resample to 2500 samples (5s at 500Hz) if needed
-            if len(lead_I) != 5000:
-                from scipy.signal import resample
-                lead_I = resample(lead_I, 5000)
+            # Resample to 2500 samples (5s at 500Hz)
+            # LR records are 1000 samples (10s at 100Hz) → take first 500 (5s) → resample to 2500
+            # HR records are 5000 samples (10s at 500Hz) → take first 2500 (5s)
+            fs = record.fs
+            five_sec_samples = int(5 * fs)
+            lead_5s = lead_I[:five_sec_samples]
 
-            # Take first 5s (2500 samples) for identity
-            signals.append(lead_I[:2500].astype(np.float32))
+            if len(lead_5s) != 2500:
+                lead_5s = scipy_resample(lead_5s, 2500)
+
+            signals.append(lead_5s.astype(np.float32))
             patient_ids.append(int(row['patient_id']))
-            record_count += 1
 
-            if record_count % 5000 == 0:
-                print(f"   Processed {record_count}/{len(df)} records...")
+            if (idx + 1) % 5000 == 0:
+                print(f"   Processed {idx + 1}/{total_records} records... "
+                      f"({len(signals)} ok, {failed} failed)")
 
         except Exception as e:
+            failed += 1
             continue
 
     signals = np.array(signals)[:, np.newaxis, :]  # (N, 1, 2500)
     patient_ids = np.array(patient_ids)
 
     print(f"   ✅ Processed {len(signals)} records from {len(np.unique(patient_ids))} patients")
+    print(f"   ⚠️  {failed} records failed/skipped")
     np.savez_compressed(output_file, signals=signals, patient_ids=patient_ids)
     print(f"   💾 Saved: {output_file}")
 
