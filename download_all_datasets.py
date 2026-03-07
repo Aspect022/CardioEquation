@@ -141,11 +141,11 @@ def download_ptbxl():
         print(f"   This may take 30-60 minutes...")
         try:
             import wfdb
-            wfdb.dl_database('ptb-xl/1.0.3', PTBXL_DIR)
+            # Use just 'ptb-xl' - wfdb handles the versioning internally
+            wfdb.dl_database('ptb-xl', PTBXL_DIR)
             print("   ✅ LR records download complete!")
         except Exception as e:
             # wfdb may crash at the LR/HR boundary but LR records are fine
-            # Check if we got enough records
             lr_count = 0
             if os.path.exists(lr_dir):
                 for root, dirs, files in os.walk(lr_dir):
@@ -224,7 +224,11 @@ def download_cpsc2018():
     try:
         import wfdb
         print("   Attempting PhysioNet mirror download...")
-        wfdb.dl_database('cpsc2018', CPSC_DIR)
+        # PhysioNet slug for CPSC2018 is 'challenge-2018'
+        try:
+            wfdb.dl_database('challenge-2018', CPSC_DIR)
+        except Exception:
+            wfdb.dl_database('cpsc2018', CPSC_DIR)
         print("   ✅ CPSC2018 download complete!")
         return True
     except Exception as e:
@@ -405,6 +409,10 @@ def process_ptbxl():
         except Exception as e:
             failed += 1
             continue
+
+    if len(signals) == 0:
+        print("   ❌ No records processed successfully. Check download logs.")
+        return False
 
     signals = np.array(signals)[:, np.newaxis, :]  # (N, 1, 2500)
     patient_ids = np.array(patient_ids)
