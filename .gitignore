@@ -24,6 +24,7 @@ env/
 *~
 
 # ── Data (large, downloaded on GPU server) ──
+
 data/mitbih_raw/
 data/mitdb/
 data/ptbxl/
@@ -59,8 +60,8 @@ Thumbs.db
 desktop.ini
 
 # ── Logs ────────────────────────────────────
-*.log
 wandb/
+checkpoints/runs/
 
 # ── Keep tracked ────────────────────────────
 # NOTE: Dataset/ folder with hospital PDFs is tracked

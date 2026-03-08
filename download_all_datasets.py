@@ -181,13 +181,20 @@ def download_chapman():
     print(f"   Size: ~1 GB (10,646 records, 12-lead, 500Hz)")
     print("=" * 60)
 
-    # Check if already downloaded by looking for .hea files recursively
-    existing_count = _count_hea_files(CHAPMAN_DIR)
-    if existing_count > 5000:
-        print(f"   ✅ Chapman already downloaded ({existing_count} records), skipping.")
+    # Check if already downloaded — must have BOTH .hea AND .dat files
+    existing_hea = _count_hea_files(CHAPMAN_DIR)
+    existing_dat = 0
+    if os.path.exists(CHAPMAN_DIR):
+        for root, dirs, files in os.walk(CHAPMAN_DIR):
+            existing_dat += sum(1 for f in files if f.endswith('.dat'))
+    if existing_hea > 5000 and existing_dat > 5000:
+        print(f"   ✅ Chapman already downloaded ({existing_hea} .hea, {existing_dat} .dat), skipping.")
         return True
+    elif existing_hea > 5000 and existing_dat < 1000:
+        print(f"   ⚠️  Found {existing_hea} .hea but only {existing_dat} .dat files!")
+        print(f"   📦 Re-downloading to get .dat signal files...")
 
-    print(f"   📦 Downloading via wget... (found {existing_count} existing)")
+    print(f"   📦 Downloading via wget... (found {existing_hea} .hea, {existing_dat} .dat)")
     print(f"   This may take 10-30 minutes...")
     # wget -r: recursive, -N: timestamping, -c: continue partial,
     # -np: no parent, -nH: no host dir, --cut-dirs=3: skip physionet.org/files/ecg-arrhythmia/1.0.0/
@@ -197,7 +204,6 @@ def download_chapman():
         '-P', CHAPMAN_DIR,
         '-e', 'robots=off',
         '--no-verbose',
-        '--accept', '*.hea,*.dat',
         'https://physionet.org/files/ecg-arrhythmia/1.0.0/'
     ])
 
@@ -511,8 +517,10 @@ def process_chapman():
                 print(f"   Processed {i + 1}/{len(hea_files)} records... "
                       f"({len(signals)} ok, {failed} failed)")
 
-        except Exception:
+        except Exception as e:
             failed += 1
+            if failed <= 5:
+                print(f"   ⚠️  Record {i} failed: {e}")
             continue
 
     if len(signals) == 0:

@@ -7,3 +7,12 @@
   "fake_morphology": "{'hr_mean': 82.51399923808852, 'hr_std': 22.22373153041378, 'qrs_duration_mean_ms': 92.15094339622641, 'qrs_duration_std_ms': 55.902676962403454}",
   "HR_MAE": 17.235482105760013
 }
+{
+  "FFD": 41.97870290363216,
+  "MMD": 0.3825993401574149,
+  "ReID_Top1": 0.058823529411764705,
+  "ReID_Top5": 0.23529411764705882,
+  "real_morphology": "{'hr_mean': 99.74948134384853, 'hr_std': 47.389395062038226, 'qrs_duration_mean_ms': 101.77011494252874, 'qrs_duration_std_ms': 37.61196347624666}",
+  "fake_morphology": "{'hr_mean': 90.46777213104914, 'hr_std': 21.07582439473172, 'qrs_duration_mean_ms': 107.00952380952381, 'qrs_duration_std_ms': 65.05038270640253}",
+  "HR_MAE": 9.281709212799385
+}

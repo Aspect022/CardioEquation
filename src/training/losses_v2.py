@@ -72,6 +72,7 @@ def correlation_loss(clean, reconstructed):
 def combined_diffusion_loss(
     noise_true, noise_pred, clean_signal, recon_signal,
     feature_extractor=None,
+    alpha_bar_t=None,
     w_noise=1.0, w_signal=1.0, w_identity=0.5,
     w_spectral=0.1, w_correlation=0.2,
 ):
@@ -79,22 +80,35 @@ def combined_diffusion_loss(
     Full multi-component loss for CardioEquation diffusion training.
 
     Components:
-        1. Noise MSE (standard diffusion) — weight 1.0
-        2. Signal MSE (reconstruction fidelity) — weight 1.0
-        3. Identity cosine loss (personalization) — weight 0.5
-        4. Spectral FFT loss (frequency preservation) — weight 0.1
-        5. Correlation loss (shape preservation) — weight 0.2
+        1. Noise MSE (standard diffusion) — weight 1.0  (always active)
+        2. Signal MSE (reconstruction fidelity) — weight 1.0  (SNR-weighted)
+        3. Identity cosine loss (personalization) — weight 0.5  (SNR-weighted)
+        4. Spectral FFT loss (frequency preservation) — weight 0.1  (SNR-weighted)
+        5. Correlation loss (shape preservation) — weight 0.2  (SNR-weighted)
+
+    Auxiliary losses (2-5) are weighted by alpha_bar_t so they only contribute
+    meaningfully at low-noise timesteps where x_0_pred is reliable.
+    At high noise (large t), alpha_bar_t ≈ 0 → auxiliary losses are suppressed.
     """
+    # Primary diffusion loss — always active at full weight
     loss = w_noise * noise_mse_loss(noise_true, noise_pred)
-    loss = loss + w_signal * signal_mse_loss(clean_signal, recon_signal)
+
+    # SNR weight: mean of alpha_bar_t across the batch (scalar)
+    # Falls off naturally: t=0 → snr_w≈1.0, t=500 → ~0.5, t=900 → ~0.01
+    if alpha_bar_t is not None:
+        snr_w = alpha_bar_t.mean().clamp(min=0.0, max=1.0)
+    else:
+        snr_w = 1.0  # Fallback: no weighting
+
+    loss = loss + snr_w * w_signal * signal_mse_loss(clean_signal, recon_signal)
 
     if feature_extractor is not None:
-        loss = loss + w_identity * cosine_identity_loss(
+        loss = loss + snr_w * w_identity * cosine_identity_loss(
             feature_extractor, clean_signal, recon_signal
         )
 
-    loss = loss + w_spectral * spectral_loss(clean_signal, recon_signal)
-    loss = loss + w_correlation * correlation_loss(clean_signal, recon_signal)
+    loss = loss + snr_w * w_spectral * spectral_loss(clean_signal, recon_signal)
+    loss = loss + snr_w * w_correlation * correlation_loss(clean_signal, recon_signal)
 
     return loss
 

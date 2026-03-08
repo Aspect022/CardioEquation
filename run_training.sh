@@ -69,6 +69,11 @@ pip install torch torchvision -q  # Fallback to default CUDA
 echo "📦 Installing project dependencies..."
 pip install -r requirements_pytorch.txt -q
 
+# ── Weights & Biases Setup ────────────────────────────────
+export WANDB_API_KEY="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"
+echo "📊 W&B: Logging in..."
+python -c "import wandb; wandb.login(key='$WANDB_API_KEY', relogin=True)" 2>/dev/null && echo "   ✅ W&B authenticated" || echo "   ⚠️  W&B login failed (will try during training)"
+
 # ── 1. GPU Check ──────────────────────────────────────────
 echo ""
 echo "🖥️  GPU Verification:"

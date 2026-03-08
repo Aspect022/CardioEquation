@@ -12,6 +12,7 @@ Features:
 - Classifier-Free Guidance training (10% conditioning dropout)
 - Cosine LR schedule with linear warmup
 - Checkpoint saving
+- Weights & Biases + TensorBoard logging
 
 Usage:
     python src/training/train_dit.py --epochs 200 --batch_size 32 --accum_steps 8
@@ -58,6 +59,11 @@ def parse_args():
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--use_bf16', action='store_true', default=True)
+    # ── Experiment Tracking ──
+    parser.add_argument('--wandb_project', type=str, default='CardioEquation', help='W&B project name')
+    parser.add_argument('--wandb_run', type=str, default=None, help='W&B run name (auto-generated if None)')
+    parser.add_argument('--no_wandb', action='store_true', default=False, help='Disable W&B logging')
+    parser.add_argument('--no_tensorboard', action='store_true', default=False, help='Disable TensorBoard')
     return parser.parse_args()
 
 
@@ -208,6 +214,32 @@ def train(args):
 
     os.makedirs(args.output_dir, exist_ok=True)
 
+    # ── Experiment Tracking ───────────────────────────────
+    wandb_run = None
+    tb_writer = None
+
+    if not args.no_wandb:
+        try:
+            import wandb
+            wandb_run = wandb.init(
+                project=args.wandb_project,
+                name=args.wandb_run or f"DiT-ECG-{args.model_size}_e{args.epochs}",
+                config=vars(args),
+                reinit=True,
+            )
+            print(f"📊 W&B initialized: {wandb_run.url}")
+        except Exception as e:
+            print(f"   ⚠️  W&B init failed: {e} — continuing without W&B")
+
+    if not args.no_tensorboard:
+        try:
+            from torch.utils.tensorboard import SummaryWriter
+            tb_dir = os.path.join(args.output_dir, 'runs')
+            tb_writer = SummaryWriter(log_dir=tb_dir)
+            print(f"📊 TensorBoard initialized: {tb_dir}")
+        except Exception as e:
+            print(f"   ⚠️  TensorBoard init failed: {e} — continuing without TB")
+
     # ── Models ────────────────────────────────────────────────
     print(f"🏗️  Building DiT-ECG-{args.model_size}...")
     if args.model_size == 'S':
@@ -215,7 +247,24 @@ def train(args):
     else:
         model = dit_ecg_b().to(device)
 
-    feature_extractor = FeatureExtractorPT().to(device) if args.use_identity_loss else None
+    feature_extractor = None
+    if args.use_identity_loss:
+        feature_extractor = FeatureExtractorPT().to(device)
+        # ── Load pre-trained contrastive weights ──
+        contrastive_path = os.path.join(args.output_dir, 'feature_extractor_contrastive.pt')
+        if os.path.exists(contrastive_path):
+            print(f"   📥 Loading pre-trained feature extractor from {contrastive_path}")
+            state_dict = torch.load(contrastive_path, map_location=device, weights_only=True)
+            feature_extractor.load_state_dict(state_dict)
+            print(f"   ✅ Pre-trained weights loaded successfully!")
+        else:
+            print(f"   ⚠️  No pre-trained encoder found at {contrastive_path}")
+            print(f"   ⚠️  Using random initialization (not recommended!)")
+        # ── Freeze the encoder — do NOT train it alongside DiT ──
+        for param in feature_extractor.parameters():
+            param.requires_grad = False
+        feature_extractor.eval()
+        print(f"   ❄️  Feature extractor frozen for diffusion training.")
 
     total_params = sum(p.numel() for p in model.parameters()) / 1e6
     print(f"   DiT Parameters: {total_params:.1f}M")
@@ -246,9 +295,8 @@ def train(args):
           f"accum={args.accum_steps}, effective={args.batch_size * args.accum_steps}")
 
     # ── Optimizer & Scheduler ─────────────────────────────────
+    # Only train DiT parameters — feature extractor is frozen
     all_params = list(model.parameters())
-    if feature_extractor:
-        all_params += list(feature_extractor.parameters())
 
     optimizer = torch.optim.AdamW(
         all_params,
@@ -291,8 +339,7 @@ def train(args):
 
     for epoch in range(start_epoch, args.epochs):
         model.train()
-        if feature_extractor:
-            feature_extractor.train()
+        # feature_extractor stays in eval() mode — frozen
 
         epoch_loss = 0.0
         num_batches = 0
@@ -330,10 +377,11 @@ def train(args):
                 alpha_bar_t = scheduler.alpha_bar_t.to(device)[t].view(-1, 1, 1)
                 x_0_pred = (x_t - (1 - alpha_bar_t).sqrt() * noise_pred) / alpha_bar_t.sqrt().clamp(min=1e-8)
 
-                # Compute loss
+                # Compute loss (with SNR weighting for auxiliary losses)
                 loss = combined_diffusion_loss(
                     noise, noise_pred, future, x_0_pred,
                     feature_extractor=feature_extractor if args.use_identity_loss else None,
+                    alpha_bar_t=alpha_bar_t.squeeze(),
                 )
                 loss = loss / args.accum_steps  # Scale for gradient accumulation
 
@@ -349,6 +397,16 @@ def train(args):
                 optimizer.zero_grad()
                 global_step += 1
 
+                # ── Step-level logging (every 50 steps) ──
+                if global_step % 50 == 0:
+                    step_loss = loss.item() * args.accum_steps
+                    if tb_writer:
+                        tb_writer.add_scalar('train/loss_step', step_loss, global_step)
+                        tb_writer.add_scalar('train/lr', current_lr, global_step)
+                    if wandb_run:
+                        import wandb
+                        wandb.log({'loss_step': step_loss, 'lr': current_lr, 'step': global_step})
+
             epoch_loss += loss.item() * args.accum_steps
             num_batches += 1
 
@@ -362,6 +420,21 @@ def train(args):
               f"LR: {current_lr:.2e} | "
               f"Time: {elapsed:.1f}s | "
               f"Step: {global_step}")
+
+        # ── Epoch-level logging ──
+        if tb_writer:
+            tb_writer.add_scalar('train/loss_epoch', avg_loss, epoch + 1)
+            tb_writer.add_scalar('train/lr_epoch', current_lr, epoch + 1)
+            tb_writer.add_scalar('train/epoch_time_s', elapsed, epoch + 1)
+        if wandb_run:
+            import wandb
+            wandb.log({
+                'epoch': epoch + 1,
+                'loss': avg_loss,
+                'lr': current_lr,
+                'epoch_time_s': elapsed,
+                'best_loss': best_loss if avg_loss >= best_loss else avg_loss,
+            })
 
         # ── Checkpointing ─────────────────────────────────
         if (epoch + 1) % args.save_every == 0 or (epoch + 1) == args.epochs:
@@ -405,6 +478,16 @@ def train(args):
     with open(config_path, 'w') as f:
         json.dump(vars(args), f, indent=2)
     print(f"📋 Config saved: {config_path}")
+
+    # ── Finalize Experiment Tracking ──
+    if tb_writer:
+        tb_writer.close()
+        print("📊 TensorBoard logs saved.")
+    if wandb_run:
+        import wandb
+        wandb.log({'final_loss': best_loss})
+        wandb.finish()
+        print("📊 W&B run finished.")
 
 
 if __name__ == '__main__':

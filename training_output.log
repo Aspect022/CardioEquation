@@ -1,0 +1,602 @@
+nohup: ignoring input
+============================================================
+  CardioEquation V2: Training Pipeline
+============================================================
+   Activated: /home/user04/Projects/Cardio/CardioEquation/venv_v2/bin/python
+   Python: Python 3.10.12
+
+ Installing PyTorch (CUDA 12.1)...
+ Installing project dependencies...
+
+️  GPU Verification:
+   ✅ GPU: NVIDIA A100 80GB PCIe (85.1 GB)
+   ✅ BF16 Support: True
+   ✅ CUDA Version: 12.1
+
+============================================================
+ Step 1: Downloading & Processing ALL Datasets
+============================================================
+ Downloading MIT-BIH + PTB-XL + Chapman-Shaoxing...
+
+變 CardioEquation V2: Dataset Downloader
+============================================================
+============================================================
+ Downloading MIT-BIH Arrhythmia Database
+   Target: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_raw
+   Records: 48
+============================================================
+
+   Result: 0 downloaded, 48 already existed, 0 failed
+
+============================================================
+⚙️  Processing MIT-BIH for Forecasting
+   Context: 10s, Future: 10s, Stride: 10s
+   Output: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_forecasting.npz
+============================================================
+   ✅ Created: 8592 samples
+   Context: (8592, 5000, 1), Future: (8592, 5000, 1)
+    Saved: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_forecasting.npz
+
+============================================================
+ Summary (took 28s):
+   ✅ mitbih_download
+   ✅ mitbih_process
+
+✅ All datasets ready! You can start training.
+
+   Next step: python verify_datasets.py
+Last-modified header missing -- time-stamps turned off.
+2026-03-07 18:28:54 URL:https://physionet.org/files/ptb-xl/1.0.3/records100/ [2683] -> "/home/user04/Projects/Cardio/CardioEquation/data/ptbxl/records100/index.html" [1]
+Last-modified header missing -- time-stamps turned off.
+2026-03-07 18:28:58 URL:https://physionet.org/files/ptb-xl/1.0.3/records100/00000/ [231211] -> "/home/user04/Projects/Cardio/CardioEquation/data/ptbxl/records100/00000/index.html" [1]
+Last-modified header missing -- time-stamps turned off.
+2026-03-07 18:29:02 URL:https://physionet.org/files/ptb-xl/1.0.3/records100/01000/ [234253] -> "/home/user04/Projects/Cardio/CardioEquation/data/ptbxl/records100/01000/index.html" [1]
+Last-modified header missing -- time-stamps turned off.
+2026-03-07 18:29:10 URL:https://physionet.org/files/ptb-xl/1.0.3/records100/02000/ [233785] -> "/home/user04/Projects/Cardio/CardioEquation/data/ptbxl/records100/02000/index.html" [1]
+Last-modified header missing -- time-stamps turned off.
+2026-03-07 18:29:18 URL:https://physionet.org/files/ptb-xl/1.0.3/records100/03000/ [233083] -> "/home/user04/Projects/Cardio/CardioEquation/data/ptbxl/records100/03000/index.html" [1]
+Last-modified header missing -- time-stamps turned off.
+2026-03-08 05:45:04 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45530.hea [671/671] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45530.hea" [1]
+2026-03-08 05:45:05 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45531.hea [677/677] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45531.hea" [1]
+2026-03-08 05:45:05 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45532.hea [678/678] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45532.hea" [1]
+2026-03-08 05:45:05 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45533.hea [678/678] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45533.hea" [1]
+2026-03-08 05:45:06 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45534.hea [678/678] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45534.hea" [1]
+2026-03-08 05:45:06 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45535.hea [669/669] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45535.hea" [1]
+2026-03-08 05:45:06 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45536.hea [679/679] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45536.hea" [1]
+2026-03-08 05:45:06 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45537.hea [670/670] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45537.hea" [1]
+2026-03-08 05:45:07 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45538.hea [686/686] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45538.hea" [1]
+2026-03-08 05:45:07 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45539.hea [677/677] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45539.hea" [1]
+2026-03-08 05:45:07 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45540.hea [687/687] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45540.hea" [1]
+2026-03-08 05:45:07 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45541.hea [674/674] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45541.hea" [1]
+2026-03-08 05:45:08 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45542.hea [628/628] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45542.hea" [1]
+2026-03-08 05:45:08 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45543.hea [730/730] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45543.hea" [1]
+2026-03-08 05:45:08 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45544.hea [637/637] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45544.hea" [1]
+2026-03-08 05:45:09 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45545.hea [672/672] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45545.hea" [1]
+2026-03-08 05:45:09 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45546.hea [674/674] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45546.hea" [1]
+2026-03-08 05:45:09 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45547.hea [682/682] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45547.hea" [1]
+2026-03-08 05:45:09 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45548.hea [671/671] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45548.hea" [1]
+2026-03-08 05:45:10 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45549.hea [662/662] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45549.hea" [1]
+2026-03-08 05:45:10 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45550.hea [668/668] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45550.hea" [1]
+2026-03-08 05:45:10 URL:https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/46/461/JS45551.hea [646/646] -> "/home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing/WFDBRecords/46/461/JS45551.hea" [1]
+FINISHED --2026-03-08 05:45:10--
+Total wall clock time: 3h 34m 29s
+Downloaded: 45652 files, 39M in 16s (2.49 MB/s)
+
+變 CardioEquation V2: Dataset Downloader
+============================================================
+============================================================
+ Downloading Chapman-Shaoxing ECG Database
+   Target: /home/user04/Projects/Cardio/CardioEquation/data/chapman_shaoxing
+   Size: ~1 GB (10,646 records, 12-lead, 500Hz)
+============================================================
+    Downloading via wget... (found 0 existing)
+   This may take 10-30 minutes...
+   ✅ Downloaded 45152 Chapman records
+
+============================================================
+⚙️  Processing Chapman-Shaoxing
+   Output: /home/user04/Projects/Cardio/CardioEquation/data/chapman_processed.npz
+============================================================
+   Found 45152 records
+   ❌ No valid signals found!
+
+============================================================
+ Summary (took 12979s):
+   ✅ chapman_download
+   ❌ chapman_process
+
+⚠️  Some downloads failed. Check errors above.
+   You can retry individual datasets with --mitbih, --ptbxl, --chapman, --cpsc
+
+   Next step: python verify_datasets.py
+
+⚙️  Processing all datasets into training format...
+
+變 CardioEquation V2: Dataset Downloader
+============================================================
+
+============================================================
+⚙️  Processing MIT-BIH for Forecasting
+   Context: 10s, Future: 10s, Stride: 10s
+   Output: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_forecasting.npz
+============================================================
+   ✅ Created: 8592 samples
+   Context: (8592, 5000, 1), Future: (8592, 5000, 1)
+    Saved: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_forecasting.npz
+
+   ✅ PTB-XL already processed (21799 records), skipping.
+
+============================================================
+⚙️  Processing Chapman-Shaoxing
+   Output: /home/user04/Projects/Cardio/CardioEquation/data/chapman_processed.npz
+============================================================
+   Found 45152 records
+   ❌ No valid signals found!
+
+============================================================
+ Summary (took 135s):
+   ✅ mitbih_process
+   ✅ ptbxl_process
+   ❌ chapman_process
+
+⚠️  Some downloads failed. Check errors above.
+   You can retry individual datasets with --mitbih, --ptbxl, --chapman, --cpsc
+
+   Next step: python verify_datasets.py
+
+============================================================
+ Step 2: Verifying Datasets
+============================================================
+變 CardioEquation V2: Pre-Training Verification
+Run this before starting training to ensure everything is ready.
+
+
+ 1. MIT-BIH Arrhythmia Database
+   Location: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_raw
+
+ 2. MIT-BIH Forecasting Data (Processed)
+   Location: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_forecasting.npz
+
+ 3. PTB-XL Dataset (21,837 records)
+   Location: /home/user04/Projects/Cardio/CardioEquation/data/ptbxl
+
+ 4. CPSC2018 Dataset (6,877 records)
+   Location: /home/user04/Projects/Cardio/CardioEquation/data/cpsc2018
+
+ 5. Clinical Hospital ECG Data (Validation)
+   Location: /home/user04/Projects/Cardio/CardioEquation/Dataset
+
+ 6. Model Code Integrity
+
+ 7. Python Dependencies
+
+ 8. GPU Availability
+
+======================================================================
+  CardioEquation V2: Dataset Verification Report
+======================================================================
+  ✅ MIT-BIH directory exists
+  ✅ MIT-BIH records (48/48): Present: 48, Missing: 0
+  ✅ MIT-BIH file sizes look correct: Avg .dat size: 1.9 MB
+  ✅ mitbih_forecasting.npz exists: 314.7 MB
+  ✅ Forecasting data has 'context' and 'future' arrays: context: (8592, 5000, 1), future: (8592, 5000, 1)
+  ✅ Sufficient training samples (>100): 8592 samples
+  ✅ Signal length is 5000: Expected 2500 or 5000
+  ✅ No NaN values in data
+  ✅ No Inf values in data
+  ✅ Data is normalized: std=0.999
+  ✅ PTB-XL metadata CSV exists
+  ✅ PTB-XL record count: 21799 records, 18869 patients
+  ✅ PTB-XL processed data: signals: (21799, 1, 2500), patients: 18869
+  ❌ CPSC2018 files present: 0 files found
+  ✅ Hospital ECG PDFs: 24 PDFs from 9 patients: A, CHIKKAIRAMMA, D, DI0, JHOLA...
+  ✅ src/models/dit_ecg.py: 9408 bytes
+  ✅ src/models/feature_extractor_pt.py: 5928 bytes
+  ✅ src/training/train_dit.py: 17688 bytes
+  ✅ src/training/train_contrastive.py: 10143 bytes
+  ✅ src/training/losses_v2.py: 3796 bytes
+  ✅ src/training/noise_scheduler.py: 5208 bytes
+  ✅ src/training/ema.py: 3851 bytes
+  ✅ src/inference/pipeline_v2.py: 5025 bytes
+  ✅ src/evaluation/eval_metrics.py: 8760 bytes
+  ✅ src/evaluation/clinical_validation.py: 10992 bytes
+  ✅ PyTorch (core training): installed
+  ✅ NumPy (arrays): installed
+  ✅ SciPy (resampling): installed
+  ✅ WFDB (PhysioNet data loading): installed
+  ✅ tqdm (progress bars): installed
+  ✅ NeuroKit2 (ECG morphology analysis): installed
+  ✅ pandas (PTB-XL metadata): installed
+  ✅ matplotlib (plotting): installed
+  ✅ GPU available: NVIDIA A100 80GB PCIe (85.1 GB, BF16=True)
+
+----------------------------------------------------------------------
+  ❌ 1 ERRORS found:
+     • CPSC2018 files present
+
+  Fix with: python download_all_datasets.py
+======================================================================
+⚠️  Dataset verification has warnings/errors. Check above.
+   Continuing anyway (non-critical items may be missing)...
+
+離 Step 3: Verifying model shapes...
+   ✅ DiT-ECG-B: 265.1M params, output torch.Size([2, 1, 2500])
+   ✅ FeatureExtractor: 8.7M params, output torch.Size([2, 512])
+   ✅ All shapes verified!
+
+============================================================
+ Step 2: Contrastive Pre-Training (Stage 0)
+============================================================
+ Stage 0: Contrastive Pre-Training for Identity Encoder
+============================================================
+   Model: ContrastiveFeatureExtractor (9.4M params)
+ Loading PTB-XL contrastive data from data/ptbxl_processed.npz
+   + Combining with MIT-BIH from data/mitbih_forecasting.npz
+   = Total: 30391 segments, 21733 patients
+   Dataset: 30391 segments, 21733 patients
+Epoch 001/200 | Loss: 0.0790 | Time: 57.9s
+Epoch 010/200 | Loss: 0.0134 | Time: 49.0s
+Epoch 020/200 | Loss: 0.0100 | Time: 49.6s
+Epoch 030/200 | Loss: 0.0079 | Time: 49.8s
+Epoch 040/200 | Loss: 0.0062 | Time: 51.3s
+Epoch 050/200 | Loss: 0.0049 | Time: 48.1s
+Epoch 060/200 | Loss: 0.0047 | Time: 47.0s
+Epoch 070/200 | Loss: 0.0034 | Time: 51.1s
+Epoch 080/200 | Loss: 0.0034 | Time: 50.2s
+Epoch 090/200 | Loss: 0.0032 | Time: 48.4s
+Epoch 100/200 | Loss: 0.0035 | Time: 48.8s
+Epoch 110/200 | Loss: 0.0030 | Time: 49.4s
+Epoch 120/200 | Loss: 0.0033 | Time: 48.2s
+Epoch 130/200 | Loss: 0.0030 | Time: 48.1s
+Epoch 140/200 | Loss: 0.0020 | Time: 48.2s
+Epoch 150/200 | Loss: 0.0022 | Time: 47.3s
+Epoch 160/200 | Loss: 0.0022 | Time: 46.6s
+Epoch 170/200 | Loss: 0.0018 | Time: 48.2s
+Epoch 180/200 | Loss: 0.0031 | Time: 48.7s
+Epoch 190/200 | Loss: 0.0022 | Time: 49.0s
+Epoch 200/200 | Loss: 0.0020 | Time: 48.9s
+
+✅ Contrastive pre-training complete!
+ Encoder saved: checkpoints/feature_extractor_contrastive.pt
+   Use this to initialize FeatureExtractorPT in train_dit.py
+
+============================================================
+ Step 3: DiT-ECG Diffusion Training
+============================================================
+️  GPU: NVIDIA A100 80GB PCIe (85.1 GB)
+️  Building DiT-ECG-B...
+   DiT Parameters: 265.1M
+   FeatureExtractor Parameters: 8.7M
+   EMA: decay=0.9999, warmup=True
+   Noise Schedule: Cosine (1000 discrete steps)
+ Loading MIT-BIH dataset from data/mitbih_forecasting.npz
+   ⚠️  Signal length is 5000, model expects 2500
+   ✂️  Truncated to 2500 samples (first 5s)
+   + Loading PTB-XL from data/ptbxl_processed.npz
+   = Combined dataset: 30391 samples (MIT-BIH: 8592)
+   Dataset: 30391 samples, batch=32, accum=8, effective=256
+   Optimizer: AdamW (lr=0.0001, wd=0.01)
+   LR Schedule: Cosine with 5000-step warmup
+   Total training steps: 23725
+   CFG dropout: 0.1
+   Precision: BF16 mixed precision
+
+ Starting training for 200 epochs...
+======================================================================
+/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py:307: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
+Epoch 001/200 | Loss: 110576.255939 | LR: 2.36e-06 | Time: 379.6s | Step: 118
+Epoch 002/200 | Loss: 7075.328119 | LR: 4.72e-06 | Time: 370.0s | Step: 236
+Epoch 003/200 | Loss: 519.395225 | LR: 7.08e-06 | Time: 372.7s | Step: 354
+Epoch 004/200 | Loss: 319.918667 | LR: 9.44e-06 | Time: 376.7s | Step: 472
+Epoch 005/200 | Loss: 251.447265 | LR: 1.18e-05 | Time: 368.8s | Step: 590
+Epoch 006/200 | Loss: 291.538333 | LR: 1.42e-05 | Time: 360.3s | Step: 708
+Epoch 007/200 | Loss: 299.777217 | LR: 1.65e-05 | Time: 271.8s | Step: 826
+Epoch 008/200 | Loss: 254.794970 | LR: 1.89e-05 | Time: 291.2s | Step: 944
+Epoch 009/200 | Loss: 251.039614 | LR: 2.12e-05 | Time: 261.3s | Step: 1062
+Epoch 010/200 | Loss: 302.134033 | LR: 2.36e-05 | Time: 342.1s | Step: 1180
+    Checkpoint saved: checkpoints/dit_ecg_epoch_010.pt
+Epoch 011/200 | Loss: 222.041033 | LR: 2.60e-05 | Time: 346.7s | Step: 1298
+Epoch 012/200 | Loss: 208.346456 | LR: 2.83e-05 | Time: 348.0s | Step: 1416
+Epoch 013/200 | Loss: 193.241772 | LR: 3.07e-05 | Time: 344.2s | Step: 1534
+Epoch 014/200 | Loss: 242.276378 | LR: 3.30e-05 | Time: 349.5s | Step: 1652
+Epoch 015/200 | Loss: 214.959124 | LR: 3.54e-05 | Time: 344.6s | Step: 1770
+Epoch 016/200 | Loss: 154.832056 | LR: 3.78e-05 | Time: 345.9s | Step: 1888
+Epoch 017/200 | Loss: 129.942159 | LR: 4.01e-05 | Time: 346.0s | Step: 2006
+Epoch 018/200 | Loss: 155.959403 | LR: 4.25e-05 | Time: 347.0s | Step: 2124
+Epoch 019/200 | Loss: 113.618003 | LR: 4.48e-05 | Time: 347.7s | Step: 2242
+Epoch 020/200 | Loss: 105.548776 | LR: 4.72e-05 | Time: 345.4s | Step: 2360
+    Checkpoint saved: checkpoints/dit_ecg_epoch_020.pt
+Epoch 021/200 | Loss: 137.624496 | LR: 4.96e-05 | Time: 330.1s | Step: 2478
+Epoch 022/200 | Loss: 163.996584 | LR: 5.19e-05 | Time: 258.4s | Step: 2596
+Epoch 023/200 | Loss: 112.676677 | LR: 5.43e-05 | Time: 258.8s | Step: 2714
+Epoch 024/200 | Loss: 135.058671 | LR: 5.66e-05 | Time: 260.8s | Step: 2832
+Epoch 025/200 | Loss: 114.081265 | LR: 5.90e-05 | Time: 327.6s | Step: 2950
+Epoch 026/200 | Loss: 103.274141 | LR: 6.14e-05 | Time: 349.1s | Step: 3068
+Epoch 027/200 | Loss: 103.607144 | LR: 6.37e-05 | Time: 345.5s | Step: 3186
+Epoch 028/200 | Loss: 106.823718 | LR: 6.61e-05 | Time: 346.6s | Step: 3304
+Epoch 029/200 | Loss: 92.187642 | LR: 6.84e-05 | Time: 348.5s | Step: 3422
+Epoch 030/200 | Loss: 107.849081 | LR: 7.08e-05 | Time: 346.3s | Step: 3540
+    Checkpoint saved: checkpoints/dit_ecg_epoch_030.pt
+Epoch 031/200 | Loss: 112.403969 | LR: 7.32e-05 | Time: 345.4s | Step: 3658
+Epoch 032/200 | Loss: 86.976001 | LR: 7.55e-05 | Time: 346.3s | Step: 3776
+Epoch 033/200 | Loss: 92.679644 | LR: 7.79e-05 | Time: 345.0s | Step: 3894
+Epoch 034/200 | Loss: 100.474096 | LR: 8.02e-05 | Time: 344.3s | Step: 4012
+Epoch 035/200 | Loss: 117.376364 | LR: 8.26e-05 | Time: 344.2s | Step: 4130
+Epoch 036/200 | Loss: 95.157065 | LR: 8.50e-05 | Time: 344.3s | Step: 4248
+Epoch 037/200 | Loss: 86.805101 | LR: 8.73e-05 | Time: 272.2s | Step: 4366
+Epoch 038/200 | Loss: 88.513099 | LR: 8.97e-05 | Time: 259.3s | Step: 4484
+Epoch 039/200 | Loss: 97.691232 | LR: 9.20e-05 | Time: 259.7s | Step: 4602
+Epoch 040/200 | Loss: 100.960752 | LR: 9.44e-05 | Time: 259.9s | Step: 4720
+    Checkpoint saved: checkpoints/dit_ecg_epoch_040.pt
+Epoch 041/200 | Loss: 82.605205 | LR: 9.68e-05 | Time: 256.3s | Step: 4838
+Epoch 042/200 | Loss: 94.592616 | LR: 9.91e-05 | Time: 260.3s | Step: 4956
+Epoch 043/200 | Loss: 112.798616 | LR: 1.00e-04 | Time: 249.8s | Step: 5074
+Epoch 044/200 | Loss: 91.200546 | LR: 1.00e-04 | Time: 237.8s | Step: 5192
+Epoch 045/200 | Loss: 78.454684 | LR: 9.99e-05 | Time: 236.7s | Step: 5310
+Epoch 046/200 | Loss: 73.994319 | LR: 9.99e-05 | Time: 233.0s | Step: 5428
+Epoch 047/200 | Loss: 82.708344 | LR: 9.98e-05 | Time: 234.3s | Step: 5546
+Epoch 048/200 | Loss: 85.956916 | LR: 9.97e-05 | Time: 236.4s | Step: 5664
+Epoch 049/200 | Loss: 88.102839 | LR: 9.96e-05 | Time: 236.0s | Step: 5782
+Epoch 050/200 | Loss: 69.335877 | LR: 9.94e-05 | Time: 235.7s | Step: 5900
+    Checkpoint saved: checkpoints/dit_ecg_epoch_050.pt
+Epoch 051/200 | Loss: 64.894967 | LR: 9.93e-05 | Time: 232.6s | Step: 6018
+Epoch 052/200 | Loss: 75.106771 | LR: 9.91e-05 | Time: 234.1s | Step: 6136
+Epoch 053/200 | Loss: 78.531615 | LR: 9.89e-05 | Time: 235.7s | Step: 6254
+Epoch 054/200 | Loss: 76.107951 | LR: 9.87e-05 | Time: 235.2s | Step: 6372
+Epoch 055/200 | Loss: 64.243289 | LR: 9.84e-05 | Time: 236.0s | Step: 6490
+Epoch 056/200 | Loss: 57.240118 | LR: 9.82e-05 | Time: 235.2s | Step: 6608
+Epoch 057/200 | Loss: 63.925739 | LR: 9.79e-05 | Time: 235.7s | Step: 6726
+Epoch 058/200 | Loss: 76.601133 | LR: 9.76e-05 | Time: 237.0s | Step: 6844
+Epoch 059/200 | Loss: 62.116313 | LR: 9.73e-05 | Time: 237.4s | Step: 6962
+Epoch 060/200 | Loss: 52.249357 | LR: 9.70e-05 | Time: 238.8s | Step: 7080
+    Checkpoint saved: checkpoints/dit_ecg_epoch_060.pt
+Epoch 061/200 | Loss: 56.455869 | LR: 9.66e-05 | Time: 231.9s | Step: 7198
+Epoch 062/200 | Loss: 52.156585 | LR: 9.63e-05 | Time: 234.5s | Step: 7316
+Epoch 063/200 | Loss: 50.507924 | LR: 9.59e-05 | Time: 233.8s | Step: 7434
+Epoch 064/200 | Loss: 47.318181 | LR: 9.55e-05 | Time: 236.7s | Step: 7552
+Epoch 065/200 | Loss: 51.314696 | LR: 9.51e-05 | Time: 235.4s | Step: 7670
+Epoch 066/200 | Loss: 58.480623 | LR: 9.46e-05 | Time: 235.1s | Step: 7788
+Epoch 067/200 | Loss: 79.412854 | LR: 9.42e-05 | Time: 237.8s | Step: 7906
+Epoch 068/200 | Loss: 50.397698 | LR: 9.37e-05 | Time: 235.6s | Step: 8024
+Epoch 069/200 | Loss: 52.029017 | LR: 9.32e-05 | Time: 235.2s | Step: 8142
+Epoch 070/200 | Loss: 46.394901 | LR: 9.27e-05 | Time: 236.5s | Step: 8260
+    Checkpoint saved: checkpoints/dit_ecg_epoch_070.pt
+Epoch 071/200 | Loss: 46.233902 | LR: 9.22e-05 | Time: 232.2s | Step: 8378
+Epoch 072/200 | Loss: 43.645476 | LR: 9.16e-05 | Time: 238.7s | Step: 8496
+Epoch 073/200 | Loss: 46.433238 | LR: 9.11e-05 | Time: 235.6s | Step: 8614
+Epoch 074/200 | Loss: 47.614916 | LR: 9.05e-05 | Time: 234.0s | Step: 8732
+Epoch 075/200 | Loss: 47.580594 | LR: 8.99e-05 | Time: 236.4s | Step: 8850
+Epoch 076/200 | Loss: 43.536396 | LR: 8.93e-05 | Time: 236.2s | Step: 8968
+Epoch 077/200 | Loss: 47.750045 | LR: 8.87e-05 | Time: 233.8s | Step: 9086
+Epoch 078/200 | Loss: 42.910061 | LR: 8.81e-05 | Time: 237.0s | Step: 9204
+Epoch 079/200 | Loss: 44.658707 | LR: 8.74e-05 | Time: 237.2s | Step: 9322
+Epoch 080/200 | Loss: 42.171277 | LR: 8.68e-05 | Time: 238.9s | Step: 9440
+    Checkpoint saved: checkpoints/dit_ecg_epoch_080.pt
+Epoch 081/200 | Loss: 43.798799 | LR: 8.61e-05 | Time: 233.4s | Step: 9558
+Epoch 082/200 | Loss: 47.376838 | LR: 8.54e-05 | Time: 236.0s | Step: 9676
+Epoch 083/200 | Loss: 45.219368 | LR: 8.47e-05 | Time: 236.3s | Step: 9794
+Epoch 084/200 | Loss: 44.404709 | LR: 8.40e-05 | Time: 235.9s | Step: 9912
+Epoch 085/200 | Loss: 49.965341 | LR: 8.32e-05 | Time: 239.1s | Step: 10030
+Epoch 086/200 | Loss: 41.792092 | LR: 8.25e-05 | Time: 240.7s | Step: 10148
+Epoch 087/200 | Loss: 44.614285 | LR: 8.17e-05 | Time: 235.6s | Step: 10266
+Epoch 088/200 | Loss: 41.982988 | LR: 8.10e-05 | Time: 235.6s | Step: 10384
+Epoch 089/200 | Loss: 40.382318 | LR: 8.02e-05 | Time: 235.0s | Step: 10502
+Epoch 090/200 | Loss: 40.189882 | LR: 7.94e-05 | Time: 232.7s | Step: 10620
+    Checkpoint saved: checkpoints/dit_ecg_epoch_090.pt
+Epoch 091/200 | Loss: 45.367995 | LR: 7.86e-05 | Time: 227.3s | Step: 10738
+Epoch 092/200 | Loss: 40.765381 | LR: 7.77e-05 | Time: 237.8s | Step: 10856
+Epoch 093/200 | Loss: 37.742403 | LR: 7.69e-05 | Time: 238.9s | Step: 10974
+Epoch 094/200 | Loss: 39.177824 | LR: 7.61e-05 | Time: 235.4s | Step: 11092
+Epoch 095/200 | Loss: 39.805603 | LR: 7.52e-05 | Time: 235.5s | Step: 11210
+Epoch 096/200 | Loss: 47.408971 | LR: 7.44e-05 | Time: 236.8s | Step: 11328
+Epoch 097/200 | Loss: 38.987759 | LR: 7.35e-05 | Time: 236.1s | Step: 11446
+Epoch 098/200 | Loss: 37.578459 | LR: 7.26e-05 | Time: 239.3s | Step: 11564
+Epoch 099/200 | Loss: 37.552504 | LR: 7.17e-05 | Time: 237.7s | Step: 11682
+Epoch 100/200 | Loss: 36.698950 | LR: 7.08e-05 | Time: 235.7s | Step: 11800
+    Checkpoint saved: checkpoints/dit_ecg_epoch_100.pt
+Epoch 101/200 | Loss: 39.183159 | LR: 6.99e-05 | Time: 231.9s | Step: 11918
+Epoch 102/200 | Loss: 45.868840 | LR: 6.90e-05 | Time: 236.7s | Step: 12036
+Epoch 103/200 | Loss: 37.074833 | LR: 6.81e-05 | Time: 234.7s | Step: 12154
+Epoch 104/200 | Loss: 41.954038 | LR: 6.72e-05 | Time: 238.3s | Step: 12272
+Epoch 105/200 | Loss: 40.568097 | LR: 6.62e-05 | Time: 238.9s | Step: 12390
+Epoch 106/200 | Loss: 35.181295 | LR: 6.53e-05 | Time: 238.3s | Step: 12508
+Epoch 107/200 | Loss: 40.194145 | LR: 6.44e-05 | Time: 237.4s | Step: 12626
+Epoch 108/200 | Loss: 37.758507 | LR: 6.34e-05 | Time: 237.2s | Step: 12744
+Epoch 109/200 | Loss: 42.292379 | LR: 6.25e-05 | Time: 233.9s | Step: 12862
+Epoch 110/200 | Loss: 38.045700 | LR: 6.15e-05 | Time: 237.1s | Step: 12980
+    Checkpoint saved: checkpoints/dit_ecg_epoch_110.pt
+Epoch 111/200 | Loss: 37.730738 | LR: 6.05e-05 | Time: 236.0s | Step: 13098
+Epoch 112/200 | Loss: 37.185573 | LR: 5.96e-05 | Time: 238.2s | Step: 13216
+Epoch 113/200 | Loss: 38.540818 | LR: 5.86e-05 | Time: 240.0s | Step: 13334
+Epoch 114/200 | Loss: 37.135613 | LR: 5.76e-05 | Time: 237.7s | Step: 13452
+Epoch 115/200 | Loss: 35.663020 | LR: 5.66e-05 | Time: 238.2s | Step: 13570
+Epoch 116/200 | Loss: 35.086288 | LR: 5.56e-05 | Time: 235.5s | Step: 13688
+Epoch 117/200 | Loss: 39.979638 | LR: 5.47e-05 | Time: 234.4s | Step: 13806
+Epoch 118/200 | Loss: 35.775649 | LR: 5.37e-05 | Time: 234.6s | Step: 13924
+Epoch 119/200 | Loss: 35.170955 | LR: 5.27e-05 | Time: 235.2s | Step: 14042
+Epoch 120/200 | Loss: 36.332383 | LR: 5.17e-05 | Time: 236.0s | Step: 14160
+    Checkpoint saved: checkpoints/dit_ecg_epoch_120.pt
+Epoch 121/200 | Loss: 35.961529 | LR: 5.07e-05 | Time: 233.8s | Step: 14278
+Epoch 122/200 | Loss: 34.635026 | LR: 4.97e-05 | Time: 236.6s | Step: 14396
+Epoch 123/200 | Loss: 34.154276 | LR: 4.87e-05 | Time: 234.7s | Step: 14514
+Epoch 124/200 | Loss: 36.382847 | LR: 4.77e-05 | Time: 236.1s | Step: 14632
+Epoch 125/200 | Loss: 36.746783 | LR: 4.68e-05 | Time: 239.0s | Step: 14750
+Epoch 126/200 | Loss: 36.769673 | LR: 4.58e-05 | Time: 238.0s | Step: 14868
+Epoch 127/200 | Loss: 35.817107 | LR: 4.48e-05 | Time: 237.9s | Step: 14986
+Epoch 128/200 | Loss: 33.219811 | LR: 4.38e-05 | Time: 238.2s | Step: 15104
+Epoch 129/200 | Loss: 34.651622 | LR: 4.28e-05 | Time: 234.8s | Step: 15222
+Epoch 130/200 | Loss: 34.496310 | LR: 4.18e-05 | Time: 235.6s | Step: 15340
+    Checkpoint saved: checkpoints/dit_ecg_epoch_130.pt
+Epoch 131/200 | Loss: 35.320844 | LR: 4.09e-05 | Time: 234.0s | Step: 15458
+Epoch 132/200 | Loss: 34.836148 | LR: 3.99e-05 | Time: 237.1s | Step: 15576
+Epoch 133/200 | Loss: 34.751657 | LR: 3.89e-05 | Time: 238.7s | Step: 15694
+Epoch 134/200 | Loss: 35.353136 | LR: 3.80e-05 | Time: 238.3s | Step: 15812
+Epoch 135/200 | Loss: 34.414989 | LR: 3.70e-05 | Time: 235.8s | Step: 15930
+Epoch 136/200 | Loss: 33.886319 | LR: 3.60e-05 | Time: 234.6s | Step: 16048
+Epoch 137/200 | Loss: 33.644179 | LR: 3.51e-05 | Time: 234.4s | Step: 16166
+Epoch 138/200 | Loss: 33.859307 | LR: 3.42e-05 | Time: 235.9s | Step: 16284
+Epoch 139/200 | Loss: 33.633265 | LR: 3.32e-05 | Time: 238.6s | Step: 16402
+Epoch 140/200 | Loss: 33.984767 | LR: 3.23e-05 | Time: 239.6s | Step: 16520
+    Checkpoint saved: checkpoints/dit_ecg_epoch_140.pt
+Epoch 141/200 | Loss: 32.430563 | LR: 3.14e-05 | Time: 235.6s | Step: 16638
+Epoch 142/200 | Loss: 32.795513 | LR: 3.05e-05 | Time: 234.6s | Step: 16756
+Epoch 143/200 | Loss: 32.724160 | LR: 2.95e-05 | Time: 234.6s | Step: 16874
+Epoch 144/200 | Loss: 32.651109 | LR: 2.87e-05 | Time: 235.5s | Step: 16992
+Epoch 145/200 | Loss: 32.979317 | LR: 2.78e-05 | Time: 238.5s | Step: 17110
+Epoch 146/200 | Loss: 32.704567 | LR: 2.69e-05 | Time: 238.1s | Step: 17228
+Epoch 147/200 | Loss: 31.686475 | LR: 2.60e-05 | Time: 238.9s | Step: 17346
+Epoch 148/200 | Loss: 31.182566 | LR: 2.51e-05 | Time: 234.2s | Step: 17464
+Epoch 149/200 | Loss: 30.624262 | LR: 2.43e-05 | Time: 236.9s | Step: 17582
+Epoch 150/200 | Loss: 31.194517 | LR: 2.34e-05 | Time: 237.6s | Step: 17700
+    Checkpoint saved: checkpoints/dit_ecg_epoch_150.pt
+Epoch 151/200 | Loss: 31.313806 | LR: 2.26e-05 | Time: 236.4s | Step: 17818
+Epoch 152/200 | Loss: 30.742091 | LR: 2.18e-05 | Time: 237.3s | Step: 17936
+Epoch 153/200 | Loss: 31.526031 | LR: 2.10e-05 | Time: 238.6s | Step: 18054
+Epoch 154/200 | Loss: 30.922301 | LR: 2.02e-05 | Time: 238.1s | Step: 18172
+Epoch 155/200 | Loss: 30.617749 | LR: 1.94e-05 | Time: 241.2s | Step: 18290
+Epoch 156/200 | Loss: 30.091787 | LR: 1.86e-05 | Time: 234.7s | Step: 18408
+Epoch 157/200 | Loss: 29.626596 | LR: 1.78e-05 | Time: 237.4s | Step: 18526
+Epoch 158/200 | Loss: 29.760229 | LR: 1.71e-05 | Time: 234.9s | Step: 18644
+Epoch 159/200 | Loss: 29.433450 | LR: 1.64e-05 | Time: 240.7s | Step: 18762
+Epoch 160/200 | Loss: 28.746322 | LR: 1.56e-05 | Time: 237.3s | Step: 18880
+    Checkpoint saved: checkpoints/dit_ecg_epoch_160.pt
+Epoch 161/200 | Loss: 28.717658 | LR: 1.49e-05 | Time: 236.7s | Step: 18998
+Epoch 162/200 | Loss: 29.233009 | LR: 1.42e-05 | Time: 238.1s | Step: 19116
+Epoch 163/200 | Loss: 29.021874 | LR: 1.35e-05 | Time: 236.5s | Step: 19234
+Epoch 164/200 | Loss: 28.932971 | LR: 1.29e-05 | Time: 239.5s | Step: 19352
+Epoch 165/200 | Loss: 28.995725 | LR: 1.22e-05 | Time: 241.6s | Step: 19470
+Epoch 166/200 | Loss: 28.543111 | LR: 1.16e-05 | Time: 240.6s | Step: 19588
+Epoch 167/200 | Loss: 29.406182 | LR: 1.09e-05 | Time: 233.2s | Step: 19706
+Epoch 168/200 | Loss: 28.890723 | LR: 1.03e-05 | Time: 239.1s | Step: 19824
+Epoch 169/200 | Loss: 28.260616 | LR: 9.74e-06 | Time: 238.7s | Step: 19942
+Epoch 170/200 | Loss: 28.235386 | LR: 9.16e-06 | Time: 237.1s | Step: 20060
+    Checkpoint saved: checkpoints/dit_ecg_epoch_170.pt
+Epoch 171/200 | Loss: 28.252499 | LR: 8.60e-06 | Time: 239.2s | Step: 20178
+Epoch 172/200 | Loss: 28.530881 | LR: 8.05e-06 | Time: 238.6s | Step: 20296
+Epoch 173/200 | Loss: 28.512613 | LR: 7.52e-06 | Time: 239.5s | Step: 20414
+Epoch 174/200 | Loss: 28.678353 | LR: 7.00e-06 | Time: 239.0s | Step: 20532
+Epoch 175/200 | Loss: 27.767906 | LR: 6.51e-06 | Time: 240.4s | Step: 20650
+Epoch 176/200 | Loss: 28.313002 | LR: 6.03e-06 | Time: 238.6s | Step: 20768
+Epoch 177/200 | Loss: 27.667424 | LR: 5.57e-06 | Time: 238.9s | Step: 20886
+Epoch 178/200 | Loss: 27.699981 | LR: 5.12e-06 | Time: 235.1s | Step: 21004
+Epoch 179/200 | Loss: 27.974479 | LR: 4.69e-06 | Time: 239.4s | Step: 21122
+Epoch 180/200 | Loss: 28.186626 | LR: 4.28e-06 | Time: 240.0s | Step: 21240
+    Checkpoint saved: checkpoints/dit_ecg_epoch_180.pt
+Epoch 181/200 | Loss: 28.186692 | LR: 3.89e-06 | Time: 234.9s | Step: 21358
+Epoch 182/200 | Loss: 27.348542 | LR: 3.52e-06 | Time: 237.8s | Step: 21476
+Epoch 183/200 | Loss: 27.498282 | LR: 3.16e-06 | Time: 236.3s | Step: 21594
+Epoch 184/200 | Loss: 27.726772 | LR: 2.82e-06 | Time: 238.7s | Step: 21712
+Epoch 185/200 | Loss: 27.118284 | LR: 2.51e-06 | Time: 241.0s | Step: 21830
+Epoch 186/200 | Loss: 27.295471 | LR: 2.21e-06 | Time: 236.9s | Step: 21948
+Epoch 187/200 | Loss: 27.622648 | LR: 1.92e-06 | Time: 237.6s | Step: 22066
+Epoch 188/200 | Loss: 27.836006 | LR: 1.66e-06 | Time: 239.9s | Step: 22184
+Epoch 189/200 | Loss: 27.582825 | LR: 1.42e-06 | Time: 236.2s | Step: 22302
+Epoch 190/200 | Loss: 27.554848 | LR: 1.19e-06 | Time: 238.4s | Step: 22420
+    Checkpoint saved: checkpoints/dit_ecg_epoch_190.pt
+Epoch 191/200 | Loss: 27.265259 | LR: 9.88e-07 | Time: 235.6s | Step: 22538
+Epoch 192/200 | Loss: 27.260831 | LR: 8.02e-07 | Time: 238.5s | Step: 22656
+Epoch 193/200 | Loss: 27.660549 | LR: 6.35e-07 | Time: 241.4s | Step: 22774
+Epoch 194/200 | Loss: 27.476119 | LR: 4.88e-07 | Time: 238.2s | Step: 22892
+Epoch 195/200 | Loss: 27.497104 | LR: 3.59e-07 | Time: 240.0s | Step: 23010
+Epoch 196/200 | Loss: 27.731628 | LR: 2.51e-07 | Time: 239.8s | Step: 23128
+Epoch 197/200 | Loss: 27.607309 | LR: 1.61e-07 | Time: 240.3s | Step: 23246
+Epoch 198/200 | Loss: 27.936174 | LR: 9.17e-08 | Time: 240.6s | Step: 23364
+Epoch 199/200 | Loss: 27.377213 | LR: 4.15e-08 | Time: 238.9s | Step: 23482
+Epoch 200/200 | Loss: 27.533833 | LR: 1.10e-08 | Time: 239.2s | Step: 23600
+    Checkpoint saved: checkpoints/dit_ecg_epoch_200.pt
+
+======================================================================
+✅ Training complete! Best loss: 27.118284
+ EMA model saved: checkpoints/dit_ecg_ema_final.pt
+ Config saved: checkpoints/train_config.json
+
+============================================================
+ Step 4: Clinical Validation (Hospital ECG PDFs)
+============================================================
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+ Clinical Validation: Real Hospital ECG Data
+============================================================
+ Found 24 ECG reports
+ Unique patients: 10
+   A: 7 records
+   CHIKKAIRAMMA: 2 records
+   D: 4 records
+   DI0: 1 records
+   JHOLA: 2 records
+   JTJ: 1 records
+   KALAMMA: 2 records
+   R: 1 records
+   RAKESHBARMAN: 2 records
+   Unknown: 2 records
+
+ Digitizing ECG signals...
+   ✅ ecg_report_0000575: KALAMMA — 2500 samples
+   ✅ ecg_report_0000576: KALAMMA — 2500 samples
+   ✅ ecg_report_0000577: JHOLA — 2500 samples
+   ✅ ecg_report_0000578: JHOLA — 2500 samples
+   ✅ ecg_report_0000579: JTJ — 2500 samples
+   ✅ ecg_report_0000580: Unknown — 2500 samples
+   ✅ ecg_report_0000581: DI0 — 2500 samples
+   ✅ ecg_report_0000582: Unknown — 2500 samples
+   ✅ ecg_report_0000583: R — 2500 samples
+   ✅ ecg_report_0000596: A — 2500 samples
+   ✅ ecg_report_0000597: RAKESHBARMAN — 2500 samples
+   ✅ ecg_report_0000598: RAKESHBARMAN — 2500 samples
+   ✅ ecg_report_0000599: A — 2500 samples
+   ✅ ecg_report_0000600: A — 2500 samples
+   ✅ ecg_report_0000601: A — 2500 samples
+   ✅ ecg_report_0000602: A — 2500 samples
+   ✅ ecg_report_0000603: A — 2500 samples
+   ✅ ecg_report_0000604: A — 2500 samples
+   ✅ ecg_report_0000605: CHIKKAIRAMMA — 2500 samples
+   ✅ ecg_report_0000606: CHIKKAIRAMMA — 2500 samples
+   ✅ ecg_report_0000607: D — 2500 samples
+   ✅ ecg_report_0000608: D — 2500 samples
+   ✅ ecg_report_0000609: D — 2500 samples
+   ✅ ecg_report_0000610: D — 2500 samples
+
+✅ Successfully digitized 24 signals from 10 patients
+ Loading DiT-ECG-B...
+✅ Pipeline ready on cuda
+
+ Running generation + validation...
+
+ Clinical Validation Results:
+   FFD (Fréchet ECG Distance): 41.97870290363216
+   MMD: 0.3825993401574149
+   HR MAE: 9.281709212799385
+   Re-ID Top-1: 0.058823529411764705
+   Re-ID Top-5: 0.23529411764705882
+ Comparison plot saved: outputs/clinical_validation/clinical_comparison.png
+
+ Results saved to outputs/clinical_validation/clinical_results.json
+ Digitized signals saved: outputs/clinical_validation/clinical_ecg_digitized.npz
+
+============================================================
+ Step 5: Pushing Results to GitHub
+============================================================
+[main 5608b51]  Training complete (2026-03-08 23:06:17) — NVIDIA A100 80GB PCIe
+ 5 files changed, 61 insertions(+), 61 deletions(-)
+ rewrite checkpoints/training_log.txt (65%)
+ rewrite outputs/clinical_validation/clinical_comparison.png (87%)
+ rewrite outputs/clinical_validation/clinical_results.json (65%)
+ mode change 100644 => 100755 run_training.sh
+    Pushing to GitHub...
