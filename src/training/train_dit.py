@@ -7,31 +7,34 @@ Features:
 - Cosine noise schedule (DDPM)
 - EMA (decay=0.9999 with warmup)
 - BF16 mixed precision
-- Gradient accumulation (effective batch size = micro_batch × accum_steps)
-- Gradient clipping (max_norm=1.0)
-- Classifier-Free Guidance training (10% conditioning dropout)
-- Cosine LR schedule with linear warmup
-- Checkpoint saving
-- Weights & Biases + TensorBoard logging
+- SNR-weighted multi-component loss
+- Gradient accumulation
+- Classifier-free guidance (CFG) dropout
+- W&B + TensorBoard experiment tracking
+- Per-component loss logging
+- DiT-stage data augmentation (time-warp, amplitude, noise, baseline wander)
+- Validation split + early stopping
 
-Usage:
-    python src/training/train_dit.py --epochs 200 --batch_size 32 --accum_steps 8
-    python src/training/train_dit.py --epochs 2 --batch_size 4 --dataset synthetic  # smoke test
+V2.1 Changes:
+- Added ECGDiTAugmenter with time-warp for HR diversity
+- Added validation split + early stopping (patience-based)
+- Per-component loss breakdown logged to W&B/TensorBoard
+- combined_diffusion_loss now returns (total, loss_dict)
 """
 
-import torch
-import torch.nn.functional as F
-from torch.cuda.amp import autocast
 import os
 import sys
-import argparse
 import time
 import json
+import argparse
+import math
 
-# Add project root to path
+import torch
+from torch.cuda.amp import autocast
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from src.models.dit_ecg import dit_ecg_b, dit_ecg_s
+from src.models.dit_ecg import dit_ecg_s, dit_ecg_b
 from src.models.feature_extractor_pt import FeatureExtractorPT
 from src.training.ema import EMAModel
 from src.training.noise_scheduler import CosineNoiseScheduler
@@ -40,7 +43,7 @@ from src.training.losses_v2 import combined_diffusion_loss
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train DiT-ECG')
-    parser.add_argument('--epochs', type=int, default=200)
+    parser.add_argument('--epochs', type=int, default=500)
     parser.add_argument('--batch_size', type=int, default=32, help='Micro batch size per GPU')
     parser.add_argument('--accum_steps', type=int, default=8, help='Gradient accumulation steps')
     parser.add_argument('--lr', type=float, default=1e-4)
@@ -64,60 +67,114 @@ def parse_args():
     parser.add_argument('--wandb_run', type=str, default=None, help='W&B run name (auto-generated if None)')
     parser.add_argument('--no_wandb', action='store_true', default=False, help='Disable W&B logging')
     parser.add_argument('--no_tensorboard', action='store_true', default=False, help='Disable TensorBoard')
+    # ── V2.1: Validation + Early Stopping ──
+    parser.add_argument('--val_split', type=float, default=0.1, help='Fraction of data for validation')
+    parser.add_argument('--patience', type=int, default=30, help='Early stopping patience (epochs)')
+    # ── V2.1: Augmentation ──
+    parser.add_argument('--no_augment', action='store_true', default=False, help='Disable DiT augmentation')
     return parser.parse_args()
 
 
+# Cosine LR schedule with linear warmup.
 def get_cosine_schedule_with_warmup(optimizer, warmup_steps, total_steps):
-    """Cosine LR schedule with linear warmup."""
+
     def lr_lambda(step):
         if step < warmup_steps:
-            return step / max(1, warmup_steps)
-        progress = (step - warmup_steps) / max(1, total_steps - warmup_steps)
-        return 0.5 * (1.0 + __import__('math').cos(__import__('math').pi * progress))
+            return float(step) / float(max(1, warmup_steps))
+        progress = float(step - warmup_steps) / float(max(1, total_steps - warmup_steps))
+        return max(0.0, 0.5 * (1.0 + math.cos(math.pi * progress)))
+
     return torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+
+
+# ── ECG Augmenter for DiT Training ─────────────────────────────────
+class ECGDiTAugmenter:
+    """
+    Identity-preserving augmentations for DiT diffusion training.
+
+    Applied to both context and future signals with INDEPENDENT random seeds
+    to prevent the model from simply copying augmentation patterns.
+
+    Augmentations:
+      - Amplitude scaling (0.8–1.2×): simulates sensor gain variation
+      - Gaussian noise (σ=0.01): simulates sensor noise
+      - Baseline wander (low-freq sinusoid): simulates electrode drift
+      - Time warp (±10% resample): KEY for HR diversity
+    """
+    def __init__(self, p=0.5):
+        self.p = p  # probability of applying each augmentation
+
+    def __call__(self, x):
+        """
+        Apply random augmentations.
+        x: (B, 1, T) tensor
+        """
+        B, C, T = x.shape
+
+        # Amplitude scaling (0.8–1.2×)
+        if torch.rand(1).item() < self.p:
+            scale = 0.8 + 0.4 * torch.rand(B, 1, 1, device=x.device)
+            x = x * scale
+
+        # Gaussian noise (σ=0.01)
+        if torch.rand(1).item() < self.p:
+            noise = 0.01 * torch.randn_like(x)
+            x = x + noise
+
+        # Baseline wander (low-freq sinusoid, amplitude 0.05)
+        if torch.rand(1).item() < self.p:
+            t_axis = torch.linspace(0, 2 * math.pi, T, device=x.device)
+            freq = 0.1 + 0.3 * torch.rand(B, 1, 1, device=x.device)
+            phase = 2 * math.pi * torch.rand(B, 1, 1, device=x.device)
+            wander = 0.05 * torch.sin(freq * t_axis.unsqueeze(0).unsqueeze(0) + phase)
+            x = x + wander
+
+        # Time warp (±10% resample) — KEY for HR diversity
+        if torch.rand(1).item() < self.p:
+            # Sample a single scale for the whole batch for efficiency
+            scale = 0.9 + 0.2 * torch.rand(1).item()  # 0.9 to 1.1
+            new_len = int(T * scale)
+            if new_len > 100 and new_len < T * 3:
+                x = torch.nn.functional.interpolate(x, size=new_len, mode='linear', align_corners=True)
+                if x.shape[-1] > T:
+                    x = x[:, :, :T]
+                elif x.shape[-1] < T:
+                    pad = T - x.shape[-1]
+                    x = torch.nn.functional.pad(x, (0, pad), mode='replicate')
+
+        return x
 
 
 def create_synthetic_dataset(num_samples=2000, signal_length=2500):
     """Create a simple synthetic dataset for smoke testing."""
     import numpy as np
 
-    contexts = []
-    futures = []
+    print(f"🔧 Creating synthetic dataset ({num_samples} samples)...")
 
+    segments = []
     for i in range(num_samples):
-        # Generate random ECG-like signal (5 Gaussian bumps)
         t = np.linspace(0, 5, signal_length)
         hr = np.random.uniform(60, 100)
-        beat_duration = 60.0 / hr
+        freq = hr / 60.0
 
-        signal = np.zeros(signal_length)
-        for beat_start in np.arange(0, 5, beat_duration):
-            # P wave
-            signal += 0.2 * np.exp(-((t - beat_start - 0.1) ** 2) / (2 * 0.02 ** 2))
-            # QRS complex
-            signal += -0.15 * np.exp(-((t - beat_start - 0.2) ** 2) / (2 * 0.01 ** 2))
-            signal += 1.0 * np.exp(-((t - beat_start - 0.22) ** 2) / (2 * 0.008 ** 2))
-            signal += -0.2 * np.exp(-((t - beat_start - 0.24) ** 2) / (2 * 0.01 ** 2))
-            # T wave
-            signal += 0.3 * np.exp(-((t - beat_start - 0.4) ** 2) / (2 * 0.04 ** 2))
+        # Simplified ECG: P-wave + QRS + T-wave
+        p_wave = 0.15 * np.sin(2 * np.pi * freq * t)
+        qrs = 1.0 * np.exp(-50 * (np.mod(t * freq, 1.0) - 0.4) ** 2)
+        t_wave = 0.3 * np.exp(-10 * (np.mod(t * freq, 1.0) - 0.7) ** 2)
+        noise = 0.02 * np.random.randn(signal_length)
 
-        # Add small noise for context
-        noisy = signal + np.random.normal(0, 0.05, signal_length)
+        ecg = p_wave + qrs + t_wave + noise
+        ecg = (ecg - ecg.mean()) / (ecg.std() + 1e-8)
+        segments.append(ecg)
 
-        # Normalize
-        signal = (signal - signal.mean()) / (signal.std() + 1e-8)
-        noisy = (noisy - noisy.mean()) / (noisy.std() + 1e-8)
+    segments = np.array(segments)[:, np.newaxis, :]
 
-        contexts.append(noisy.astype(np.float32))
-        futures.append(signal.astype(np.float32))
+    # context = future for synthetic (self-reconstruction)
+    context = torch.from_numpy(segments).float()
+    future = torch.from_numpy(segments).float()
 
-    contexts = np.array(contexts)[:, np.newaxis, :]  # (N, 1, T)
-    futures = np.array(futures)[:, np.newaxis, :]     # (N, 1, T)
-
-    dataset = torch.utils.data.TensorDataset(
-        torch.from_numpy(contexts),
-        torch.from_numpy(futures)
-    )
+    dataset = torch.utils.data.TensorDataset(context, future)
+    print(f"   ✅ Synthetic dataset: {num_samples} samples, shape {context.shape}")
     return dataset
 
 
@@ -281,18 +338,45 @@ def train(args):
     scheduler = CosineNoiseScheduler(num_train_timesteps=1000)
     print("   Noise Schedule: Cosine (1000 discrete steps)")
 
+    # ── Augmenter ─────────────────────────────────────────────
+    augmenter = None
+    if not args.no_augment:
+        augmenter = ECGDiTAugmenter(p=0.5)
+        print("   Augmentation: ON (amplitude, noise, baseline wander, time-warp)")
+    else:
+        print("   Augmentation: OFF")
+
     # ── Dataset ───────────────────────────────────────────────
-    dataset = load_dataset(args)
-    dataloader = torch.utils.data.DataLoader(
-        dataset,
+    full_dataset = load_dataset(args)
+
+    # ── Train/Val Split ──
+    val_size = int(len(full_dataset) * args.val_split)
+    train_size = len(full_dataset) - val_size
+    train_dataset, val_dataset = torch.utils.data.random_split(
+        full_dataset, [train_size, val_size],
+        generator=torch.Generator().manual_seed(args.seed)
+    )
+    print(f"   Train: {train_size} samples | Val: {val_size} samples")
+
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=args.num_workers,
         pin_memory=True,
         drop_last=True,
     )
-    print(f"   Dataset: {len(dataset)} samples, batch={args.batch_size}, "
-          f"accum={args.accum_steps}, effective={args.batch_size * args.accum_steps}")
+    val_loader = torch.utils.data.DataLoader(
+        val_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=args.num_workers,
+        pin_memory=True,
+        drop_last=False,
+    )
+
+    print(f"   Batch={args.batch_size}, accum={args.accum_steps}, "
+          f"effective={args.batch_size * args.accum_steps}")
 
     # ── Optimizer & Scheduler ─────────────────────────────────
     # Only train DiT parameters — feature extractor is frozen
@@ -306,7 +390,7 @@ def train(args):
         weight_decay=0.01,
     )
 
-    total_steps = args.epochs * len(dataloader) // args.accum_steps
+    total_steps = args.epochs * len(train_loader) // args.accum_steps
     lr_scheduler = get_cosine_schedule_with_warmup(
         optimizer, args.warmup_steps, total_steps
     )
@@ -315,6 +399,7 @@ def train(args):
     print(f"   LR Schedule: Cosine with {args.warmup_steps}-step warmup")
     print(f"   Total training steps: {total_steps}")
     print(f"   CFG dropout: {args.cfg_dropout}")
+    print(f"   Early stopping: patience={args.patience} epochs")
     if args.use_bf16:
         print("   Precision: BF16 mixed precision")
 
@@ -332,10 +417,12 @@ def train(args):
         print(f"   Resumed at epoch {start_epoch}, step {global_step}")
 
     # ── Training Loop ─────────────────────────────────────────
-    print(f"\n🚀 Starting training for {args.epochs} epochs...")
+    print(f"\n🚀 Starting training for {args.epochs} epochs (early stopping: patience={args.patience})...")
     print("=" * 70)
 
     best_loss = float('inf')
+    best_val_loss = float('inf')
+    patience_counter = 0
 
     for epoch in range(start_epoch, args.epochs):
         model.train()
@@ -346,9 +433,17 @@ def train(args):
         epoch_start = time.time()
         optimizer.zero_grad()
 
-        for batch_idx, (context, future) in enumerate(dataloader):
+        # ── Per-component accumulators for epoch logging ──
+        epoch_components = {}
+
+        for batch_idx, (context, future) in enumerate(train_loader):
             context = context.to(device)
             future = future.to(device)
+
+            # ── Apply augmentations (independent for context and future) ──
+            if augmenter is not None:
+                context = augmenter(context)
+                future = augmenter(future)
 
             # ── Forward diffusion ──────────────────────────
             with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
@@ -378,7 +473,7 @@ def train(args):
                 x_0_pred = (x_t - (1 - alpha_bar_t).sqrt() * noise_pred) / alpha_bar_t.sqrt().clamp(min=1e-8)
 
                 # Compute loss (with SNR weighting for auxiliary losses)
-                loss = combined_diffusion_loss(
+                loss, loss_dict = combined_diffusion_loss(
                     noise, noise_pred, future, x_0_pred,
                     feature_extractor=feature_extractor if args.use_identity_loss else None,
                     alpha_bar_t=alpha_bar_t.squeeze(),
@@ -387,6 +482,13 @@ def train(args):
 
             # Backward
             loss.backward()
+
+            # Accumulate per-component losses for epoch logging
+            for k, v in loss_dict.items():
+                if k not in epoch_components:
+                    epoch_components[k] = 0.0
+                val = v.item() if torch.is_tensor(v) else v
+                epoch_components[k] += val
 
             # Gradient accumulation step
             if (batch_idx + 1) % args.accum_steps == 0:
@@ -397,15 +499,27 @@ def train(args):
                 optimizer.zero_grad()
                 global_step += 1
 
+                current_lr = optimizer.param_groups[0]['lr']
+
                 # ── Step-level logging (every 50 steps) ──
                 if global_step % 50 == 0:
                     step_loss = loss.item() * args.accum_steps
+                    log_data = {
+                        'loss_step': step_loss,
+                        'lr': current_lr,
+                        'step': global_step,
+                    }
+                    # Add per-component losses
+                    for k, v in loss_dict.items():
+                        val = v.item() if torch.is_tensor(v) else v
+                        log_data[f'component/{k}'] = val
+
                     if tb_writer:
-                        tb_writer.add_scalar('train/loss_step', step_loss, global_step)
-                        tb_writer.add_scalar('train/lr', current_lr, global_step)
+                        for k, v in log_data.items():
+                            tb_writer.add_scalar(f'train/{k}', v, global_step)
                     if wandb_run:
                         import wandb
-                        wandb.log({'loss_step': step_loss, 'lr': current_lr, 'step': global_step})
+                        wandb.log(log_data)
 
             epoch_loss += loss.item() * args.accum_steps
             num_batches += 1
@@ -415,26 +529,78 @@ def train(args):
         elapsed = time.time() - epoch_start
         current_lr = optimizer.param_groups[0]['lr']
 
+        # Average per-component losses
+        avg_components = {k: v / max(num_batches, 1) for k, v in epoch_components.items()}
+
+        # ── Validation Loss ──────────────────────────────
+        val_loss = 0.0
+        val_batches = 0
+        model.eval()
+        with torch.no_grad():
+            for context_v, future_v in val_loader:
+                context_v = context_v.to(device)
+                future_v = future_v.to(device)
+
+                with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
+                    t = scheduler.sample_timesteps(future_v.shape[0], device)
+                    x_t, noise = scheduler.q_sample(future_v, t)
+
+                    if feature_extractor:
+                        identity = feature_extractor(context_v)
+                    else:
+                        identity = torch.zeros(future_v.shape[0], 512, device=device)
+
+                    t_normalized = t.float() / scheduler.num_train_timesteps
+                    noise_pred = model(x_t, t_normalized, identity)
+
+                    alpha_bar_t = scheduler.alpha_bar_t.to(device)[t].view(-1, 1, 1)
+                    x_0_pred = (x_t - (1 - alpha_bar_t).sqrt() * noise_pred) / alpha_bar_t.sqrt().clamp(min=1e-8)
+
+                    v_loss, _ = combined_diffusion_loss(
+                        noise, noise_pred, future_v, x_0_pred,
+                        feature_extractor=feature_extractor if args.use_identity_loss else None,
+                        alpha_bar_t=alpha_bar_t.squeeze(),
+                    )
+
+                val_loss += v_loss.item()
+                val_batches += 1
+        model.train()
+
+        avg_val_loss = val_loss / max(val_batches, 1)
+
         print(f"Epoch {epoch+1:03d}/{args.epochs} | "
               f"Loss: {avg_loss:.6f} | "
+              f"Val: {avg_val_loss:.6f} | "
               f"LR: {current_lr:.2e} | "
               f"Time: {elapsed:.1f}s | "
               f"Step: {global_step}")
 
+        # Print component breakdown every 10 epochs
+        if (epoch + 1) % 10 == 0:
+            components_str = " | ".join([f"{k}: {v:.4f}" for k, v in avg_components.items()])
+            print(f"   Components: {components_str}")
+
         # ── Epoch-level logging ──
+        epoch_log = {
+            'epoch': epoch + 1,
+            'loss': avg_loss,
+            'val_loss': avg_val_loss,
+            'lr': current_lr,
+            'epoch_time_s': elapsed,
+            'best_loss': best_loss if avg_loss >= best_loss else avg_loss,
+            'best_val_loss': best_val_loss if avg_val_loss >= best_val_loss else avg_val_loss,
+            'patience_counter': patience_counter,
+        }
+        # Add per-component losses
+        for k, v in avg_components.items():
+            epoch_log[f'component/{k}'] = v
+
         if tb_writer:
-            tb_writer.add_scalar('train/loss_epoch', avg_loss, epoch + 1)
-            tb_writer.add_scalar('train/lr_epoch', current_lr, epoch + 1)
-            tb_writer.add_scalar('train/epoch_time_s', elapsed, epoch + 1)
+            for k, v in epoch_log.items():
+                tb_writer.add_scalar(f'train/{k}', v, epoch + 1)
         if wandb_run:
             import wandb
-            wandb.log({
-                'epoch': epoch + 1,
-                'loss': avg_loss,
-                'lr': current_lr,
-                'epoch_time_s': elapsed,
-                'best_loss': best_loss if avg_loss >= best_loss else avg_loss,
-            })
+            wandb.log(epoch_log)
 
         # ── Checkpointing ─────────────────────────────────
         if (epoch + 1) % args.save_every == 0 or (epoch + 1) == args.epochs:
@@ -447,24 +613,38 @@ def train(args):
                 'ema': ema.state_dict(),
                 'args': vars(args),
                 'loss': avg_loss,
+                'val_loss': avg_val_loss,
             }, ckpt_path)
             print(f"   💾 Checkpoint saved: {ckpt_path}")
 
-        # Best model
-        if avg_loss < best_loss:
-            best_loss = avg_loss
+        # Best model (by validation loss)
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            patience_counter = 0
             best_path = os.path.join(args.output_dir, "dit_ecg_best.pt")
             torch.save({
                 'epoch': epoch + 1,
                 'global_step': global_step,
                 'model': model.state_dict(),
                 'ema': ema.state_dict(),
-                'loss': best_loss,
+                'loss': avg_loss,
+                'val_loss': best_val_loss,
             }, best_path)
+            print(f"   🏆 New best val_loss: {best_val_loss:.6f} (saved)")
+        else:
+            patience_counter += 1
+            if patience_counter >= args.patience:
+                print(f"\n⏹️  Early stopping triggered! No val improvement for {args.patience} epochs.")
+                print(f"   Best val_loss: {best_val_loss:.6f}")
+                break
+
+        # Also track best train loss
+        if avg_loss < best_loss:
+            best_loss = avg_loss
 
     # ── Save Final EMA Model ──────────────────────────────
     print("\n" + "=" * 70)
-    print(f"✅ Training complete! Best loss: {best_loss:.6f}")
+    print(f"✅ Training complete! Best val_loss: {best_val_loss:.6f} | Best train_loss: {best_loss:.6f}")
 
     # Save EMA-only weights for inference
     ema.apply_to(model)
@@ -485,7 +665,7 @@ def train(args):
         print("📊 TensorBoard logs saved.")
     if wandb_run:
         import wandb
-        wandb.log({'final_loss': best_loss})
+        wandb.log({'final_loss': best_loss, 'final_val_loss': best_val_loss})
         wandb.finish()
         print("📊 W&B run finished.")
 

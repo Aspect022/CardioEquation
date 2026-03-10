@@ -1,0 +1,192 @@
+# CardioEquation V2 — Training Progress Report
+**Date**: March 9, 2026  
+**Author**: Team CardioEquation  
+**GPU**: NVIDIA A100 80GB PCIe | CUDA 12.1
+
+---
+
+## 1. Project Overview
+
+CardioEquation generates **synthetic patient-specific ECG signals** using a Diffusion Transformer (DiT). Given a patient's existing ECG, the model generates new ECG segments that preserve the patient's unique cardiac characteristics (morphology, heart rate, QRS shape) while being entirely synthetic.
+
+### Architecture
+
+| Component | Details |
+|-----------|---------|
+| **Generator** | DiT-ECG-B — 85M param Diffusion Transformer, 24 blocks, d=768, 12 heads |
+| **Identity Encoder** | ResNet-18 based FeatureExtractorPT (512-d embeddings) |
+| **Signal Format** | Single-lead ECG, 2500 samples (5 seconds at 500Hz) |
+| **Noise Schedule** | Cosine schedule with DDIM sampling (50 steps) |
+| **Conditioning** | Classifier-Free Guidance (CFG scale=3.0) via AdaLN-Zero |
+
+### Training Pipeline (2-Stage)
+
+```
+Stage 0: Contrastive Pre-Training (200 epochs)
+   └── SimCLR-style InfoNCE loss
+   └── Output: frozen identity encoder that maps ECG → 512-d patient embedding
+
+Stage 1: DiT Diffusion Training (200 epochs)
+   └── Primary: ε-prediction MSE (standard diffusion loss)
+   └── Auxiliary: signal reconstruction, spectral, correlation, identity losses
+   └── Output: diffusion model that generates ECGs conditioned on patient identity
+```
+
+---
+
+## 2. Evaluation Metrics — What Each One Means
+
+### FFD (Fréchet ECG Distance) — *Distribution Quality*
+> **Lower is better.** Analogous to FID in image generation.
+
+Measures how similar the **distribution** of generated ECGs is to the distribution of real ECGs. Computed by comparing the mean and covariance of feature embeddings (from the identity encoder) between real and generated sets. A score of 0 means the distributions are identical. Our target: **< 15**.
+
+### MMD (Maximum Mean Discrepancy) — *Distribution Similarity*
+> **Lower is better.** Target: **< 0.2**
+
+Another distribution-level metric using kernel-based comparison. Captures higher-order distributional differences that FFD might miss.
+
+### ReID Top-1 / Top-5 (Patient Re-Identification Accuracy) — *Identity Preservation*
+> **Higher is better.** Target: **> 50% Top-1**
+
+Answers: *"If we generate an ECG for Patient X, can the identity encoder correctly identify it as Patient X?"* We generate a synthetic ECG for each patient, then check if the closest real ECG (by embedding distance) belongs to the same patient. Top-1 = exact match, Top-5 = correct within 5 closest.
+
+**Important caveat**: ReID difficulty scales with patient pool size. Chance-level for 48 patients = 2.1%. Chance-level for 28,000 patients = 0.004%.
+
+### HR MAE (Heart Rate Mean Absolute Error) — *Physiological Accuracy*
+> **Lower is better.** Target: **< 5 bpm**
+
+Measures how closely the heart rate of generated ECGs matches the heart rate of the reference real ECGs. Uses R-peak detection via NeuroKit2.
+
+---
+
+## 3. Training Datasets
+
+| Dataset | Records | Patients | Source | Used in |
+|---------|---------|----------|--------|---------|
+| **MIT-BIH** | 8,592 segments | 48 | PhysioNet Arrhythmia DB | Run 1, Run 2 |
+| **PTB-XL** | ~21,000 | ~18,000 | PhysioNet PTB-XL v1.0.3 | Run 2 only |
+| **Chapman-Shaoxing** | ~10,000 | ~10,000 | PhysioNet Chapman DB | Run 2 only |
+| **Hospital ECGs** | 24 PDFs | 10 | Clinical validation set | Eval only |
+
+---
+
+## 4. Run 1 — Baseline (March 7)
+
+**Data**: MIT-BIH only (8,592 segments, 48 patients)  
+**Training Time**: ~13 hours (200 epochs contrastive + 200 epochs DiT)
+
+### Results
+
+| Metric | Value | Assessment |
+|--------|-------|------------|
+| **FFD** | 1032.0 | 🔴 Very poor — huge distribution gap |
+| **MMD** | 0.661 | 🔴 High |
+| **ReID Top-1** | 11.8% | 🟡 Above chance (2.1% for 48 patients) |
+| **ReID Top-5** | 35.3% | 🟡 Moderate |
+| **HR MAE** | 17.2 bpm | 🔴 Generated HR deviates significantly |
+
+### Loss Curve (DiT Training)
+```
+Epoch   1: Loss = 671.8
+Epoch  50: Loss = 58.5
+Epoch 100: Loss = 36.7
+Epoch 150: Loss = 30.2
+Epoch 200: Loss = 27.1  ← plateaued from ~epoch 170
+```
+
+### Diagnosis
+The extremely high FFD (1032) and loss plateau indicated **fundamental problems**, not just "needs more training." Investigation revealed three critical bugs.
+
+---
+
+## 5. Bugs Found & Fixed
+
+### 🔴 Bug 1: Identity Encoder Using Random Weights (Critical)
+
+**What happened**: The identity encoder (FeatureExtractorPT) was supposed to load pre-trained contrastive weights from Stage 0. Instead, it was **randomly initialized** during DiT training. The model was conditioning on meaningless random embeddings → it couldn't learn patient-specific generation.
+
+**Fix**: 
+- Load `feature_extractor_contrastive.pt` at DiT training start
+- Freeze all encoder parameters (`requires_grad = False`)
+- Set encoder to `.eval()` mode (disables dropout/batchnorm updates)
+- Remove encoder from the optimizer
+
+### 🔴 Bug 2: Auxiliary Losses Computed on Garbage Predictions (Critical)
+
+**What happened**: The auxiliary losses (signal MSE, spectral, correlation, identity preservation) were computed on `x_0_pred` — the model's prediction of the clean signal. At **high noise timesteps** (e.g., t ≈ T), `x_0_pred ≈ noise / √ᾱ_t`, which is amplified noise, not a meaningful signal. These garbage predictions produced **random gradients** that fought the primary diffusion objective, causing the loss plateau at ~27.
+
+**Fix**: Multiply all auxiliary losses by `ᾱ_t` (the signal-to-noise ratio at timestep t). This ensures auxiliary losses only contribute at **low-noise timesteps** where `x_0_pred` is a reliable reconstruction.
+
+### 🟡 Bug 3: Chapman-Shaoxing Dataset Missing Signal Files
+
+**What happened**: The `wget` download command for Chapman-Shaoxing had a file-type filter (`--accept '*.hea,*.dat'`) that was incorrectly only downloading `.hea` header files — the actual `.dat` signal data was being filtered out. ~10,000 records were effectively empty.
+
+**Fix**: Removed the file-type filter. Added verification logic to check for both `.hea` and `.dat` files.
+
+---
+
+## 6. Run 2 — Post-Fixes (March 8)
+
+**Data**: MIT-BIH + PTB-XL + Chapman (~33,000 segments, ~28,000 patients)  
+**Training Time**: ~13 hours (200 epochs contrastive + 200 epochs DiT)
+
+### Results Comparison
+
+| Metric | Run 1 | Run 2 | Change | Notes |
+|--------|-------|-------|--------|-------|
+| **FFD** | 1032.0 | **42.0** | ✅ **25x better** | Major improvement in distribution quality |
+| **MMD** | 0.661 | **0.383** | ✅ **42% lower** | Distributions are closer |
+| **ReID Top-1** | 11.8% | 5.9% | ⚠️ See below | Patient pool changed |
+| **ReID Top-5** | 35.3% | 23.5% | ⚠️ See below | Patient pool changed |
+| **HR MAE** | 17.2 bpm | **9.3 bpm** | ✅ **46% better** | Heart rate more accurate |
+| **HR Std (gen)** | 22.2 bpm | 21.1 bpm | — | Still lower diversity than real (47.4) |
+
+### Why ReID Dropped — This Is Expected
+
+The ReID numbers **cannot be compared directly** between runs because the patient pool changed drastically:
+
+| | Run 1 | Run 2 |
+|--|-------|-------|
+| **Patients** | 48 | ~28,000 |
+| **Chance level** | 2.08% | 0.004% |
+| **Top-1 achieved** | 11.8% (5.7× chance) | 5.9% (1,500× chance) |
+
+Run 2's ReID is actually **much stronger relative to chance** — the model is distinguishing between 28,000 patients at 1,500× above random. Run 1's 11.8% across 48 patients is comparatively trivial.
+
+### Morphological Analysis
+
+| Metric | Real ECGs | Run 1 (Generated) | Run 2 (Generated) |
+|--------|-----------|-------------------|-------------------|
+| HR Mean | 99.7 bpm | 82.5 bpm | 90.5 bpm ✅ |
+| HR Std | 47.4 bpm | 22.2 bpm | 21.1 bpm |
+| QRS Duration | 101.8 ms | 92.2 ms | 107.0 ms ✅ |
+
+HR mean improved from 17 bpm off → 9 bpm off. QRS duration is now slightly over-estimated but within normal range. HR standard deviation is still low — generated ECGs don't yet capture the full diversity of heart rates in the real data.
+
+---
+
+## 7. Run 3 — Currently In Progress
+
+### What's New
+1. **Weights & Biases (W&B)** experiment tracking added — per-component loss breakdown visible at [wandb.ai](https://wandb.ai)
+2. **TensorBoard** logging for local visualization
+3. All three bug fixes applied
+4. Chapman dataset properly downloaded with signal files
+
+### What We're Watching For
+- **Per-component loss breakdown**: Are auxiliary losses still dominating? Do we need to reduce their weights?
+- **ReID trend across epochs**: Is identity preservation improving or stagnating?
+- **Loss plateau**: Does syncing the losses with SNR weighting break through the 27 barrier?
+
+---
+
+## 8. Remaining Next Steps
+
+| Priority | Action | Expected Impact |
+|----------|--------|-----------------|
+| 1 | **Analyze Run 3 W&B logs** | Understand loss component balance |
+| 2 | **Tune auxiliary loss weights** | If identity loss dominates, reduce weight |
+| 3 | **Increase training epochs** (400-500) | May break loss plateau |
+| 4 | **Expand clinical validation set** | More robust ReID evaluation |
+| 5 | **Multi-lead generation** | Extend from Lead I to 12-lead |

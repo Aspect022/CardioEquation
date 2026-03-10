@@ -3,6 +3,11 @@ Diffusion Noise Scheduler
 ==========================
 Cosine noise schedule for forward diffusion process.
 Supports both DDPM training and DDIM sampling.
+
+V2.1: Added eta parameter for stochastic DDIM sampling.
+  eta=0: deterministic DDIM (original)
+  eta=1: fully stochastic (DDPM equivalent)
+  eta=0.75: recommended default for ECG (preserves diversity)
 """
 
 import torch
@@ -72,9 +77,13 @@ class CosineNoiseScheduler:
         return torch.randint(0, self.num_train_timesteps, (batch_size,), device=device)
 
     @torch.no_grad()
-    def ddim_sample_step(self, model, x_t, t, t_prev, cond, guidance_scale=1.0):
+    def ddim_sample_step(self, model, x_t, t, t_prev, cond, guidance_scale=1.0, eta=0.0):
         """
-        Single DDIM deterministic sampling step.
+        Single DDIM sampling step with optional stochasticity.
+
+        When eta=0: deterministic DDIM (original).
+        When eta=1: equivalent to DDPM (fully stochastic).
+        Intermediate eta values interpolate between deterministic and stochastic.
 
         Args:
             model: DiT-ECG model
@@ -83,6 +92,7 @@ class CosineNoiseScheduler:
             t_prev: previous timestep (int)
             cond: (B, D) conditioning vector
             guidance_scale: CFG scale (1.0 = no guidance)
+            eta: stochasticity parameter (0=deterministic, 1=fully stochastic)
         Returns:
             x_t_prev: (B, C, T) denoised state at t_prev
         """
@@ -102,7 +112,7 @@ class CosineNoiseScheduler:
                 x_t, t_tensor.float() / self.num_train_timesteps, cond
             )
 
-        # DDIM update
+        # DDIM update with eta
         alpha_bar_t = self.alpha_bar_t[t].to(device)
         alpha_bar_t_prev = self.alpha_bar_t[t_prev].to(device) if t_prev >= 0 else torch.tensor(1.0, device=device)
 
@@ -111,17 +121,35 @@ class CosineNoiseScheduler:
         sqrt_one_minus_alpha = (1 - alpha_bar_t).sqrt()
         x_0_pred = (x_t - sqrt_one_minus_alpha * eps_pred) / sqrt_alpha.clamp(min=1e-8)
 
-        # DDIM (deterministic, η=0)
-        sqrt_alpha_prev = alpha_bar_t_prev.sqrt()
-        sqrt_one_minus_alpha_prev = (1 - alpha_bar_t_prev).sqrt()
+        # ── Stochastic DDIM (eta > 0) ──
+        # σ_t controls the amount of noise re-injected at each step
+        # eta=0 → σ_t=0 (deterministic), eta=1 → σ_t=β̃ (DDPM)
+        sigma_t = 0.0
+        if eta > 0 and t_prev >= 0:
+            sigma_t = eta * (
+                ((1 - alpha_bar_t_prev) / (1 - alpha_bar_t))
+                * (1 - alpha_bar_t / alpha_bar_t_prev)
+            ).clamp(min=0).sqrt()
 
-        x_t_prev = sqrt_alpha_prev * x_0_pred + sqrt_one_minus_alpha_prev * eps_pred
+        sqrt_alpha_prev = alpha_bar_t_prev.sqrt()
+
+        # Direction pointing to x_t (deterministic component)
+        dir_coeff = (1 - alpha_bar_t_prev - sigma_t ** 2).clamp(min=0).sqrt()
+
+        x_t_prev = sqrt_alpha_prev * x_0_pred + dir_coeff * eps_pred
+
+        # Add stochastic noise (only when eta > 0)
+        if sigma_t > 0:
+            noise = torch.randn_like(x_t)
+            x_t_prev = x_t_prev + sigma_t * noise
+
         return x_t_prev
 
     @torch.no_grad()
-    def ddim_sample(self, model, shape, cond, num_steps=50, guidance_scale=3.0, device='cuda'):
+    def ddim_sample(self, model, shape, cond, num_steps=50, guidance_scale=3.0,
+                    eta=0.75, device='cuda'):
         """
-        Full DDIM sampling loop.
+        Full DDIM sampling loop with stochastic eta.
 
         Args:
             model: DiT-ECG model
@@ -129,6 +157,7 @@ class CosineNoiseScheduler:
             cond: (B, D) conditioning vector
             num_steps: Number of sampling steps (50 recommended)
             guidance_scale: CFG scale (3.0 recommended)
+            eta: DDIM stochasticity (0=deterministic, 1=DDPM, 0.75=recommended)
         Returns:
             x_0: (B, C, T) generated clean signal
         """
@@ -142,6 +171,7 @@ class CosineNoiseScheduler:
 
         for i, t in enumerate(timesteps):
             t_prev = timesteps[i + 1] if i + 1 < len(timesteps) else 0
-            x_t = self.ddim_sample_step(model, x_t, t, t_prev, cond, guidance_scale)
+            x_t = self.ddim_sample_step(model, x_t, t, t_prev, cond,
+                                        guidance_scale, eta=eta)
 
         return x_t

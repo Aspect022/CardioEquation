@@ -199,7 +199,7 @@ if [ "$RUN_DIT" = true ]; then
             --warmup_steps 10
     else
         python src/training/train_dit.py \
-            --epochs 200 \
+            --epochs 500 \
             --batch_size 32 \
             --accum_steps 8 \
             --model_size B \
@@ -207,7 +207,9 @@ if [ "$RUN_DIT" = true ]; then
             --output_dir checkpoints \
             --save_every 10 \
             --lr 1e-4 \
-            --warmup_steps 5000
+            --warmup_steps 5000 \
+            --patience 30 \
+            --val_split 0.1
     fi
 fi
 
