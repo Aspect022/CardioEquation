@@ -1,7 +1,7 @@
 {
-  "epochs": 200,
-  "batch_size": 32,
-  "accum_steps": 8,
+  "epochs": 500,
+  "batch_size": 16,
+  "accum_steps": 16,
   "lr": 0.0001,
   "warmup_steps": 5000,
   "ema_decay": 0.9999,
@@ -17,5 +17,12 @@
   "resume": null,
   "num_workers": 4,
   "seed": 42,
-  "use_bf16": true
+  "use_bf16": true,
+  "wandb_project": "CardioEquation",
+  "wandb_run": null,
+  "no_wandb": false,
+  "no_tensorboard": false,
+  "val_split": 0.1,
+  "patience": 30,
+  "no_augment": false
 }
