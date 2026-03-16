@@ -6,7 +6,6 @@ __pycache__/
 dist/
 build/
 *.egg
-data/
 *.npz
 *.pth
 checkpoints/
@@ -65,6 +64,10 @@ checkpoints/runs/
 
 # ── Keep tracked ────────────────────────────
 # NOTE: Dataset/ folder with hospital PDFs is tracked
-# NOTE: src/ code is tracked
+# NOTE: src/ code is tracked (including src/data/*.py scripts)
 # NOTE: docs/ is tracked
 # NOTE: models/ (model architecture code) is tracked — NOT weights
+
+# Explicitly unignore src/data Python source files
+# (src/data/ was caught by the bare data/ rule above — fixed by removing it)
+src/data/*.py
