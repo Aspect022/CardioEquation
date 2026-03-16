@@ -20,6 +20,14 @@ V2.1 Changes:
 - Added validation split + early stopping (patience-based)
 - Per-component loss breakdown logged to W&B/TensorBoard
 - combined_diffusion_loss now returns (total, loss_dict)
+
+V2.2 Changes (Run 5):
+- Explicit HR conditioning via HREmbedding + ConditioningProjector
+- DifferentiableHRLoss (FFT autocorrelation + soft argmax)
+- HR variance loss to prevent HR diversity collapse
+- HR-balanced WeightedRandomSampler
+- HR label loading from precomputed .npz files
+- HR-specific CFG dropout
 """
 
 import os
@@ -38,7 +46,7 @@ from src.models.dit_ecg import dit_ecg_s, dit_ecg_b
 from src.models.feature_extractor_pt import FeatureExtractorPT
 from src.training.ema import EMAModel
 from src.training.noise_scheduler import CosineNoiseScheduler
-from src.training.losses_v2 import combined_diffusion_loss
+from src.training.losses_v2 import combined_diffusion_loss, DifferentiableHRLoss, hr_variance_loss
 
 
 def parse_args():
@@ -199,6 +207,8 @@ def load_dataset(args):
         # Expected shape: (N, T, 1) → convert to (N, 1, T) for PyTorch
         context = data['context']
         future = data['future']
+        # Load HR labels if available
+        hr_labels = data['hr_labels'] if 'hr_labels' in data else None
 
         if context.shape[-1] == 1:
             context = context.transpose(0, 2, 1)  # (N, 1, T)
@@ -227,6 +237,11 @@ def load_dataset(args):
             ptbxl_signals = ptbxl['signals']  # (N, 1, 2500)
             context = np.concatenate([context, ptbxl_signals], axis=0)
             future = np.concatenate([future, ptbxl_signals], axis=0)
+            # Append HR labels
+            if hr_labels is not None and 'hr_labels' in ptbxl:
+                hr_labels = np.concatenate([hr_labels, ptbxl['hr_labels']], axis=0)
+            elif 'hr_labels' in ptbxl:
+                hr_labels = ptbxl['hr_labels']
 
         # ── Combine with Chapman-Shaoxing if available ──
         chapman_path = 'data/chapman_processed.npz'
@@ -236,13 +251,28 @@ def load_dataset(args):
             chapman_signals = chapman['signals']  # (N, 1, 2500)
             context = np.concatenate([context, chapman_signals], axis=0)
             future = np.concatenate([future, chapman_signals], axis=0)
+            # Append HR labels
+            if hr_labels is not None and 'hr_labels' in chapman:
+                hr_labels = np.concatenate([hr_labels, chapman['hr_labels']], axis=0)
+            elif 'hr_labels' in chapman:
+                hr_labels = chapman['hr_labels']
 
         n_mitbih = len(data['context'])
         print(f"   = Combined dataset: {len(context)} samples (MIT-BIH: {n_mitbih})")
 
+        # Build HR labels tensor (default to 75 bpm if not available)
+        if hr_labels is not None and len(hr_labels) == len(context):
+            print(f"   ❤️  HR labels loaded: mean={hr_labels.mean():.1f}, "
+                  f"std={hr_labels.std():.1f} bpm")
+        else:
+            print(f"   ⚠️  HR labels not found — using default 75 bpm")
+            print(f"   ⚠️  Run: python src/data/precompute_hr.py first!")
+            hr_labels = np.full(len(context), 75.0, dtype=np.float32)
+
         dataset = torch.utils.data.TensorDataset(
             torch.from_numpy(context).float(),
-            torch.from_numpy(future).float()
+            torch.from_numpy(future).float(),
+            torch.from_numpy(hr_labels).float(),
         )
         return dataset
 
@@ -258,6 +288,7 @@ def load_dataset(args):
 
 def train(args):
     """Main training loop."""
+    import numpy as np  # Used for HR-balanced sampling
     # ── Setup ─────────────────────────────────────────────────
     torch.manual_seed(args.seed)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -358,10 +389,31 @@ def train(args):
     )
     print(f"   Train: {train_size} samples | Val: {val_size} samples")
 
+    # ── HR-balanced sampling (Run 5) ──
+    # Extract HR labels from full dataset for WeightedRandomSampler
+    try:
+        all_hr = full_dataset.tensors[2].numpy()  # 3rd tensor = HR
+        train_indices = train_dataset.indices
+        train_hr = all_hr[train_indices]
+
+        hr_bins = np.digitize(train_hr, bins=[40, 55, 65, 75, 85, 100, 120, 160])
+        bin_counts = np.bincount(hr_bins, minlength=9).clip(min=1)
+        sample_weights = 1.0 / bin_counts[hr_bins]
+        sampler = torch.utils.data.WeightedRandomSampler(
+            sample_weights, len(sample_weights), replacement=True
+        )
+        print(f"   ❤️  HR-balanced sampling enabled (bins: {bin_counts})")
+        use_hr_sampler = True
+    except Exception as e:
+        print(f"   ⚠️  HR-balanced sampling failed ({e}), using random shuffle")
+        sampler = None
+        use_hr_sampler = False
+
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
         batch_size=args.batch_size,
-        shuffle=True,
+        shuffle=(not use_hr_sampler),
+        sampler=sampler if use_hr_sampler else None,
         num_workers=args.num_workers,
         pin_memory=True,
         drop_last=True,
@@ -377,6 +429,16 @@ def train(args):
 
     print(f"   Batch={args.batch_size}, accum={args.accum_steps}, "
           f"effective={args.batch_size * args.accum_steps}")
+
+    # ── HR Loss (Run 5) ────────────────────────────────────
+    hr_loss_fn = DifferentiableHRLoss(
+        fs=500.0, hr_min=30.0, hr_max=200.0, softmax_temp=10.0
+    ).to(device)
+    hr_warmup_steps = 5000  # Ramp weight from 0→1
+    hr_loss_weight = 0.05   # Max weight after warmup
+    hr_var_weight = 0.5     # HR variance loss weight
+    print(f"   ❤️  HR Loss: DifferentiableHRLoss (warmup={hr_warmup_steps} steps)")
+    print(f"   ❤️  HR Loss weight: {hr_loss_weight}, HR variance weight: {hr_var_weight}")
 
     # ── Optimizer & Scheduler ─────────────────────────────────
     # Only train DiT parameters — feature extractor is frozen
@@ -436,9 +498,11 @@ def train(args):
         # ── Per-component accumulators for epoch logging ──
         epoch_components = {}
 
-        for batch_idx, (context, future) in enumerate(train_loader):
-            context = context.to(device)
-            future = future.to(device)
+        for batch_idx, batch_data in enumerate(train_loader):
+            context = batch_data[0].to(device)
+            future = batch_data[1].to(device)
+            hr_batch = batch_data[2].to(device) if len(batch_data) > 2 else \
+                torch.full((batch_data[0].shape[0],), 75.0, device=device)
 
             # ── Apply augmentations (independent for context and future) ──
             if augmenter is not None:
@@ -463,21 +527,41 @@ def train(args):
                 if args.cfg_dropout > 0:
                     drop_mask = torch.rand(identity.shape[0], device=device) < args.cfg_dropout
                     identity[drop_mask] = 0.0
+                    # Drop HR to neutral (75 bpm) when identity is dropped
+                    hr_batch[drop_mask] = 75.0
 
-                # Predict noise
+                # Predict noise (with HR conditioning — Run 5)
                 t_normalized = t.float() / scheduler.num_train_timesteps
-                noise_pred = model(x_t, t_normalized, identity)
+                noise_pred = model(x_t, t_normalized, identity, hr_bpm=hr_batch)
 
                 # Reconstruct x_0 estimate (for auxiliary losses)
                 alpha_bar_t = scheduler.alpha_bar_t.to(device)[t].view(-1, 1, 1)
                 x_0_pred = (x_t - (1 - alpha_bar_t).sqrt() * noise_pred) / alpha_bar_t.sqrt().clamp(min=1e-8)
 
-                # Compute loss (with SNR weighting for auxiliary losses)
+                # Compute base diffusion loss (with SNR weighting)
                 loss, loss_dict = combined_diffusion_loss(
                     noise, noise_pred, future, x_0_pred,
                     feature_extractor=feature_extractor if args.use_identity_loss else None,
                     alpha_bar_t=alpha_bar_t.squeeze(),
                 )
+
+                # ── HR losses (Run 5, warmup ramp) ──
+                hr_ramp = min(1.0, global_step / hr_warmup_steps)
+                hr_loss_val, hr_est = hr_loss_fn(
+                    x_0_pred, hr_batch, weight=hr_loss_weight * hr_ramp
+                )
+                hr_var_val = hr_variance_loss(
+                    hr_est, target_std=47.0, weight=hr_var_weight * hr_ramp
+                )
+                loss = loss + hr_loss_val + hr_var_val
+
+                # Add HR metrics to loss_dict for logging
+                loss_dict['hr_loss'] = hr_loss_val.detach()
+                loss_dict['hr_variance_loss'] = hr_var_val.detach()
+                loss_dict['hr_est_mean'] = hr_est.mean()
+                loss_dict['hr_est_std'] = hr_est.std()
+                loss_dict['hr_ramp'] = hr_ramp
+
                 loss = loss / args.accum_steps  # Scale for gradient accumulation
 
             # Backward
@@ -537,9 +621,11 @@ def train(args):
         val_batches = 0
         model.eval()
         with torch.no_grad():
-            for context_v, future_v in val_loader:
-                context_v = context_v.to(device)
-                future_v = future_v.to(device)
+            for val_batch in val_loader:
+                context_v = val_batch[0].to(device)
+                future_v = val_batch[1].to(device)
+                hr_v = val_batch[2].to(device) if len(val_batch) > 2 else \
+                    torch.full((val_batch[0].shape[0],), 75.0, device=device)
 
                 with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
                     t = scheduler.sample_timesteps(future_v.shape[0], device)
@@ -551,7 +637,7 @@ def train(args):
                         identity = torch.zeros(future_v.shape[0], 512, device=device)
 
                     t_normalized = t.float() / scheduler.num_train_timesteps
-                    noise_pred = model(x_t, t_normalized, identity)
+                    noise_pred = model(x_t, t_normalized, identity, hr_bpm=hr_v)
 
                     alpha_bar_t = scheduler.alpha_bar_t.to(device)[t].view(-1, 1, 1)
                     x_0_pred = (x_t - (1 - alpha_bar_t).sqrt() * noise_pred) / alpha_bar_t.sqrt().clamp(min=1e-8)

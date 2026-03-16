@@ -5,6 +5,13 @@ Based on DiT (Peebles & Xie, arXiv:2212.09748) adapted for 1D ECG signals.
 Uses AdaLN-Zero conditioning from the DiT paper, with dual-pathway
 conditioning inspired by ECGTwin (arXiv:2508.02720).
 
+Run 5 Changes:
+  - Added HREmbedding: sinusoidal encoding of scalar HR (30-200 bpm)
+  - Added ConditioningProjector: 3 separate MLP heads (t, hr, pid)
+    with HR and PID heads zero-initialized for training stability
+  - forward() now accepts hr_bpm parameter
+  - Based on research: Option B (Separate AdaLN streams)
+
 Architecture: DiT-ECG-B (85M params)
 - 24 Transformer blocks
 - d_model = 768
@@ -33,6 +40,71 @@ class SinusoidalPosEmbed(nn.Module):
         emb = t[:, None].float() * emb[None, :]
         emb = torch.cat([emb.sin(), emb.cos()], dim=-1)
         return emb
+
+
+class HREmbedding(nn.Module):
+    """
+    Sinusoidal encoding of scalar heart rate (bpm) → dense vector.
+
+    Research-confirmed (Option B): HR gets its own dedicated embedding
+    with sinusoidal frequencies, normalized to [0, 1] over physiological
+    range [30, 200] bpm.
+    """
+
+    def __init__(self, hidden_dim=256, hr_min=30.0, hr_max=200.0):
+        super().__init__()
+        self.hr_min = hr_min
+        self.hr_max = hr_max
+        self.register_buffer(
+            "freqs",
+            torch.exp(-math.log(10000) * torch.arange(hidden_dim // 2) / (hidden_dim // 2))
+        )
+        self.mlp = nn.Sequential(
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.SiLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+        )
+
+    def forward(self, hr):
+        # hr: (B,) bpm values
+        hr_norm = ((hr - self.hr_min) / (self.hr_max - self.hr_min)).clamp(0, 1)
+        args = hr_norm[:, None] * self.freqs[None]  # (B, dim/2)
+        emb = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)  # (B, dim)
+        return self.mlp(emb)  # (B, hidden_dim)
+
+
+class ConditioningProjector(nn.Module):
+    """
+    3 independent MLP heads → additive combination.
+
+    Research-confirmed: HR and patient_id heads are zero-initialized
+    so training starts from pure timestep conditioning and gradually
+    learns the auxiliary signals.
+    """
+
+    def __init__(self, hidden_dim=256, d_model=768):
+        super().__init__()
+
+        def _head(in_dim, out_dim):
+            return nn.Sequential(
+                nn.Linear(in_dim, hidden_dim),
+                nn.SiLU(),
+                nn.Linear(hidden_dim, out_dim),
+            )
+
+        self.t_mlp = _head(hidden_dim, d_model)
+        self.hr_mlp = _head(hidden_dim, d_model)
+        self.pid_mlp = _head(hidden_dim, d_model)
+
+        # Zero-init HR and patient heads
+        nn.init.zeros_(self.hr_mlp[-1].weight)
+        nn.init.zeros_(self.hr_mlp[-1].bias)
+        nn.init.zeros_(self.pid_mlp[-1].weight)
+        nn.init.zeros_(self.pid_mlp[-1].bias)
+
+    def forward(self, t_emb, hr_emb, pid_emb):
+        """All inputs: (B, hidden_dim). Output: (B, d_model)."""
+        return self.t_mlp(t_emb) + self.hr_mlp(hr_emb) + self.pid_mlp(pid_emb)
 
 
 class PatchEmbed1D(nn.Module):
@@ -156,6 +228,7 @@ class DiTECG(nn.Module):
         heads=12,
         mlp_ratio=4,
         cond_dim=512,
+        cond_hidden=256,
         dropout=0.0,
     ):
         super().__init__()
@@ -170,19 +243,27 @@ class DiTECG(nn.Module):
             torch.zeros(1, self.num_patches, dim)
         )
 
-        # Timestep embedding
+        # Timestep embedding → hidden_dim (reduced from d_model)
         self.time_embed = nn.Sequential(
-            SinusoidalPosEmbed(dim),
-            nn.Linear(dim, dim * 4),
+            SinusoidalPosEmbed(cond_hidden),
+            nn.Linear(cond_hidden, cond_hidden * 4),
             nn.SiLU(),
-            nn.Linear(dim * 4, dim),
+            nn.Linear(cond_hidden * 4, cond_hidden),
         )
 
-        # Identity conditioning projection
-        self.cond_proj = nn.Sequential(
-            nn.Linear(cond_dim, dim * 4),
+        # HR embedding (Run 5: research-confirmed Option B)
+        self.hr_embed = HREmbedding(hidden_dim=cond_hidden)
+
+        # Identity embedding projection: cond_dim → hidden_dim
+        self.pid_proj = nn.Sequential(
+            nn.Linear(cond_dim, cond_hidden * 2),
             nn.SiLU(),
-            nn.Linear(dim * 4, dim),
+            nn.Linear(cond_hidden * 2, cond_hidden),
+        )
+
+        # Conditioning projector: 3 heads → d_model (zero-init HR/PID)
+        self.cond_proj = ConditioningProjector(
+            hidden_dim=cond_hidden, d_model=dim
         )
 
         # --- Transformer Blocks ---
@@ -206,19 +287,29 @@ class DiTECG(nn.Module):
         # Initialize positional embeddings
         nn.init.trunc_normal_(self.pos_embed, std=0.02)
 
-    def forward(self, x, t, cond):
+    def forward(self, x, t, cond, hr_bpm=None):
         """
         Args:
             x: (B, C, T) — noisy signal, e.g. (B, 1, 2500)
             t: (B,) — diffusion timesteps (continuous [0, 1] or discrete)
             cond: (B, cond_dim) — identity conditioning vector (512-dim)
+            hr_bpm: (B,) — heart rate in bpm (optional, defaults to 75.0)
         Returns:
             (B, C, T) — predicted noise ε or velocity v
         """
-        # Compute combined conditioning: time + identity
-        t_emb = self.time_embed(t)     # (B, D)
-        c_emb = self.cond_proj(cond)   # (B, D)
-        combined_cond = t_emb + c_emb  # (B, D)
+        B = x.shape[0]
+
+        # Default HR if not provided (neutral = 75 bpm)
+        if hr_bpm is None:
+            hr_bpm = torch.full((B,), 75.0, device=x.device)
+
+        # Compute conditioning embeddings (all → hidden_dim)
+        t_emb = self.time_embed(t)              # (B, hidden_dim)
+        hr_emb = self.hr_embed(hr_bpm)           # (B, hidden_dim)
+        pid_emb = self.pid_proj(cond)            # (B, hidden_dim)
+
+        # Project through 3 separate heads → d_model (HR/PID zero-init)
+        combined_cond = self.cond_proj(t_emb, hr_emb, pid_emb)  # (B, D)
 
         # Patchify + positional embedding
         x = self.patch_embed(x)         # (B, N, D)
@@ -238,17 +329,18 @@ class DiTECG(nn.Module):
         x = self.unpatch(x)  # (B, C, T)
         return x
 
-    def forward_with_cfg(self, x, t, cond, guidance_scale=3.0):
+    def forward_with_cfg(self, x, t, cond, hr_bpm=None, guidance_scale=3.0):
         """
         Classifier-Free Guidance inference.
         Runs the model twice: once conditioned, once unconditioned.
         """
         # Conditioned pass
-        eps_cond = self.forward(x, t, cond)
+        eps_cond = self.forward(x, t, cond, hr_bpm=hr_bpm)
 
-        # Unconditioned pass (null conditioning)
+        # Unconditioned pass (null conditioning + neutral HR)
         null_cond = torch.zeros_like(cond)
-        eps_uncond = self.forward(x, t, null_cond)
+        null_hr = torch.full_like(hr_bpm, 75.0) if hr_bpm is not None else None
+        eps_uncond = self.forward(x, t, null_cond, hr_bpm=null_hr)
 
         # Guided prediction
         eps_guided = eps_uncond + guidance_scale * (eps_cond - eps_uncond)
@@ -278,10 +370,17 @@ if __name__ == "__main__":
     x = torch.randn(2, 1, 2500)
     t = torch.rand(2)
     c = torch.randn(2, 512)
-    out = model(x, t, c)
+    hr = torch.tensor([72.0, 85.0])  # HR in bpm
+    out = model(x, t, c, hr_bpm=hr)
     params = sum(p.numel() for p in model.parameters()) / 1e6
     print(f"DiT-ECG-B: {params:.1f}M params")
     print(f"Input:  {x.shape}")
     print(f"Output: {out.shape}")
     assert out.shape == x.shape, f"Shape mismatch: {out.shape} != {x.shape}"
-    print("✅ Forward pass verified!")
+    # Test without HR (backward compat)
+    out_no_hr = model(x, t, c)
+    assert out_no_hr.shape == x.shape
+    # Test CFG
+    out_cfg = model.forward_with_cfg(x, t, c, hr_bpm=hr, guidance_scale=3.0)
+    assert out_cfg.shape == x.shape
+    print("✅ Forward pass verified (with HR + CFG)!")

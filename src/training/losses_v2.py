@@ -6,10 +6,16 @@ Multi-component loss for diffusion training + forecasting.
 Changes in V2.1:
   - combined_diffusion_loss now returns (total_loss, loss_dict) for W&B logging
   - Added morphology_gradient_loss (1st + 2nd derivative matching)
+
+Changes in V2.2 (Run 5):
+  - Added DifferentiableHRLoss (FFT autocorrelation + soft argmax)
+  - Added hr_variance_loss (penalizes HR diversity collapse)
+  - Fixed w_spectral default: 0.1 → 0.0001
 """
 
 import torch
 import torch.nn.functional as F
+import math
 
 
 def noise_mse_loss(noise_true, noise_pred):
@@ -106,7 +112,7 @@ def combined_diffusion_loss(
     feature_extractor=None,
     alpha_bar_t=None,
     w_noise=1.0, w_signal=1.0, w_identity=0.5,
-    w_spectral=0.1, w_correlation=0.2, w_morphology=0.3,
+    w_spectral=0.0001, w_correlation=0.2, w_morphology=0.3,
 ):
     """
     Full multi-component loss for CardioEquation diffusion training.
@@ -188,3 +194,98 @@ def info_nce_loss(z_i, z_j, temperature=0.07):
     loss_ji = F.cross_entropy(logits.T, labels)
 
     return (loss_ij + loss_ji) / 2.0
+
+
+# ── Run 5: HR-specific losses ──────────────────────────────────────────────
+
+class DifferentiableHRLoss(torch.nn.Module):
+    """
+    Differentiable HR estimation via FFT autocorrelation + soft argmax.
+
+    Research-confirmed: Most stable method for backprop through HR estimation.
+    Smooth gradients even when generated ECG is noisy (early training).
+
+    Pipeline:
+        1. Zero-mean signal
+        2. FFT autocorrelation (Wiener-Khinchin theorem)
+        3. Soft argmax over physiological lag window [lag_min, lag_max]
+        4. Convert soft lag → HR (bpm)
+        5. L1 loss against target HR
+
+    Args:
+        fs: Sampling frequency (Hz)
+        hr_min: Minimum physiological HR (bpm)
+        hr_max: Maximum physiological HR (bpm)
+        softmax_temp: Temperature for soft argmax (higher = sharper)
+    """
+
+    def __init__(self, fs=500.0, hr_min=30.0, hr_max=200.0, softmax_temp=10.0):
+        super().__init__()
+        self.fs = fs
+        self.hr_min = hr_min
+        self.hr_max = hr_max
+        self.temp = softmax_temp
+        self.lag_min = int(fs * 60.0 / hr_max)   # ~150 samples for 200bpm
+        self.lag_max = int(fs * 60.0 / hr_min)    # ~1000 samples for 30bpm
+
+    def forward(self, ecg, hr_target, weight=1.0):
+        """
+        Args:
+            ecg: (B, 1, T) generated/predicted ECG signal
+            hr_target: (B,) target HR in bpm
+            weight: scalar weight for the loss (used for warmup ramp)
+
+        Returns:
+            loss: scalar
+            hr_estimated: (B,) estimated HR in bpm (detached)
+        """
+        # Squeeze channel: (B, 1, T) → (B, T)
+        x = ecg.squeeze(1)
+        x = x - x.mean(dim=-1, keepdim=True)  # Zero-mean
+
+        B, T = x.shape
+
+        # FFT autocorrelation (Wiener-Khinchin)
+        n_fft = 2 ** math.ceil(math.log2(2 * T - 1))
+        X = torch.fft.rfft(x, n=n_fft)
+        acf = torch.fft.irfft(X.real**2 + X.imag**2, n=n_fft)[:, :T]
+        acf = acf / (acf[:, 0:1] + 1e-8)  # Normalize by zero-lag
+
+        # Extract window in physiological lag range
+        lag_max = min(self.lag_max, T - 1)
+        window = acf[:, self.lag_min:lag_max]  # (B, W)
+
+        # Soft argmax: weighted sum of lag indices
+        lags = torch.arange(
+            window.shape[-1], device=x.device, dtype=x.dtype
+        ) + self.lag_min  # (W,)
+        weights = F.softmax(self.temp * window, dim=-1)  # (B, W)
+        soft_lag = (weights * lags).sum(dim=-1)  # (B,)
+
+        # Convert lag → HR (bpm)
+        hr_est = (60.0 * self.fs / (soft_lag + 1e-6)).clamp(
+            self.hr_min, self.hr_max
+        )
+
+        # L1 loss (more robust than L2 for HR)
+        loss = F.l1_loss(hr_est, hr_target.float())
+
+        return weight * loss, hr_est.detach()
+
+
+def hr_variance_loss(hr_estimated, target_std=47.0, weight=1.0):
+    """
+    Penalizes when batch HR std drops below target.
+
+    Real ECG HR std = 47.4 bpm. When generated ECGs collapse to
+    similar heart rates, this loss pushes the model to diversify.
+
+    Args:
+        hr_estimated: (B,) estimated HR values in bpm
+        target_std: target standard deviation (bpm)
+        weight: scalar weight
+
+    Returns:
+        loss: scalar (0 if std >= target_std)
+    """
+    return weight * torch.relu(target_std - hr_estimated.std())
