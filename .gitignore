@@ -70,4 +70,4 @@ checkpoints/runs/
 
 # Explicitly unignore src/data Python source files
 # (src/data/ was caught by the bare data/ rule above — fixed by removing it)
-src/data/*.py
+
