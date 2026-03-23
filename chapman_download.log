@@ -1,0 +1,8 @@
+nohup: ignoring input
+Found 45152 .hea files
+  FAIL: https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/29/297/JS29198.dat -> HTTP Error 404: Not Found
+  FAIL: https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/29/297/JS29193.dat -> HTTP Error 404: Not Found
+  FAIL: https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/29/297/JS29152.dat -> HTTP Error 404: Not Found
+  FAIL: https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/29/297/JS29120.dat -> HTTP Error 404: Not Found
+  FAIL: https://physionet.org/files/ecg-arrhythmia/1.0.0/WFDBRecords/29/297/JS29167.dat -> HTTP Error 404: Not Found
+Done! Downloaded: 0, Skipped: 0, Failed: 45152

@@ -1,0 +1,75 @@
+nohup: ignoring input
+============================================================
+  CardioEquation V2: Training Pipeline
+============================================================
+   Activated: /home/user04/Projects/Cardio/CardioEquation/venv_v2/bin/python
+   Python: Python 3.10.12
+
+📦 Installing PyTorch (CUDA 12.1)...
+📦 Installing project dependencies...
+
+🖥️  GPU Verification:
+   ✅ GPU: NVIDIA A100 80GB PCIe (85.1 GB)
+   ✅ BF16 Support: True
+   ✅ CUDA Version: 12.1
+
+============================================================
+📥 Step 1: Downloading & Processing ALL Datasets
+============================================================
+📦 Downloading MIT-BIH + PTB-XL + Chapman-Shaoxing...
+
+🫀 CardioEquation V2: Dataset Downloader
+============================================================
+============================================================
+📥 Downloading MIT-BIH Arrhythmia Database
+   Target: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_raw
+   Records: 48
+============================================================
+
+   Result: 0 downloaded, 48 already existed, 0 failed
+
+============================================================
+⚙️  Processing MIT-BIH for Forecasting
+   Context: 10s, Future: 10s, Stride: 10s
+   Output: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_forecasting.npz
+============================================================
+   ✅ Created: 8592 samples
+   Context: (8592, 5000, 1), Future: (8592, 5000, 1)
+   💾 Saved: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_forecasting.npz
+
+============================================================
+📊 Summary (took 24s):
+   ✅ mitbih_download
+   ✅ mitbih_process
+
+✅ All datasets ready! You can start training.
+
+   Next step: python verify_datasets.py
+
+🫀 CardioEquation V2: Dataset Downloader
+============================================================
+============================================================
+📥 Downloading PTB-XL Dataset
+   Target: /home/user04/Projects/Cardio/CardioEquation/data/ptbxl
+   Size: ~800 MB (21,837 records, 12-lead, 100Hz LR)
+============================================================
+   📝 Downloading ptbxl_database.csv...
+   ✅ CSV downloaded (6440 KB)
+   📦 Downloading LR (100Hz) records... (found 0 existing)
+   This may take 30-60 minutes...
+   ❌ Download failed (0 records): 404 Error: Not Found for url: https://physionet.org/content/ptb-xl/1.0.3/1.0.3/
+
+============================================================
+⚙️  Processing PTB-XL
+   Output: /home/user04/Projects/Cardio/CardioEquation/data/ptbxl_processed.npz
+============================================================
+   Records: 21799
+   Patients: 18869
+Traceback (most recent call last):
+  File "/home/user04/Projects/Cardio/CardioEquation/download_all_datasets.py", line 579, in <module>
+    main()
+  File "/home/user04/Projects/Cardio/CardioEquation/download_all_datasets.py", line 555, in main
+    results['ptbxl_process'] = process_ptbxl()
+  File "/home/user04/Projects/Cardio/CardioEquation/download_all_datasets.py", line 409, in process_ptbxl
+    signals = np.array(signals)[:, np.newaxis, :]  # (N, 1, 2500)
+IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed

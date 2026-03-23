@@ -1,0 +1,247 @@
+nohup: ignoring input
+=== Processing datasets ===
+
+🫀 CardioEquation V2: Dataset Downloader
+============================================================
+
+============================================================
+⚙️  Processing MIT-BIH for Forecasting
+   Context: 10s, Future: 10s, Stride: 10s
+   Output: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_forecasting.npz
+============================================================
+   ✅ Created: 8592 samples
+   Context: (8592, 5000, 1), Future: (8592, 5000, 1)
+   💾 Saved: /home/user04/Projects/Cardio/CardioEquation/data/mitbih_forecasting.npz
+
+   ✅ PTB-XL already processed (21799 records), skipping.
+
+============================================================
+⚙️  Processing Chapman-Shaoxing
+   Output: /home/user04/Projects/Cardio/CardioEquation/data/chapman_processed.npz
+============================================================
+   Found 45152 records
+   Processed 2000/45152 records... (2000 ok, 0 failed)
+   Processed 4000/45152 records... (3999 ok, 1 failed)
+   ⚠️  Record 4647 failed: list index out of range
+   Processed 6000/45152 records... (5998 ok, 2 failed)
+   Processed 8000/45152 records... (7998 ok, 2 failed)
+   Processed 10000/45152 records... (9998 ok, 2 failed)
+   Processed 12000/45152 records... (11998 ok, 2 failed)
+   Processed 14000/45152 records... (13998 ok, 2 failed)
+   Processed 16000/45152 records... (15998 ok, 2 failed)
+   Processed 18000/45152 records... (17998 ok, 2 failed)
+   Processed 20000/45152 records... (19998 ok, 2 failed)
+   Processed 22000/45152 records... (21998 ok, 2 failed)
+   Processed 24000/45152 records... (23998 ok, 2 failed)
+   Processed 26000/45152 records... (25998 ok, 2 failed)
+   Processed 28000/45152 records... (27998 ok, 2 failed)
+   ⚠️  Record 28652 failed: time data '/' does not match format '%d/%m/%Y'
+   Processed 30000/45152 records... (29997 ok, 3 failed)
+   Processed 32000/45152 records... (31997 ok, 3 failed)
+   Processed 34000/45152 records... (33997 ok, 3 failed)
+   Processed 36000/45152 records... (35997 ok, 3 failed)
+   Processed 38000/45152 records... (37997 ok, 3 failed)
+   Processed 40000/45152 records... (39997 ok, 3 failed)
+   Processed 42000/45152 records... (41997 ok, 3 failed)
+   Processed 44000/45152 records... (43997 ok, 3 failed)
+   ✅ Processed 45149 records
+   ⚠️  3 records failed/skipped
+   💾 Saved: /home/user04/Projects/Cardio/CardioEquation/data/chapman_processed.npz
+
+============================================================
+📊 Summary (took 1170s):
+   ✅ mitbih_process
+   ✅ ptbxl_process
+   ✅ chapman_process
+
+✅ All datasets ready! You can start training.
+
+   Next step: python verify_datasets.py
+=== Contrastive Pre-training ===
+🔬 Stage 0: Contrastive Pre-Training for Identity Encoder
+============================================================
+   Model: ContrastiveFeatureExtractor (9.4M params)
+📊 Loading PTB-XL contrastive data from data/ptbxl_processed.npz
+   + Combining with MIT-BIH from data/mitbih_forecasting.npz
+   + Combining with Chapman-Shaoxing from data/chapman_processed.npz
+   = Total: 75540 segments, 66882 patients
+   Dataset: 75540 segments, 66882 patients
+Epoch 001/200 | Loss: 0.0403 | Time: 135.4s
+Epoch 010/200 | Loss: 0.0054 | Time: 124.7s
+Epoch 020/200 | Loss: 0.0035 | Time: 124.7s
+Epoch 030/200 | Loss: 0.0019 | Time: 147.8s
+Epoch 040/200 | Loss: 0.0021 | Time: 145.9s
+Epoch 050/200 | Loss: 0.0014 | Time: 146.0s
+Epoch 060/200 | Loss: 0.0013 | Time: 146.4s
+Epoch 070/200 | Loss: 0.0014 | Time: 145.9s
+Epoch 080/200 | Loss: 0.0011 | Time: 145.8s
+Epoch 090/200 | Loss: 0.0011 | Time: 145.3s
+Epoch 100/200 | Loss: 0.0010 | Time: 145.6s
+Epoch 110/200 | Loss: 0.0010 | Time: 145.6s
+Epoch 120/200 | Loss: 0.0009 | Time: 146.0s
+Epoch 130/200 | Loss: 0.0008 | Time: 146.6s
+Epoch 140/200 | Loss: 0.0008 | Time: 146.0s
+Epoch 150/200 | Loss: 0.0010 | Time: 145.9s
+Epoch 160/200 | Loss: 0.0009 | Time: 145.6s
+Epoch 170/200 | Loss: 0.0006 | Time: 146.0s
+Epoch 180/200 | Loss: 0.0007 | Time: 145.4s
+Epoch 190/200 | Loss: 0.0009 | Time: 146.3s
+Epoch 200/200 | Loss: 0.0006 | Time: 146.1s
+
+✅ Contrastive pre-training complete!
+💾 Encoder saved: checkpoints/feature_extractor_contrastive.pt
+   Use this to initialize FeatureExtractorPT in train_dit.py
+=== DiT Training (Phase 1 improvements) ===
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: tgijayesh (tgijayesh-dayananda-sagar-university) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: setting up run qvu6obo0
+wandb: Tracking run with wandb version 0.25.0
+wandb: Run data is saved locally in /home/user04/Projects/Cardio/CardioEquation/wandb/run-20260311_090349-qvu6obo0
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run DiT-ECG-B_e500
+wandb: ⭐️ View project at https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation
+wandb: 🚀 View run at https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/qvu6obo0
+🖥️  GPU: NVIDIA A100 80GB PCIe (85.1 GB)
+📊 W&B initialized: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/qvu6obo0
+📊 TensorBoard initialized: checkpoints/runs
+🏗️  Building DiT-ECG-B...
+   📥 Loading pre-trained feature extractor from checkpoints/feature_extractor_contrastive.pt
+   ✅ Pre-trained weights loaded successfully!
+   ❄️  Feature extractor frozen for diffusion training.
+   DiT Parameters: 265.1M
+   FeatureExtractor Parameters: 8.7M
+   EMA: decay=0.9999, warmup=True
+   Noise Schedule: Cosine (1000 discrete steps)
+   Augmentation: ON (amplitude, noise, baseline wander, time-warp)
+📊 Loading MIT-BIH dataset from data/mitbih_forecasting.npz
+   ⚠️  Signal length is 5000, model expects 2500
+   ✂️  Truncated to 2500 samples (first 5s)
+   + Loading PTB-XL from data/ptbxl_processed.npz
+   + Loading Chapman-Shaoxing from data/chapman_processed.npz
+   = Combined dataset: 75540 samples (MIT-BIH: 8592)
+   Train: 67986 samples | Val: 7554 samples
+   Batch=32, accum=8, effective=256
+   Optimizer: AdamW (lr=0.0001, wd=0.01)
+   LR Schedule: Cosine with 5000-step warmup
+   Total training steps: 132750
+   CFG dropout: 0.1
+   Early stopping: patience=30 epochs
+   Precision: BF16 mixed precision
+
+🚀 Starting training for 500 epochs (early stopping: patience=30)...
+======================================================================
+/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py:449: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
+Traceback (most recent call last):
+  File "/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py", line 675, in <module>
+    train(args)
+  File "/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py", line 469, in train
+    noise_pred = model(x_t, t_normalized, identity)
+  File "/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/user04/Projects/Cardio/CardioEquation/src/training/../../src/models/dit_ecg.py", line 229, in forward
+    x = block(x, combined_cond)
+  File "/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/user04/Projects/Cardio/CardioEquation/src/training/../../src/models/dit_ecg.py", line 131, in forward
+    attn_out, _ = self.attn(h, h, h)
+  File "/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/torch/nn/modules/activation.py", line 1368, in forward
+    attn_output, attn_output_weights = F.multi_head_attention_forward(
+  File "/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/torch/nn/functional.py", line 6097, in multi_head_attention_forward
+    q, k, v = _in_projection_packed(query, key, value, in_proj_weight, in_proj_bias)
+  File "/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/torch/nn/functional.py", line 5501, in _in_projection_packed
+    proj = linear(q, w, b)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 36.00 MiB. GPU 0 has a total capacity of 79.25 GiB of which 31.81 MiB is free. Process 259529 has 422.08 MiB memory in use. Process 681962 has 2.95 GiB memory in use. Process 1616417 has 3.07 GiB memory in use. Process 1115245 has 66.31 GiB memory in use. Including non-PyTorch memory, this process has 6.42 GiB memory in use. Of the allocated memory 5.76 GiB is allocated by PyTorch, and 168.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mDiT-ECG-B_e500[0m at: [34mhttps://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/qvu6obo0[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20260311_090349-qvu6obo0/logs[0m
+=== Clinical Validation ===
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+/home/user04/Projects/Cardio/CardioEquation/venv_v2/lib/python3.10/site-packages/neurokit2/signal/signal_period.py:83: NeuroKitWarning: Too few peaks detected to compute the rate. Returning empty vector.
+  warn(
+🏥 Clinical Validation: Real Hospital ECG Data
+============================================================
+📋 Found 24 ECG reports
+👤 Unique patients: 10
+   A: 7 records
+   CHIKKAIRAMMA: 2 records
+   D: 4 records
+   DI0: 1 records
+   JHOLA: 2 records
+   JTJ: 1 records
+   KALAMMA: 2 records
+   R: 1 records
+   RAKESHBARMAN: 2 records
+   Unknown: 2 records
+
+📡 Digitizing ECG signals...
+   ✅ ecg_report_0000575: KALAMMA — 2500 samples
+   ✅ ecg_report_0000576: KALAMMA — 2500 samples
+   ✅ ecg_report_0000577: JHOLA — 2500 samples
+   ✅ ecg_report_0000578: JHOLA — 2500 samples
+   ✅ ecg_report_0000579: JTJ — 2500 samples
+   ✅ ecg_report_0000580: Unknown — 2500 samples
+   ✅ ecg_report_0000581: DI0 — 2500 samples
+   ✅ ecg_report_0000582: Unknown — 2500 samples
+   ✅ ecg_report_0000583: R — 2500 samples
+   ✅ ecg_report_0000596: A — 2500 samples
+   ✅ ecg_report_0000597: RAKESHBARMAN — 2500 samples
+   ✅ ecg_report_0000598: RAKESHBARMAN — 2500 samples
+   ✅ ecg_report_0000599: A — 2500 samples
+   ✅ ecg_report_0000600: A — 2500 samples
+   ✅ ecg_report_0000601: A — 2500 samples
+   ✅ ecg_report_0000602: A — 2500 samples
+   ✅ ecg_report_0000603: A — 2500 samples
+   ✅ ecg_report_0000604: A — 2500 samples
+   ✅ ecg_report_0000605: CHIKKAIRAMMA — 2500 samples
+   ✅ ecg_report_0000606: CHIKKAIRAMMA — 2500 samples
+   ✅ ecg_report_0000607: D — 2500 samples
+   ✅ ecg_report_0000608: D — 2500 samples
+   ✅ ecg_report_0000609: D — 2500 samples
+   ✅ ecg_report_0000610: D — 2500 samples
+
+✅ Successfully digitized 24 signals from 10 patients
+🔧 Loading DiT-ECG-B...
+✅ Pipeline ready on cuda
+
+🎯 Running generation + validation...
+
+📊 Clinical Validation Results:
+   FFD (Fréchet ECG Distance): 21.720129117910737
+   MMD: 0.43155774818569415
+   HR MAE: 31.384210860947405
+   Re-ID Top-1: 0.11764705882352941
+   Re-ID Top-5: 0.35294117647058826
+📊 Comparison plot saved: outputs/clinical_validation/clinical_comparison.png
+
+💾 Results saved to outputs/clinical_validation/clinical_results.json
+💾 Digitized signals saved: outputs/clinical_validation/clinical_ecg_digitized.npz
+=== DONE ===

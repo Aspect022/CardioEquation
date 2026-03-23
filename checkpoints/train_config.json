@@ -1,7 +1,7 @@
 {
   "epochs": 500,
-  "batch_size": 16,
-  "accum_steps": 16,
+  "batch_size": 64,
+  "accum_steps": 8,
   "lr": 0.0001,
   "warmup_steps": 5000,
   "ema_decay": 0.9999,

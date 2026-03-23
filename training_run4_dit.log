@@ -1,0 +1,711 @@
+nohup: ignoring input
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: tgijayesh (tgijayesh-dayananda-sagar-university) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: setting up run 7jle943h
+wandb: Tracking run with wandb version 0.25.0
+wandb: Run data is saved locally in /home/user04/Projects/Cardio/CardioEquation/wandb/run-20260311_121241-7jle943h
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run DiT-ECG-B_e500
+wandb: ⭐️ View project at https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation
+wandb: 🚀 View run at https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/7jle943h
+🖥️  GPU: NVIDIA A100 80GB PCIe (85.1 GB)
+📊 W&B initialized: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/7jle943h
+📊 TensorBoard initialized: checkpoints/runs
+🏗️  Building DiT-ECG-B...
+   📥 Loading pre-trained feature extractor from checkpoints/feature_extractor_contrastive.pt
+   ✅ Pre-trained weights loaded successfully!
+   ❄️  Feature extractor frozen for diffusion training.
+   DiT Parameters: 265.1M
+   FeatureExtractor Parameters: 8.7M
+   EMA: decay=0.9999, warmup=True
+   Noise Schedule: Cosine (1000 discrete steps)
+   Augmentation: ON (amplitude, noise, baseline wander, time-warp)
+📊 Loading MIT-BIH dataset from data/mitbih_forecasting.npz
+   ⚠️  Signal length is 5000, model expects 2500
+   ✂️  Truncated to 2500 samples (first 5s)
+   + Loading PTB-XL from data/ptbxl_processed.npz
+   + Loading Chapman-Shaoxing from data/chapman_processed.npz
+   = Combined dataset: 75540 samples (MIT-BIH: 8592)
+   Train: 67986 samples | Val: 7554 samples
+   Batch=16, accum=16, effective=256
+   Optimizer: AdamW (lr=0.0001, wd=0.01)
+   LR Schedule: Cosine with 5000-step warmup
+   Total training steps: 132781
+   CFG dropout: 0.1
+   Early stopping: patience=30 epochs
+   Precision: BF16 mixed precision
+
+🚀 Starting training for 500 epochs (early stopping: patience=30)...
+======================================================================
+/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py:449: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
+/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py:544: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
+Epoch 001/500 | Loss: 24263.642489 | Val: 111.624397 | LR: 5.30e-06 | Time: 748.0s | Step: 265
+   🏆 New best val_loss: 111.624397 (saved)
+Epoch 002/500 | Loss: 154.920525 | Val: 109.536544 | LR: 1.06e-05 | Time: 745.7s | Step: 530
+   🏆 New best val_loss: 109.536544 (saved)
+Epoch 003/500 | Loss: 122.911492 | Val: 97.208658 | LR: 1.59e-05 | Time: 739.4s | Step: 795
+   🏆 New best val_loss: 97.208658 (saved)
+Epoch 004/500 | Loss: 103.767895 | Val: 107.846770 | LR: 2.12e-05 | Time: 736.6s | Step: 1060
+Epoch 005/500 | Loss: 105.192362 | Val: 67.364500 | LR: 2.65e-05 | Time: 735.4s | Step: 1325
+   🏆 New best val_loss: 67.364500 (saved)
+Epoch 006/500 | Loss: 96.657757 | Val: 60.973124 | LR: 3.18e-05 | Time: 741.7s | Step: 1590
+   🏆 New best val_loss: 60.973124 (saved)
+Epoch 007/500 | Loss: 80.130841 | Val: 62.190104 | LR: 3.71e-05 | Time: 741.2s | Step: 1855
+Epoch 008/500 | Loss: 66.354590 | Val: 48.649997 | LR: 4.24e-05 | Time: 739.4s | Step: 2120
+   🏆 New best val_loss: 48.649997 (saved)
+Epoch 009/500 | Loss: 64.747529 | Val: 59.571676 | LR: 4.77e-05 | Time: 733.7s | Step: 2385
+Epoch 010/500 | Loss: 52.802050 | Val: 60.706202 | LR: 5.30e-05 | Time: 734.3s | Step: 2650
+   Components: noise_mse: 0.2409 | signal_mse: 0.5567 | identity: 0.1840 | spectral: 1125.7922 | correlation: 0.2070 | morphology: 0.6530 | snr_weight: 0.4941
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_010.pt
+Epoch 011/500 | Loss: 56.755085 | Val: 50.020683 | LR: 5.83e-05 | Time: 736.1s | Step: 2915
+Epoch 012/500 | Loss: 61.264305 | Val: 68.335861 | LR: 6.36e-05 | Time: 739.7s | Step: 3180
+Epoch 013/500 | Loss: 64.640524 | Val: 45.730449 | LR: 6.89e-05 | Time: 740.1s | Step: 3445
+   🏆 New best val_loss: 45.730449 (saved)
+Epoch 014/500 | Loss: 51.640460 | Val: 56.323747 | LR: 7.42e-05 | Time: 740.4s | Step: 3710
+Epoch 015/500 | Loss: 54.778023 | Val: 35.242427 | LR: 7.95e-05 | Time: 740.4s | Step: 3975
+   🏆 New best val_loss: 35.242427 (saved)
+Epoch 016/500 | Loss: 49.292219 | Val: 35.823700 | LR: 8.48e-05 | Time: 735.2s | Step: 4240
+Epoch 017/500 | Loss: 45.087815 | Val: 34.978018 | LR: 9.01e-05 | Time: 737.4s | Step: 4505
+   🏆 New best val_loss: 34.978018 (saved)
+Epoch 018/500 | Loss: 50.066096 | Val: 37.300122 | LR: 9.54e-05 | Time: 741.4s | Step: 4770
+Epoch 019/500 | Loss: 45.267318 | Val: 37.957313 | LR: 1.00e-04 | Time: 736.6s | Step: 5035
+Epoch 020/500 | Loss: 44.552685 | Val: 39.979794 | LR: 1.00e-04 | Time: 736.6s | Step: 5300
+   Components: noise_mse: 0.2163 | signal_mse: 0.4981 | identity: 0.1751 | spectral: 935.2215 | correlation: 0.1937 | morphology: 0.4302 | snr_weight: 0.4977
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_020.pt
+Epoch 021/500 | Loss: 39.629081 | Val: 47.790817 | LR: 1.00e-04 | Time: 731.6s | Step: 5565
+Epoch 022/500 | Loss: 39.096779 | Val: 52.276841 | LR: 1.00e-04 | Time: 737.7s | Step: 5830
+Epoch 023/500 | Loss: 59.220253 | Val: 50.420107 | LR: 1.00e-04 | Time: 739.7s | Step: 6095
+Epoch 024/500 | Loss: 44.428916 | Val: 35.051392 | LR: 1.00e-04 | Time: 737.3s | Step: 6360
+Epoch 025/500 | Loss: 35.417328 | Val: 73.762464 | LR: 1.00e-04 | Time: 740.9s | Step: 6625
+Epoch 026/500 | Loss: 38.058456 | Val: 26.337002 | LR: 9.99e-05 | Time: 739.0s | Step: 6890
+   🏆 New best val_loss: 26.337002 (saved)
+Epoch 027/500 | Loss: 34.663800 | Val: 22.856251 | LR: 9.99e-05 | Time: 737.1s | Step: 7155
+   🏆 New best val_loss: 22.856251 (saved)
+Epoch 028/500 | Loss: 29.727292 | Val: 35.089083 | LR: 9.99e-05 | Time: 738.3s | Step: 7420
+Epoch 029/500 | Loss: 27.801472 | Val: 29.209355 | LR: 9.99e-05 | Time: 737.0s | Step: 7685
+Epoch 030/500 | Loss: 24.514469 | Val: 23.431609 | LR: 9.99e-05 | Time: 744.2s | Step: 7950
+   Components: noise_mse: 0.1725 | signal_mse: 0.3402 | identity: 0.1589 | spectral: 512.0938 | correlation: 0.1743 | morphology: 0.1861 | snr_weight: 0.4975
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_030.pt
+Epoch 031/500 | Loss: 25.838258 | Val: 19.261991 | LR: 9.98e-05 | Time: 764.9s | Step: 8215
+   🏆 New best val_loss: 19.261991 (saved)
+Epoch 032/500 | Loss: 22.208065 | Val: 25.907659 | LR: 9.98e-05 | Time: 779.9s | Step: 8480
+Epoch 033/500 | Loss: 24.478991 | Val: 28.318646 | LR: 9.98e-05 | Time: 781.2s | Step: 8745
+Epoch 034/500 | Loss: 23.086026 | Val: 20.903679 | LR: 9.98e-05 | Time: 777.8s | Step: 9010
+Epoch 035/500 | Loss: 22.849973 | Val: 40.203098 | LR: 9.97e-05 | Time: 769.9s | Step: 9275
+Epoch 036/500 | Loss: 27.613925 | Val: 22.674766 | LR: 9.97e-05 | Time: 821.5s | Step: 9540
+Epoch 037/500 | Loss: 21.633824 | Val: 35.669108 | LR: 9.97e-05 | Time: 915.5s | Step: 9805
+Epoch 038/500 | Loss: 20.251499 | Val: 20.515526 | LR: 9.96e-05 | Time: 746.9s | Step: 10070
+Epoch 039/500 | Loss: 21.078751 | Val: 26.834392 | LR: 9.96e-05 | Time: 745.5s | Step: 10335
+Epoch 040/500 | Loss: 21.304667 | Val: 35.676131 | LR: 9.95e-05 | Time: 743.7s | Step: 10600
+   Components: noise_mse: 0.1604 | signal_mse: 0.3182 | identity: 0.1539 | spectral: 443.3272 | correlation: 0.1719 | morphology: 0.1630 | snr_weight: 0.4968
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_040.pt
+Epoch 041/500 | Loss: 21.605373 | Val: 19.810331 | LR: 9.95e-05 | Time: 739.6s | Step: 10865
+Epoch 042/500 | Loss: 21.225782 | Val: 17.033957 | LR: 9.94e-05 | Time: 746.2s | Step: 11130
+   🏆 New best val_loss: 17.033957 (saved)
+Epoch 043/500 | Loss: 623.561319 | Val: 23.268485 | LR: 9.94e-05 | Time: 745.5s | Step: 11395
+Epoch 044/500 | Loss: 21.204955 | Val: 19.624162 | LR: 9.93e-05 | Time: 747.2s | Step: 11660
+Epoch 045/500 | Loss: 20.243154 | Val: 22.541068 | LR: 9.93e-05 | Time: 739.9s | Step: 11925
+Epoch 046/500 | Loss: 21.384205 | Val: 18.993789 | LR: 9.92e-05 | Time: 734.3s | Step: 12190
+Epoch 047/500 | Loss: 18.848501 | Val: 17.887788 | LR: 9.92e-05 | Time: 730.1s | Step: 12455
+Epoch 048/500 | Loss: 21.597852 | Val: 17.073196 | LR: 9.91e-05 | Time: 729.6s | Step: 12720
+Epoch 049/500 | Loss: 19.948247 | Val: 17.971330 | LR: 9.90e-05 | Time: 735.7s | Step: 12985
+Epoch 050/500 | Loss: 19.378972 | Val: 36.523418 | LR: 9.90e-05 | Time: 733.9s | Step: 13250
+   Components: noise_mse: 0.1503 | signal_mse: 0.2995 | identity: 0.1506 | spectral: 401.7220 | correlation: 0.1681 | morphology: 0.1270 | snr_weight: 0.4971
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_050.pt
+Epoch 051/500 | Loss: 20.020710 | Val: 22.885096 | LR: 9.89e-05 | Time: 732.4s | Step: 13515
+Epoch 052/500 | Loss: 20.777819 | Val: 19.005672 | LR: 9.88e-05 | Time: 733.1s | Step: 13780
+Epoch 053/500 | Loss: 20.051036 | Val: 19.380524 | LR: 9.88e-05 | Time: 737.6s | Step: 14045
+Epoch 054/500 | Loss: 20.728683 | Val: 22.370437 | LR: 9.87e-05 | Time: 734.1s | Step: 14310
+Epoch 055/500 | Loss: 20.074434 | Val: 20.440977 | LR: 9.86e-05 | Time: 737.4s | Step: 14575
+Epoch 056/500 | Loss: 20.266018 | Val: 22.147494 | LR: 9.85e-05 | Time: 742.4s | Step: 14840
+Epoch 057/500 | Loss: 21.053482 | Val: 19.858248 | LR: 9.85e-05 | Time: 740.3s | Step: 15105
+Epoch 058/500 | Loss: 19.490048 | Val: 16.309887 | LR: 9.84e-05 | Time: 737.7s | Step: 15370
+   🏆 New best val_loss: 16.309887 (saved)
+Epoch 059/500 | Loss: 18.954977 | Val: 21.511613 | LR: 9.83e-05 | Time: 734.4s | Step: 15635
+Epoch 060/500 | Loss: 18.658015 | Val: 23.907343 | LR: 9.82e-05 | Time: 731.9s | Step: 15900
+   Components: noise_mse: 0.1483 | signal_mse: 0.2960 | identity: 0.1504 | spectral: 389.1907 | correlation: 0.1692 | morphology: 0.1051 | snr_weight: 0.4952
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_060.pt
+Epoch 061/500 | Loss: 19.493539 | Val: 18.916311 | LR: 9.81e-05 | Time: 732.0s | Step: 16165
+Epoch 062/500 | Loss: 17.858953 | Val: 17.124347 | LR: 9.80e-05 | Time: 736.8s | Step: 16430
+Epoch 063/500 | Loss: 18.581210 | Val: 17.209177 | LR: 9.79e-05 | Time: 739.8s | Step: 16695
+Epoch 064/500 | Loss: 51.045710 | Val: 17.685549 | LR: 9.79e-05 | Time: 739.8s | Step: 16960
+Epoch 065/500 | Loss: 18.656097 | Val: 21.724364 | LR: 9.78e-05 | Time: 772.0s | Step: 17225
+Epoch 066/500 | Loss: 19.851078 | Val: 18.418922 | LR: 9.77e-05 | Time: 788.9s | Step: 17490
+Epoch 067/500 | Loss: 18.601907 | Val: 16.939605 | LR: 9.76e-05 | Time: 783.1s | Step: 17755
+Epoch 068/500 | Loss: 18.245647 | Val: 17.297849 | LR: 9.75e-05 | Time: 783.8s | Step: 18020
+Epoch 069/500 | Loss: 18.836825 | Val: 16.901754 | LR: 9.74e-05 | Time: 782.4s | Step: 18285
+Epoch 070/500 | Loss: 17.706388 | Val: 16.124126 | LR: 9.73e-05 | Time: 779.9s | Step: 18550
+   Components: noise_mse: 0.1473 | signal_mse: 0.2969 | identity: 0.1482 | spectral: 366.0975 | correlation: 0.1712 | morphology: 0.0947 | snr_weight: 0.4973
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_070.pt
+   🏆 New best val_loss: 16.124126 (saved)
+Epoch 071/500 | Loss: 18.123750 | Val: 16.181860 | LR: 9.71e-05 | Time: 777.1s | Step: 18815
+Epoch 072/500 | Loss: 18.876840 | Val: 22.542881 | LR: 9.70e-05 | Time: 784.7s | Step: 19080
+Epoch 073/500 | Loss: 18.226387 | Val: 16.344233 | LR: 9.69e-05 | Time: 783.4s | Step: 19345
+Epoch 074/500 | Loss: 19.944469 | Val: 17.173074 | LR: 9.68e-05 | Time: 780.6s | Step: 19610
+Epoch 075/500 | Loss: 18.843137 | Val: 18.337451 | LR: 9.67e-05 | Time: 779.9s | Step: 19875
+Epoch 076/500 | Loss: 18.059707 | Val: 15.220423 | LR: 9.66e-05 | Time: 781.1s | Step: 20140
+   🏆 New best val_loss: 15.220423 (saved)
+Epoch 077/500 | Loss: 17.013041 | Val: 18.929988 | LR: 9.65e-05 | Time: 781.9s | Step: 20405
+Epoch 078/500 | Loss: 17.548897 | Val: 19.221591 | LR: 9.63e-05 | Time: 782.6s | Step: 20670
+Epoch 079/500 | Loss: 16.897375 | Val: 15.782746 | LR: 9.62e-05 | Time: 782.4s | Step: 20935
+Epoch 080/500 | Loss: 16.338140 | Val: 17.155496 | LR: 9.61e-05 | Time: 783.0s | Step: 21200
+   Components: noise_mse: 0.1486 | signal_mse: 0.3210 | identity: 0.1488 | spectral: 336.0541 | correlation: 0.1838 | morphology: 0.0989 | snr_weight: 0.5000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_080.pt
+Epoch 081/500 | Loss: 17.024221 | Val: 17.029931 | LR: 9.60e-05 | Time: 776.6s | Step: 21465
+Epoch 082/500 | Loss: 17.643559 | Val: 14.776858 | LR: 9.58e-05 | Time: 742.2s | Step: 21730
+   🏆 New best val_loss: 14.776858 (saved)
+Epoch 083/500 | Loss: 17.026681 | Val: 15.442469 | LR: 9.57e-05 | Time: 727.8s | Step: 21995
+Epoch 084/500 | Loss: 15.641847 | Val: 20.447434 | LR: 9.56e-05 | Time: 733.6s | Step: 22260
+Epoch 085/500 | Loss: 18.460381 | Val: 33.434163 | LR: 9.54e-05 | Time: 732.4s | Step: 22525
+Epoch 086/500 | Loss: 17.002297 | Val: 15.224910 | LR: 9.53e-05 | Time: 736.7s | Step: 22790
+Epoch 087/500 | Loss: 17.470178 | Val: 18.919960 | LR: 9.52e-05 | Time: 737.3s | Step: 23055
+Epoch 088/500 | Loss: 16.286760 | Val: 16.593645 | LR: 9.50e-05 | Time: 737.7s | Step: 23320
+Epoch 089/500 | Loss: 15.782860 | Val: 15.322363 | LR: 9.49e-05 | Time: 736.9s | Step: 23585
+Epoch 090/500 | Loss: 16.962341 | Val: 20.815579 | LR: 9.47e-05 | Time: 731.9s | Step: 23850
+   Components: noise_mse: 0.1478 | signal_mse: 0.3453 | identity: 0.1509 | spectral: 353.0623 | correlation: 0.1961 | morphology: 0.1121 | snr_weight: 0.4956
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_090.pt
+Epoch 091/500 | Loss: 16.051606 | Val: 14.375137 | LR: 9.46e-05 | Time: 732.7s | Step: 24115
+   🏆 New best val_loss: 14.375137 (saved)
+Epoch 092/500 | Loss: 15.763746 | Val: 15.219462 | LR: 9.44e-05 | Time: 735.1s | Step: 24380
+Epoch 093/500 | Loss: 21.137553 | Val: 42.960894 | LR: 9.43e-05 | Time: 734.7s | Step: 24645
+Epoch 094/500 | Loss: 17.770218 | Val: 14.226255 | LR: 9.41e-05 | Time: 737.6s | Step: 24910
+   🏆 New best val_loss: 14.226255 (saved)
+Epoch 095/500 | Loss: 18.099535 | Val: 17.380470 | LR: 9.40e-05 | Time: 730.9s | Step: 25175
+Epoch 096/500 | Loss: 17.358666 | Val: 17.093659 | LR: 9.38e-05 | Time: 733.8s | Step: 25440
+Epoch 097/500 | Loss: 15.409591 | Val: 13.709911 | LR: 9.37e-05 | Time: 735.1s | Step: 25705
+   🏆 New best val_loss: 13.709911 (saved)
+Epoch 098/500 | Loss: 15.560302 | Val: 16.332368 | LR: 9.35e-05 | Time: 730.2s | Step: 25970
+Epoch 099/500 | Loss: 16.419826 | Val: 16.210680 | LR: 9.33e-05 | Time: 730.2s | Step: 26235
+Epoch 100/500 | Loss: 15.549469 | Val: 18.555278 | LR: 9.32e-05 | Time: 731.7s | Step: 26500
+   Components: noise_mse: 0.1465 | signal_mse: 0.3286 | identity: 0.1459 | spectral: 320.2292 | correlation: 0.1879 | morphology: 0.0987 | snr_weight: 0.4972
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_100.pt
+Epoch 101/500 | Loss: 15.332244 | Val: 14.925421 | LR: 9.30e-05 | Time: 732.2s | Step: 26765
+Epoch 102/500 | Loss: 14.618184 | Val: 16.036740 | LR: 9.28e-05 | Time: 734.8s | Step: 27030
+Epoch 103/500 | Loss: 15.782636 | Val: 15.387591 | LR: 9.27e-05 | Time: 734.8s | Step: 27295
+Epoch 104/500 | Loss: 14.718972 | Val: 13.490783 | LR: 9.25e-05 | Time: 734.6s | Step: 27560
+   🏆 New best val_loss: 13.490783 (saved)
+Epoch 105/500 | Loss: 15.759898 | Val: 14.533941 | LR: 9.23e-05 | Time: 732.7s | Step: 27825
+Epoch 106/500 | Loss: 14.394458 | Val: 12.612555 | LR: 9.22e-05 | Time: 736.5s | Step: 28090
+   🏆 New best val_loss: 12.612555 (saved)
+Epoch 107/500 | Loss: 13.931049 | Val: 12.960808 | LR: 9.20e-05 | Time: 733.3s | Step: 28355
+Epoch 108/500 | Loss: 13.534946 | Val: 12.690182 | LR: 9.18e-05 | Time: 736.2s | Step: 28620
+Epoch 109/500 | Loss: 12.783405 | Val: 11.160809 | LR: 9.16e-05 | Time: 732.8s | Step: 28885
+   🏆 New best val_loss: 11.160809 (saved)
+Epoch 110/500 | Loss: 14.989048 | Val: 15.543968 | LR: 9.14e-05 | Time: 731.5s | Step: 29150
+   Components: noise_mse: 0.1315 | signal_mse: 0.3007 | identity: 0.1219 | spectral: 313.9513 | correlation: 0.1642 | morphology: 0.0970 | snr_weight: 0.4933
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_110.pt
+Epoch 111/500 | Loss: 13.973447 | Val: 12.864064 | LR: 9.13e-05 | Time: 727.7s | Step: 29415
+Epoch 112/500 | Loss: 13.324983 | Val: 11.521074 | LR: 9.11e-05 | Time: 733.7s | Step: 29680
+Epoch 113/500 | Loss: 14.229372 | Val: 13.805003 | LR: 9.09e-05 | Time: 735.5s | Step: 29945
+Epoch 114/500 | Loss: 12.401049 | Val: 10.362903 | LR: 9.07e-05 | Time: 737.1s | Step: 30210
+   🏆 New best val_loss: 10.362903 (saved)
+Epoch 115/500 | Loss: 12.487237 | Val: 11.765842 | LR: 9.05e-05 | Time: 734.2s | Step: 30475
+Epoch 116/500 | Loss: 12.484497 | Val: 14.236120 | LR: 9.03e-05 | Time: 738.3s | Step: 30740
+Epoch 117/500 | Loss: 12.611918 | Val: 11.906144 | LR: 9.01e-05 | Time: 738.7s | Step: 31005
+Epoch 118/500 | Loss: 12.314877 | Val: 11.629228 | LR: 8.99e-05 | Time: 735.8s | Step: 31270
+Epoch 119/500 | Loss: 12.863076 | Val: 10.934019 | LR: 8.97e-05 | Time: 737.1s | Step: 31535
+Epoch 120/500 | Loss: 11.693084 | Val: 12.770984 | LR: 8.95e-05 | Time: 737.7s | Step: 31800
+   Components: noise_mse: 0.1180 | signal_mse: 0.2534 | identity: 0.1094 | spectral: 240.6764 | correlation: 0.1437 | morphology: 0.0733 | snr_weight: 0.4977
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_120.pt
+Epoch 121/500 | Loss: 12.511065 | Val: 13.142861 | LR: 8.93e-05 | Time: 732.8s | Step: 32065
+Epoch 122/500 | Loss: 12.528081 | Val: 12.180391 | LR: 8.91e-05 | Time: 734.5s | Step: 32330
+Epoch 123/500 | Loss: 12.424725 | Val: 12.714349 | LR: 8.89e-05 | Time: 736.0s | Step: 32595
+Epoch 124/500 | Loss: 11.884682 | Val: 11.215218 | LR: 8.87e-05 | Time: 737.9s | Step: 32860
+Epoch 125/500 | Loss: 12.049777 | Val: 10.211535 | LR: 8.85e-05 | Time: 739.3s | Step: 33125
+   🏆 New best val_loss: 10.211535 (saved)
+Epoch 126/500 | Loss: 12.140715 | Val: 11.366653 | LR: 8.83e-05 | Time: 737.1s | Step: 33390
+Epoch 127/500 | Loss: 11.399318 | Val: 10.119320 | LR: 8.81e-05 | Time: 741.0s | Step: 33655
+   🏆 New best val_loss: 10.119320 (saved)
+Epoch 128/500 | Loss: 11.173247 | Val: 10.489331 | LR: 8.79e-05 | Time: 737.0s | Step: 33920
+Epoch 129/500 | Loss: 10.541651 | Val: 10.931739 | LR: 8.77e-05 | Time: 739.4s | Step: 34185
+Epoch 130/500 | Loss: 11.268570 | Val: 10.257716 | LR: 8.75e-05 | Time: 738.6s | Step: 34450
+   Components: noise_mse: 0.1143 | signal_mse: 0.2421 | identity: 0.1043 | spectral: 232.6899 | correlation: 0.1360 | morphology: 0.0731 | snr_weight: 0.4976
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_130.pt
+Epoch 131/500 | Loss: 11.250658 | Val: 14.126465 | LR: 8.72e-05 | Time: 737.2s | Step: 34715
+Epoch 132/500 | Loss: 11.450508 | Val: 10.874429 | LR: 8.70e-05 | Time: 736.9s | Step: 34980
+Epoch 133/500 | Loss: 11.227048 | Val: 10.834874 | LR: 8.68e-05 | Time: 736.4s | Step: 35245
+Epoch 134/500 | Loss: 10.521978 | Val: 10.900621 | LR: 8.66e-05 | Time: 738.7s | Step: 35510
+Epoch 135/500 | Loss: 10.833954 | Val: 9.544074 | LR: 8.64e-05 | Time: 737.2s | Step: 35775
+   🏆 New best val_loss: 9.544074 (saved)
+Epoch 136/500 | Loss: 11.199636 | Val: 9.802785 | LR: 8.61e-05 | Time: 735.7s | Step: 36040
+Epoch 137/500 | Loss: 10.899489 | Val: 9.427269 | LR: 8.59e-05 | Time: 738.3s | Step: 36305
+   🏆 New best val_loss: 9.427269 (saved)
+Epoch 138/500 | Loss: 11.630723 | Val: 10.245214 | LR: 8.57e-05 | Time: 719.2s | Step: 36570
+Epoch 139/500 | Loss: 10.937648 | Val: 15.530173 | LR: 8.55e-05 | Time: 701.4s | Step: 36835
+Epoch 140/500 | Loss: 10.552676 | Val: 9.731530 | LR: 8.52e-05 | Time: 700.3s | Step: 37100
+   Components: noise_mse: 0.1122 | signal_mse: 0.2379 | identity: 0.1009 | spectral: 218.8256 | correlation: 0.1332 | morphology: 0.0702 | snr_weight: 0.4945
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_140.pt
+Epoch 141/500 | Loss: 10.732287 | Val: 9.296723 | LR: 8.50e-05 | Time: 688.1s | Step: 37365
+   🏆 New best val_loss: 9.296723 (saved)
+Epoch 142/500 | Loss: 10.856396 | Val: 10.929719 | LR: 8.48e-05 | Time: 695.8s | Step: 37630
+Epoch 143/500 | Loss: 10.923683 | Val: 9.707762 | LR: 8.45e-05 | Time: 696.0s | Step: 37895
+Epoch 144/500 | Loss: 10.144494 | Val: 11.709518 | LR: 8.43e-05 | Time: 699.8s | Step: 38160
+Epoch 145/500 | Loss: 10.606540 | Val: 13.802867 | LR: 8.40e-05 | Time: 696.6s | Step: 38425
+Epoch 146/500 | Loss: 10.999081 | Val: 11.768603 | LR: 8.38e-05 | Time: 695.4s | Step: 38690
+Epoch 147/500 | Loss: 11.398494 | Val: 9.149932 | LR: 8.36e-05 | Time: 698.7s | Step: 38955
+   🏆 New best val_loss: 9.149932 (saved)
+Epoch 148/500 | Loss: 11.263659 | Val: 8.996093 | LR: 8.33e-05 | Time: 689.4s | Step: 39220
+   🏆 New best val_loss: 8.996093 (saved)
+Epoch 149/500 | Loss: 9.760707 | Val: 9.996101 | LR: 8.31e-05 | Time: 688.9s | Step: 39485
+Epoch 150/500 | Loss: 9.995192 | Val: 12.096635 | LR: 8.28e-05 | Time: 693.5s | Step: 39750
+   Components: noise_mse: 0.1073 | signal_mse: 0.2288 | identity: 0.0950 | spectral: 209.3521 | correlation: 0.1294 | morphology: 0.0608 | snr_weight: 0.4950
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_150.pt
+Epoch 151/500 | Loss: 10.674272 | Val: 9.471827 | LR: 8.26e-05 | Time: 691.4s | Step: 40015
+Epoch 152/500 | Loss: 10.520560 | Val: 9.402564 | LR: 8.23e-05 | Time: 692.0s | Step: 40280
+Epoch 153/500 | Loss: 10.996266 | Val: 11.268877 | LR: 8.21e-05 | Time: 693.7s | Step: 40545
+Epoch 154/500 | Loss: 10.769895 | Val: 10.247979 | LR: 8.18e-05 | Time: 692.2s | Step: 40810
+Epoch 155/500 | Loss: 10.886587 | Val: 8.996436 | LR: 8.16e-05 | Time: 694.1s | Step: 41075
+Epoch 156/500 | Loss: 11.194225 | Val: 9.262480 | LR: 8.13e-05 | Time: 702.5s | Step: 41340
+Epoch 157/500 | Loss: 9.538734 | Val: 9.127086 | LR: 8.11e-05 | Time: 725.1s | Step: 41605
+Epoch 158/500 | Loss: 9.680713 | Val: 8.031791 | LR: 8.08e-05 | Time: 716.4s | Step: 41870
+   🏆 New best val_loss: 8.031791 (saved)
+Epoch 159/500 | Loss: 10.066173 | Val: 8.739999 | LR: 8.06e-05 | Time: 711.1s | Step: 42135
+Epoch 160/500 | Loss: 10.251135 | Val: 11.262812 | LR: 8.03e-05 | Time: 715.0s | Step: 42400
+   Components: noise_mse: 0.1088 | signal_mse: 0.2336 | identity: 0.0957 | spectral: 211.1004 | correlation: 0.1327 | morphology: 0.0665 | snr_weight: 0.4958
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_160.pt
+Epoch 161/500 | Loss: 9.917781 | Val: 8.994848 | LR: 8.01e-05 | Time: 719.0s | Step: 42665
+Epoch 162/500 | Loss: 9.472179 | Val: 9.817888 | LR: 7.98e-05 | Time: 707.0s | Step: 42930
+Epoch 163/500 | Loss: 9.870481 | Val: 12.509124 | LR: 7.95e-05 | Time: 712.3s | Step: 43195
+Epoch 164/500 | Loss: 10.228477 | Val: 10.938372 | LR: 7.93e-05 | Time: 716.1s | Step: 43460
+Epoch 165/500 | Loss: 10.106525 | Val: 9.502404 | LR: 7.90e-05 | Time: 709.4s | Step: 43725
+Epoch 166/500 | Loss: 9.919757 | Val: 8.043461 | LR: 7.87e-05 | Time: 704.2s | Step: 43990
+Epoch 167/500 | Loss: 10.507933 | Val: 8.621332 | LR: 7.85e-05 | Time: 706.4s | Step: 44255
+Epoch 168/500 | Loss: 9.420853 | Val: 8.342342 | LR: 7.82e-05 | Time: 712.6s | Step: 44520
+Epoch 169/500 | Loss: 9.894790 | Val: 10.828751 | LR: 7.79e-05 | Time: 720.6s | Step: 44785
+Epoch 170/500 | Loss: 9.935047 | Val: 12.273936 | LR: 7.77e-05 | Time: 710.9s | Step: 45050
+   Components: noise_mse: 0.1067 | signal_mse: 0.2224 | identity: 0.0896 | spectral: 204.1079 | correlation: 0.1233 | morphology: 0.0637 | snr_weight: 0.4981
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_170.pt
+Epoch 171/500 | Loss: 10.353532 | Val: 8.532295 | LR: 7.74e-05 | Time: 935.2s | Step: 45315
+Epoch 172/500 | Loss: 8.993252 | Val: 8.263346 | LR: 7.71e-05 | Time: 1117.8s | Step: 45580
+Epoch 173/500 | Loss: 9.912955 | Val: 8.422619 | LR: 7.68e-05 | Time: 1059.3s | Step: 45845
+Epoch 174/500 | Loss: 9.620496 | Val: 8.920023 | LR: 7.66e-05 | Time: 730.3s | Step: 46110
+Epoch 175/500 | Loss: 9.571969 | Val: 9.144998 | LR: 7.63e-05 | Time: 728.6s | Step: 46375
+Epoch 176/500 | Loss: 8.775002 | Val: 8.716590 | LR: 7.60e-05 | Time: 703.9s | Step: 46640
+Epoch 177/500 | Loss: 9.485395 | Val: 9.733451 | LR: 7.57e-05 | Time: 707.3s | Step: 46905
+Epoch 178/500 | Loss: 10.105779 | Val: 8.254148 | LR: 7.54e-05 | Time: 701.7s | Step: 47170
+Epoch 179/500 | Loss: 9.400608 | Val: 8.644273 | LR: 7.52e-05 | Time: 701.0s | Step: 47435
+Epoch 180/500 | Loss: 9.124242 | Val: 8.344615 | LR: 7.49e-05 | Time: 698.1s | Step: 47700
+   Components: noise_mse: 0.1051 | signal_mse: 0.2096 | identity: 0.0863 | spectral: 190.4389 | correlation: 0.1177 | morphology: 0.0609 | snr_weight: 0.4936
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_180.pt
+Epoch 181/500 | Loss: 8.892428 | Val: 7.969870 | LR: 7.46e-05 | Time: 689.3s | Step: 47965
+   🏆 New best val_loss: 7.969870 (saved)
+Epoch 182/500 | Loss: 9.856098 | Val: 8.291889 | LR: 7.43e-05 | Time: 697.1s | Step: 48230
+Epoch 183/500 | Loss: 8.992641 | Val: 10.171652 | LR: 7.40e-05 | Time: 699.0s | Step: 48495
+Epoch 184/500 | Loss: 8.726168 | Val: 7.964968 | LR: 7.37e-05 | Time: 697.1s | Step: 48760
+   🏆 New best val_loss: 7.964968 (saved)
+Epoch 185/500 | Loss: 9.595540 | Val: 8.661988 | LR: 7.35e-05 | Time: 682.6s | Step: 49025
+Epoch 186/500 | Loss: 9.409122 | Val: 8.671439 | LR: 7.32e-05 | Time: 690.4s | Step: 49290
+Epoch 187/500 | Loss: 9.063310 | Val: 8.195513 | LR: 7.29e-05 | Time: 697.7s | Step: 49555
+Epoch 188/500 | Loss: 8.727252 | Val: 7.766455 | LR: 7.26e-05 | Time: 696.0s | Step: 49820
+   🏆 New best val_loss: 7.766455 (saved)
+Epoch 189/500 | Loss: 9.259352 | Val: 8.695561 | LR: 7.23e-05 | Time: 686.9s | Step: 50085
+Epoch 190/500 | Loss: 8.605400 | Val: 9.272013 | LR: 7.20e-05 | Time: 693.5s | Step: 50350
+   Components: noise_mse: 0.1053 | signal_mse: 0.2040 | identity: 0.0837 | spectral: 177.4595 | correlation: 0.1156 | morphology: 0.0531 | snr_weight: 0.4975
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_190.pt
+Epoch 191/500 | Loss: 9.417220 | Val: 7.701202 | LR: 7.17e-05 | Time: 712.4s | Step: 50615
+   🏆 New best val_loss: 7.701202 (saved)
+Epoch 192/500 | Loss: 8.624914 | Val: 8.521107 | LR: 7.14e-05 | Time: 691.4s | Step: 50880
+Epoch 193/500 | Loss: 8.807624 | Val: 9.321315 | LR: 7.11e-05 | Time: 697.7s | Step: 51145
+Epoch 194/500 | Loss: 8.641276 | Val: 8.321341 | LR: 7.08e-05 | Time: 696.8s | Step: 51410
+Epoch 195/500 | Loss: 8.865592 | Val: 7.652282 | LR: 7.05e-05 | Time: 700.7s | Step: 51675
+   🏆 New best val_loss: 7.652282 (saved)
+Epoch 196/500 | Loss: 9.335659 | Val: 8.296818 | LR: 7.02e-05 | Time: 686.6s | Step: 51940
+Epoch 197/500 | Loss: 8.764139 | Val: 8.221274 | LR: 6.99e-05 | Time: 696.2s | Step: 52205
+Epoch 198/500 | Loss: 8.441056 | Val: 7.948924 | LR: 6.96e-05 | Time: 695.2s | Step: 52470
+Epoch 199/500 | Loss: 8.945335 | Val: 9.743339 | LR: 6.93e-05 | Time: 697.0s | Step: 52735
+Epoch 200/500 | Loss: 9.103031 | Val: 10.429579 | LR: 6.90e-05 | Time: 695.1s | Step: 53000
+   Components: noise_mse: 0.1041 | signal_mse: 0.2122 | identity: 0.0843 | spectral: 187.5976 | correlation: 0.1186 | morphology: 0.0568 | snr_weight: 0.4968
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_200.pt
+Epoch 201/500 | Loss: 9.055365 | Val: 7.378249 | LR: 6.87e-05 | Time: 689.6s | Step: 53265
+   🏆 New best val_loss: 7.378249 (saved)
+Epoch 202/500 | Loss: 9.517162 | Val: 9.370262 | LR: 6.84e-05 | Time: 686.7s | Step: 53530
+Epoch 203/500 | Loss: 8.791987 | Val: 8.254147 | LR: 6.81e-05 | Time: 685.2s | Step: 53795
+Epoch 204/500 | Loss: 8.959616 | Val: 9.366511 | LR: 6.78e-05 | Time: 694.0s | Step: 54060
+Epoch 205/500 | Loss: 8.888011 | Val: 8.490990 | LR: 6.75e-05 | Time: 696.5s | Step: 54325
+Epoch 206/500 | Loss: 8.624622 | Val: 8.805853 | LR: 6.72e-05 | Time: 690.3s | Step: 54590
+Epoch 207/500 | Loss: 8.453545 | Val: 10.885622 | LR: 6.69e-05 | Time: 694.4s | Step: 54855
+Epoch 208/500 | Loss: 8.828561 | Val: 7.781825 | LR: 6.66e-05 | Time: 694.4s | Step: 55120
+Epoch 209/500 | Loss: 8.529522 | Val: 7.972283 | LR: 6.63e-05 | Time: 692.9s | Step: 55385
+Epoch 210/500 | Loss: 8.351187 | Val: 8.611594 | LR: 6.60e-05 | Time: 696.3s | Step: 55650
+   Components: noise_mse: 0.1029 | signal_mse: 0.2036 | identity: 0.0812 | spectral: 171.9433 | correlation: 0.1152 | morphology: 0.0547 | snr_weight: 0.4955
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_210.pt
+Epoch 211/500 | Loss: 8.411919 | Val: 8.219267 | LR: 6.57e-05 | Time: 691.1s | Step: 55915
+Epoch 212/500 | Loss: 8.734228 | Val: 8.156924 | LR: 6.54e-05 | Time: 696.2s | Step: 56180
+Epoch 213/500 | Loss: 8.571277 | Val: 7.863722 | LR: 6.51e-05 | Time: 696.5s | Step: 56445
+Epoch 214/500 | Loss: 8.633881 | Val: 11.255094 | LR: 6.48e-05 | Time: 695.7s | Step: 56710
+Epoch 215/500 | Loss: 8.425455 | Val: 10.975539 | LR: 6.44e-05 | Time: 699.5s | Step: 56975
+Epoch 216/500 | Loss: 8.474315 | Val: 8.201617 | LR: 6.41e-05 | Time: 697.7s | Step: 57240
+Epoch 217/500 | Loss: 8.167543 | Val: 7.745150 | LR: 6.38e-05 | Time: 698.4s | Step: 57505
+Epoch 218/500 | Loss: 8.300198 | Val: 8.772784 | LR: 6.35e-05 | Time: 697.9s | Step: 57770
+Epoch 219/500 | Loss: 8.595588 | Val: 9.750562 | LR: 6.32e-05 | Time: 698.3s | Step: 58035
+Epoch 220/500 | Loss: 8.484928 | Val: 8.948948 | LR: 6.29e-05 | Time: 698.2s | Step: 58300
+   Components: noise_mse: 0.1016 | signal_mse: 0.1971 | identity: 0.0789 | spectral: 174.8667 | correlation: 0.1123 | morphology: 0.0557 | snr_weight: 0.4961
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_220.pt
+Epoch 221/500 | Loss: 8.617094 | Val: 7.442540 | LR: 6.26e-05 | Time: 696.8s | Step: 58565
+Epoch 222/500 | Loss: 8.357004 | Val: 7.410796 | LR: 6.22e-05 | Time: 699.6s | Step: 58830
+Epoch 223/500 | Loss: 8.171752 | Val: 7.823975 | LR: 6.19e-05 | Time: 699.1s | Step: 59095
+Epoch 224/500 | Loss: 8.310291 | Val: 9.418778 | LR: 6.16e-05 | Time: 698.7s | Step: 59360
+Epoch 225/500 | Loss: 8.156764 | Val: 7.869598 | LR: 6.13e-05 | Time: 699.4s | Step: 59625
+Epoch 226/500 | Loss: 8.201072 | Val: 8.110975 | LR: 6.10e-05 | Time: 701.0s | Step: 59890
+Epoch 227/500 | Loss: 8.398891 | Val: 6.927400 | LR: 6.07e-05 | Time: 700.4s | Step: 60155
+   🏆 New best val_loss: 6.927400 (saved)
+Epoch 228/500 | Loss: 8.171831 | Val: 7.444360 | LR: 6.03e-05 | Time: 688.1s | Step: 60420
+Epoch 229/500 | Loss: 8.245189 | Val: 9.134906 | LR: 6.00e-05 | Time: 691.3s | Step: 60685
+Epoch 230/500 | Loss: 8.130976 | Val: 7.901925 | LR: 5.97e-05 | Time: 702.6s | Step: 60950
+   Components: noise_mse: 0.1034 | signal_mse: 0.2008 | identity: 0.0789 | spectral: 167.3594 | correlation: 0.1134 | morphology: 0.0493 | snr_weight: 0.4963
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_230.pt
+Epoch 231/500 | Loss: 8.000259 | Val: 7.800108 | LR: 5.94e-05 | Time: 692.9s | Step: 61215
+Epoch 232/500 | Loss: 8.042052 | Val: 7.596644 | LR: 5.91e-05 | Time: 699.0s | Step: 61480
+Epoch 233/500 | Loss: 8.177986 | Val: 6.998214 | LR: 5.87e-05 | Time: 698.5s | Step: 61745
+Epoch 234/500 | Loss: 8.470904 | Val: 7.772902 | LR: 5.84e-05 | Time: 706.1s | Step: 62010
+Epoch 235/500 | Loss: 7.837819 | Val: 7.106107 | LR: 5.81e-05 | Time: 704.3s | Step: 62275
+Epoch 236/500 | Loss: 7.790564 | Val: 7.911847 | LR: 5.78e-05 | Time: 700.9s | Step: 62540
+Epoch 237/500 | Loss: 7.953062 | Val: 8.479964 | LR: 5.75e-05 | Time: 702.2s | Step: 62805
+Epoch 238/500 | Loss: 8.316499 | Val: 9.732959 | LR: 5.71e-05 | Time: 702.3s | Step: 63070
+Epoch 239/500 | Loss: 8.138012 | Val: 7.373079 | LR: 5.68e-05 | Time: 703.9s | Step: 63335
+Epoch 240/500 | Loss: 7.572701 | Val: 7.806512 | LR: 5.65e-05 | Time: 698.6s | Step: 63600
+   Components: noise_mse: 0.1008 | signal_mse: 0.2054 | identity: 0.0802 | spectral: 156.7193 | correlation: 0.1187 | morphology: 0.0474 | snr_weight: 0.4942
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_240.pt
+Epoch 241/500 | Loss: 7.883657 | Val: 7.319431 | LR: 5.62e-05 | Time: 697.9s | Step: 63865
+Epoch 242/500 | Loss: 8.080173 | Val: 7.652353 | LR: 5.58e-05 | Time: 703.7s | Step: 64130
+Epoch 243/500 | Loss: 8.103900 | Val: 8.770796 | LR: 5.55e-05 | Time: 703.6s | Step: 64395
+Epoch 244/500 | Loss: 8.072519 | Val: 7.829184 | LR: 5.52e-05 | Time: 703.6s | Step: 64660
+Epoch 245/500 | Loss: 7.837945 | Val: 7.074099 | LR: 5.49e-05 | Time: 703.2s | Step: 64925
+Epoch 246/500 | Loss: 8.107054 | Val: 7.087509 | LR: 5.45e-05 | Time: 698.8s | Step: 65190
+Epoch 247/500 | Loss: 7.908429 | Val: 7.409164 | LR: 5.42e-05 | Time: 702.0s | Step: 65455
+Epoch 248/500 | Loss: 7.673632 | Val: 7.717965 | LR: 5.39e-05 | Time: 701.9s | Step: 65720
+Epoch 249/500 | Loss: 8.407510 | Val: 8.189113 | LR: 5.36e-05 | Time: 701.8s | Step: 65985
+Epoch 250/500 | Loss: 7.734671 | Val: 7.191113 | LR: 5.32e-05 | Time: 704.0s | Step: 66250
+   Components: noise_mse: 0.1016 | signal_mse: 0.1993 | identity: 0.0779 | spectral: 158.9626 | correlation: 0.1135 | morphology: 0.0486 | snr_weight: 0.4977
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_250.pt
+Epoch 251/500 | Loss: 7.729794 | Val: 7.440172 | LR: 5.29e-05 | Time: 692.9s | Step: 66515
+Epoch 252/500 | Loss: 7.787469 | Val: 7.041488 | LR: 5.26e-05 | Time: 698.2s | Step: 66780
+Epoch 253/500 | Loss: 7.850857 | Val: 7.333597 | LR: 5.23e-05 | Time: 701.3s | Step: 67045
+Epoch 254/500 | Loss: 7.733507 | Val: 7.539184 | LR: 5.19e-05 | Time: 702.6s | Step: 67310
+Epoch 255/500 | Loss: 7.758825 | Val: 6.919286 | LR: 5.16e-05 | Time: 701.0s | Step: 67575
+   🏆 New best val_loss: 6.919286 (saved)
+Epoch 256/500 | Loss: 7.707926 | Val: 7.039890 | LR: 5.13e-05 | Time: 685.2s | Step: 67840
+Epoch 257/500 | Loss: 8.161426 | Val: 8.004298 | LR: 5.10e-05 | Time: 693.9s | Step: 68105
+Epoch 258/500 | Loss: 7.941573 | Val: 7.658530 | LR: 5.06e-05 | Time: 698.5s | Step: 68370
+Epoch 259/500 | Loss: 7.704211 | Val: 7.105641 | LR: 5.03e-05 | Time: 693.8s | Step: 68635
+Epoch 260/500 | Loss: 7.826927 | Val: 7.773323 | LR: 5.00e-05 | Time: 692.1s | Step: 68900
+   Components: noise_mse: 0.1016 | signal_mse: 0.2017 | identity: 0.0798 | spectral: 160.8487 | correlation: 0.1171 | morphology: 0.0465 | snr_weight: 0.4973
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_260.pt
+Epoch 261/500 | Loss: 7.674610 | Val: 6.945255 | LR: 4.97e-05 | Time: 688.6s | Step: 69165
+Epoch 262/500 | Loss: 7.592696 | Val: 7.059455 | LR: 4.93e-05 | Time: 690.9s | Step: 69430
+Epoch 263/500 | Loss: 7.523360 | Val: 6.860960 | LR: 4.90e-05 | Time: 692.2s | Step: 69695
+   🏆 New best val_loss: 6.860960 (saved)
+Epoch 264/500 | Loss: 7.742949 | Val: 8.172416 | LR: 4.87e-05 | Time: 681.4s | Step: 69960
+Epoch 265/500 | Loss: 7.690941 | Val: 7.161451 | LR: 4.84e-05 | Time: 684.6s | Step: 70225
+Epoch 266/500 | Loss: 7.444243 | Val: 8.243655 | LR: 4.80e-05 | Time: 686.7s | Step: 70490
+Epoch 267/500 | Loss: 7.552834 | Val: 7.470312 | LR: 4.77e-05 | Time: 695.2s | Step: 70755
+Epoch 268/500 | Loss: 7.809469 | Val: 6.909465 | LR: 4.74e-05 | Time: 691.5s | Step: 71020
+Epoch 269/500 | Loss: 7.636212 | Val: 7.399131 | LR: 4.71e-05 | Time: 689.8s | Step: 71285
+Epoch 270/500 | Loss: 7.803070 | Val: 7.312467 | LR: 4.67e-05 | Time: 689.1s | Step: 71550
+   Components: noise_mse: 0.1005 | signal_mse: 0.2031 | identity: 0.0784 | spectral: 160.6840 | correlation: 0.1147 | morphology: 0.0489 | snr_weight: 0.4951
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_270.pt
+Epoch 271/500 | Loss: 7.746764 | Val: 7.696499 | LR: 4.64e-05 | Time: 692.3s | Step: 71815
+Epoch 272/500 | Loss: 7.427589 | Val: 7.642847 | LR: 4.61e-05 | Time: 690.2s | Step: 72080
+Epoch 273/500 | Loss: 7.591408 | Val: 6.886617 | LR: 4.58e-05 | Time: 686.5s | Step: 72345
+Epoch 274/500 | Loss: 7.362902 | Val: 7.384465 | LR: 4.54e-05 | Time: 687.1s | Step: 72610
+Epoch 275/500 | Loss: 7.567777 | Val: 6.840387 | LR: 4.51e-05 | Time: 688.4s | Step: 72875
+   🏆 New best val_loss: 6.840387 (saved)
+Epoch 276/500 | Loss: 7.433068 | Val: 6.562737 | LR: 4.48e-05 | Time: 678.1s | Step: 73140
+   🏆 New best val_loss: 6.562737 (saved)
+Epoch 277/500 | Loss: 7.626377 | Val: 7.471691 | LR: 4.45e-05 | Time: 674.7s | Step: 73405
+Epoch 278/500 | Loss: 7.489021 | Val: 6.768638 | LR: 4.41e-05 | Time: 699.6s | Step: 73670
+Epoch 279/500 | Loss: 7.606435 | Val: 7.198572 | LR: 4.38e-05 | Time: 699.9s | Step: 73935
+Epoch 280/500 | Loss: 7.563980 | Val: 6.851798 | LR: 4.35e-05 | Time: 704.6s | Step: 74200
+   Components: noise_mse: 0.1010 | signal_mse: 0.1894 | identity: 0.0736 | spectral: 155.2931 | correlation: 0.1085 | morphology: 0.0463 | snr_weight: 0.4973
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_280.pt
+Epoch 281/500 | Loss: 7.785627 | Val: 6.772004 | LR: 4.32e-05 | Time: 726.0s | Step: 74465
+Epoch 282/500 | Loss: 7.537503 | Val: 6.741316 | LR: 4.28e-05 | Time: 769.6s | Step: 74730
+Epoch 283/500 | Loss: 7.451210 | Val: 7.117227 | LR: 4.25e-05 | Time: 729.0s | Step: 74995
+Epoch 284/500 | Loss: 7.472367 | Val: 7.021755 | LR: 4.22e-05 | Time: 740.5s | Step: 75260
+Epoch 285/500 | Loss: 7.723318 | Val: 6.919531 | LR: 4.19e-05 | Time: 743.0s | Step: 75525
+Epoch 286/500 | Loss: 7.560594 | Val: 7.141467 | LR: 4.16e-05 | Time: 741.4s | Step: 75790
+Epoch 287/500 | Loss: 7.568445 | Val: 7.073979 | LR: 4.12e-05 | Time: 740.9s | Step: 76055
+Epoch 288/500 | Loss: 7.602169 | Val: 8.211171 | LR: 4.09e-05 | Time: 738.5s | Step: 76320
+Epoch 289/500 | Loss: 7.525248 | Val: 7.203166 | LR: 4.06e-05 | Time: 738.1s | Step: 76585
+Epoch 290/500 | Loss: 8.107764 | Val: 7.361803 | LR: 4.03e-05 | Time: 734.0s | Step: 76850
+   Components: noise_mse: 0.0999 | signal_mse: 0.1943 | identity: 0.0749 | spectral: 167.5080 | correlation: 0.1103 | morphology: 0.0507 | snr_weight: 0.4969
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_290.pt
+Epoch 291/500 | Loss: 7.448753 | Val: 7.112812 | LR: 4.00e-05 | Time: 733.7s | Step: 77115
+Epoch 292/500 | Loss: 7.386977 | Val: 7.606151 | LR: 3.96e-05 | Time: 735.3s | Step: 77380
+Epoch 293/500 | Loss: 7.399513 | Val: 7.145045 | LR: 3.93e-05 | Time: 736.9s | Step: 77645
+Epoch 294/500 | Loss: 7.342487 | Val: 7.801960 | LR: 3.90e-05 | Time: 735.7s | Step: 77910
+Epoch 295/500 | Loss: 7.854365 | Val: 7.247420 | LR: 3.87e-05 | Time: 738.7s | Step: 78175
+Epoch 296/500 | Loss: 7.641950 | Val: 7.577076 | LR: 3.84e-05 | Time: 735.8s | Step: 78440
+Epoch 297/500 | Loss: 7.366857 | Val: 6.936026 | LR: 3.81e-05 | Time: 735.9s | Step: 78705
+Epoch 298/500 | Loss: 7.158464 | Val: 6.560227 | LR: 3.77e-05 | Time: 736.6s | Step: 78970
+   🏆 New best val_loss: 6.560227 (saved)
+Epoch 299/500 | Loss: 7.135508 | Val: 8.202511 | LR: 3.74e-05 | Time: 737.9s | Step: 79235
+Epoch 300/500 | Loss: 7.239221 | Val: 6.631538 | LR: 3.71e-05 | Time: 741.5s | Step: 79500
+   Components: noise_mse: 0.1011 | signal_mse: 0.1982 | identity: 0.0747 | spectral: 147.5152 | correlation: 0.1140 | morphology: 0.0451 | snr_weight: 0.4978
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_300.pt
+Epoch 301/500 | Loss: 7.208165 | Val: 6.686590 | LR: 3.68e-05 | Time: 740.1s | Step: 79765
+Epoch 302/500 | Loss: 7.371412 | Val: 7.235414 | LR: 3.65e-05 | Time: 747.4s | Step: 80030
+Epoch 303/500 | Loss: 7.350068 | Val: 6.742109 | LR: 3.62e-05 | Time: 745.2s | Step: 80295
+Epoch 304/500 | Loss: 7.227939 | Val: 7.316709 | LR: 3.59e-05 | Time: 746.7s | Step: 80560
+Epoch 305/500 | Loss: 7.292409 | Val: 6.841505 | LR: 3.55e-05 | Time: 748.4s | Step: 80825
+Epoch 306/500 | Loss: 7.087180 | Val: 6.702537 | LR: 3.52e-05 | Time: 746.6s | Step: 81090
+Epoch 307/500 | Loss: 7.285171 | Val: 6.824593 | LR: 3.49e-05 | Time: 746.0s | Step: 81355
+Epoch 308/500 | Loss: 7.466414 | Val: 7.358875 | LR: 3.46e-05 | Time: 748.2s | Step: 81620
+Epoch 309/500 | Loss: 7.078134 | Val: 6.488995 | LR: 3.43e-05 | Time: 748.7s | Step: 81885
+   🏆 New best val_loss: 6.488995 (saved)
+Epoch 310/500 | Loss: 7.121861 | Val: 6.744415 | LR: 3.40e-05 | Time: 737.4s | Step: 82150
+   Components: noise_mse: 0.1004 | signal_mse: 0.1925 | identity: 0.0738 | spectral: 145.9898 | correlation: 0.1108 | morphology: 0.0449 | snr_weight: 0.4964
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_310.pt
+Epoch 311/500 | Loss: 7.318030 | Val: 6.562147 | LR: 3.37e-05 | Time: 748.9s | Step: 82415
+Epoch 312/500 | Loss: 7.196182 | Val: 6.933372 | LR: 3.34e-05 | Time: 743.0s | Step: 82680
+Epoch 313/500 | Loss: 7.153065 | Val: 6.896588 | LR: 3.31e-05 | Time: 747.0s | Step: 82945
+Epoch 314/500 | Loss: 7.253442 | Val: 7.064022 | LR: 3.28e-05 | Time: 746.2s | Step: 83210
+Epoch 315/500 | Loss: 7.025736 | Val: 6.697866 | LR: 3.25e-05 | Time: 752.5s | Step: 83475
+Epoch 316/500 | Loss: 7.030904 | Val: 6.520719 | LR: 3.21e-05 | Time: 748.0s | Step: 83740
+Epoch 317/500 | Loss: 7.011651 | Val: 6.552294 | LR: 3.18e-05 | Time: 748.5s | Step: 84005
+Epoch 318/500 | Loss: 7.207534 | Val: 6.959359 | LR: 3.15e-05 | Time: 746.7s | Step: 84270
+Epoch 319/500 | Loss: 7.109856 | Val: 6.948437 | LR: 3.12e-05 | Time: 746.9s | Step: 84535
+Epoch 320/500 | Loss: 7.438874 | Val: 6.903460 | LR: 3.09e-05 | Time: 744.6s | Step: 84800
+   Components: noise_mse: 0.1011 | signal_mse: 0.1892 | identity: 0.0715 | spectral: 152.5279 | correlation: 0.1087 | morphology: 0.0478 | snr_weight: 0.4977
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_320.pt
+Epoch 321/500 | Loss: 7.270386 | Val: 7.522922 | LR: 3.06e-05 | Time: 747.0s | Step: 85065
+Epoch 322/500 | Loss: 7.280821 | Val: 6.621414 | LR: 3.03e-05 | Time: 747.1s | Step: 85330
+Epoch 323/500 | Loss: 7.101189 | Val: 6.978798 | LR: 3.00e-05 | Time: 747.7s | Step: 85595
+Epoch 324/500 | Loss: 7.078988 | Val: 6.671159 | LR: 2.97e-05 | Time: 747.5s | Step: 85860
+Epoch 325/500 | Loss: 7.220127 | Val: 7.292526 | LR: 2.94e-05 | Time: 748.1s | Step: 86125
+Epoch 326/500 | Loss: 7.104792 | Val: 6.967432 | LR: 2.91e-05 | Time: 750.2s | Step: 86390
+Epoch 327/500 | Loss: 7.108071 | Val: 6.627682 | LR: 2.88e-05 | Time: 748.8s | Step: 86655
+Epoch 328/500 | Loss: 7.164804 | Val: 6.751334 | LR: 2.86e-05 | Time: 761.8s | Step: 86920
+Epoch 329/500 | Loss: 7.326450 | Val: 7.069266 | LR: 2.83e-05 | Time: 1152.2s | Step: 87185
+Epoch 330/500 | Loss: 7.031451 | Val: 6.582219 | LR: 2.80e-05 | Time: 1166.2s | Step: 87450
+   Components: noise_mse: 0.1008 | signal_mse: 0.1819 | identity: 0.0702 | spectral: 144.0386 | correlation: 0.1059 | morphology: 0.0437 | snr_weight: 0.4984
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_330.pt
+Epoch 331/500 | Loss: 7.091891 | Val: 7.182650 | LR: 2.77e-05 | Time: 1160.6s | Step: 87715
+Epoch 332/500 | Loss: 7.083262 | Val: 7.047314 | LR: 2.74e-05 | Time: 1153.4s | Step: 87980
+Epoch 333/500 | Loss: 6.986071 | Val: 6.963907 | LR: 2.71e-05 | Time: 1157.6s | Step: 88245
+Epoch 334/500 | Loss: 6.961419 | Val: 6.430231 | LR: 2.68e-05 | Time: 885.4s | Step: 88510
+   🏆 New best val_loss: 6.430231 (saved)
+Epoch 335/500 | Loss: 7.050759 | Val: 6.967498 | LR: 2.65e-05 | Time: 740.9s | Step: 88775
+Epoch 336/500 | Loss: 7.049698 | Val: 6.307105 | LR: 2.62e-05 | Time: 743.2s | Step: 89040
+   🏆 New best val_loss: 6.307105 (saved)
+Epoch 337/500 | Loss: 7.080928 | Val: 6.363589 | LR: 2.59e-05 | Time: 733.3s | Step: 89305
+Epoch 338/500 | Loss: 7.094468 | Val: 6.478703 | LR: 2.57e-05 | Time: 736.5s | Step: 89570
+Epoch 339/500 | Loss: 7.069227 | Val: 6.770616 | LR: 2.54e-05 | Time: 736.9s | Step: 89835
+Epoch 340/500 | Loss: 7.070795 | Val: 6.749485 | LR: 2.51e-05 | Time: 734.6s | Step: 90100
+   Components: noise_mse: 0.0997 | signal_mse: 0.1852 | identity: 0.0709 | spectral: 144.7551 | correlation: 0.1077 | morphology: 0.0453 | snr_weight: 0.4965
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_340.pt
+Epoch 341/500 | Loss: 7.024830 | Val: 6.627083 | LR: 2.48e-05 | Time: 732.4s | Step: 90365
+Epoch 342/500 | Loss: 6.895993 | Val: 6.985314 | LR: 2.45e-05 | Time: 734.5s | Step: 90630
+Epoch 343/500 | Loss: 7.000518 | Val: 6.159098 | LR: 2.43e-05 | Time: 733.9s | Step: 90895
+   🏆 New best val_loss: 6.159098 (saved)
+Epoch 344/500 | Loss: 6.940451 | Val: 6.610182 | LR: 2.40e-05 | Time: 731.9s | Step: 91160
+Epoch 345/500 | Loss: 6.800526 | Val: 6.641907 | LR: 2.37e-05 | Time: 738.3s | Step: 91425
+Epoch 346/500 | Loss: 6.843693 | Val: 6.495687 | LR: 2.34e-05 | Time: 736.5s | Step: 91690
+Epoch 347/500 | Loss: 6.881251 | Val: 6.595656 | LR: 2.31e-05 | Time: 737.0s | Step: 91955
+Epoch 348/500 | Loss: 6.880948 | Val: 6.454081 | LR: 2.29e-05 | Time: 736.4s | Step: 92220
+Epoch 349/500 | Loss: 6.872061 | Val: 6.645538 | LR: 2.26e-05 | Time: 784.9s | Step: 92485
+Epoch 350/500 | Loss: 6.861394 | Val: 6.324499 | LR: 2.23e-05 | Time: 779.4s | Step: 92750
+   Components: noise_mse: 0.0995 | signal_mse: 0.1839 | identity: 0.0700 | spectral: 140.7743 | correlation: 0.1067 | morphology: 0.0432 | snr_weight: 0.4968
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_350.pt
+Epoch 351/500 | Loss: 6.987783 | Val: 6.632274 | LR: 2.21e-05 | Time: 745.0s | Step: 93015
+Epoch 352/500 | Loss: 6.820918 | Val: 6.408200 | LR: 2.18e-05 | Time: 759.9s | Step: 93280
+Epoch 353/500 | Loss: 6.817075 | Val: 6.463853 | LR: 2.15e-05 | Time: 747.8s | Step: 93545
+Epoch 354/500 | Loss: 6.904195 | Val: 6.407652 | LR: 2.12e-05 | Time: 747.6s | Step: 93810
+Epoch 355/500 | Loss: 6.805908 | Val: 6.635567 | LR: 2.10e-05 | Time: 748.8s | Step: 94075
+Epoch 356/500 | Loss: 6.767324 | Val: 6.629792 | LR: 2.07e-05 | Time: 767.1s | Step: 94340
+Epoch 357/500 | Loss: 6.675588 | Val: 6.733098 | LR: 2.05e-05 | Time: 741.2s | Step: 94605
+Epoch 358/500 | Loss: 6.786975 | Val: 6.256129 | LR: 2.02e-05 | Time: 745.5s | Step: 94870
+Epoch 359/500 | Loss: 6.633053 | Val: 6.302263 | LR: 1.99e-05 | Time: 746.4s | Step: 95135
+Epoch 360/500 | Loss: 6.724225 | Val: 6.502422 | LR: 1.97e-05 | Time: 783.4s | Step: 95400
+   Components: noise_mse: 0.0994 | signal_mse: 0.1826 | identity: 0.0704 | spectral: 136.9049 | correlation: 0.1061 | morphology: 0.0427 | snr_weight: 0.4982
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_360.pt
+Epoch 361/500 | Loss: 6.685945 | Val: 6.405495 | LR: 1.94e-05 | Time: 783.0s | Step: 95665
+Epoch 362/500 | Loss: 6.779864 | Val: 6.348114 | LR: 1.92e-05 | Time: 799.8s | Step: 95930
+Epoch 363/500 | Loss: 6.729006 | Val: 6.359259 | LR: 1.89e-05 | Time: 800.4s | Step: 96195
+Epoch 364/500 | Loss: 6.730612 | Val: 6.618629 | LR: 1.86e-05 | Time: 797.8s | Step: 96460
+Epoch 365/500 | Loss: 6.751367 | Val: 6.362096 | LR: 1.84e-05 | Time: 806.1s | Step: 96725
+Epoch 366/500 | Loss: 6.708861 | Val: 6.450628 | LR: 1.81e-05 | Time: 784.7s | Step: 96990
+Epoch 367/500 | Loss: 6.673042 | Val: 7.339765 | LR: 1.79e-05 | Time: 834.7s | Step: 97255
+Epoch 368/500 | Loss: 6.689088 | Val: 6.126450 | LR: 1.76e-05 | Time: 819.3s | Step: 97520
+   🏆 New best val_loss: 6.126450 (saved)
+Epoch 369/500 | Loss: 6.664958 | Val: 6.414115 | LR: 1.74e-05 | Time: 791.5s | Step: 97785
+Epoch 370/500 | Loss: 6.762046 | Val: 6.237302 | LR: 1.71e-05 | Time: 800.5s | Step: 98050
+   Components: noise_mse: 0.0987 | signal_mse: 0.1872 | identity: 0.0708 | spectral: 138.4789 | correlation: 0.1082 | morphology: 0.0435 | snr_weight: 0.4958
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_370.pt
+Epoch 371/500 | Loss: 6.639990 | Val: 6.386948 | LR: 1.69e-05 | Time: 800.4s | Step: 98315
+Epoch 372/500 | Loss: 6.692144 | Val: 6.274014 | LR: 1.67e-05 | Time: 853.6s | Step: 98580
+Epoch 373/500 | Loss: 6.680608 | Val: 5.961910 | LR: 1.64e-05 | Time: 917.5s | Step: 98845
+   🏆 New best val_loss: 5.961910 (saved)
+Epoch 374/500 | Loss: 6.666810 | Val: 6.396907 | LR: 1.62e-05 | Time: 912.3s | Step: 99110
+Epoch 375/500 | Loss: 6.608606 | Val: 6.295855 | LR: 1.59e-05 | Time: 918.2s | Step: 99375
+Epoch 376/500 | Loss: 6.614000 | Val: 6.407169 | LR: 1.57e-05 | Time: 913.4s | Step: 99640
+Epoch 377/500 | Loss: 6.631827 | Val: 6.099996 | LR: 1.55e-05 | Time: 913.9s | Step: 99905
+Epoch 378/500 | Loss: 6.549832 | Val: 6.301954 | LR: 1.52e-05 | Time: 914.0s | Step: 100170
+Epoch 379/500 | Loss: 6.569951 | Val: 6.318048 | LR: 1.50e-05 | Time: 913.8s | Step: 100435
+Epoch 380/500 | Loss: 6.522334 | Val: 6.117580 | LR: 1.48e-05 | Time: 912.9s | Step: 100700
+   Components: noise_mse: 0.0990 | signal_mse: 0.1863 | identity: 0.0706 | spectral: 133.4893 | correlation: 0.1080 | morphology: 0.0416 | snr_weight: 0.4969
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_380.pt
+Epoch 381/500 | Loss: 6.613175 | Val: 6.305060 | LR: 1.45e-05 | Time: 912.9s | Step: 100965
+Epoch 382/500 | Loss: 6.562909 | Val: 6.251060 | LR: 1.43e-05 | Time: 916.5s | Step: 101230
+Epoch 383/500 | Loss: 6.532213 | Val: 6.110480 | LR: 1.41e-05 | Time: 913.9s | Step: 101495
+Epoch 384/500 | Loss: 6.517284 | Val: 6.126438 | LR: 1.39e-05 | Time: 916.8s | Step: 101760
+Epoch 385/500 | Loss: 6.582692 | Val: 6.275008 | LR: 1.36e-05 | Time: 918.9s | Step: 102025
+Epoch 386/500 | Loss: 6.592168 | Val: 6.214478 | LR: 1.34e-05 | Time: 917.7s | Step: 102290
+Epoch 387/500 | Loss: 6.638892 | Val: 6.088332 | LR: 1.32e-05 | Time: 921.8s | Step: 102555
+Epoch 388/500 | Loss: 6.466593 | Val: 6.333211 | LR: 1.30e-05 | Time: 897.3s | Step: 102820
+Epoch 389/500 | Loss: 6.479651 | Val: 6.229039 | LR: 1.27e-05 | Time: 880.6s | Step: 103085
+Epoch 390/500 | Loss: 6.502343 | Val: 6.006352 | LR: 1.25e-05 | Time: 872.2s | Step: 103350
+   Components: noise_mse: 0.0974 | signal_mse: 0.1875 | identity: 0.0702 | spectral: 134.0139 | correlation: 0.1096 | morphology: 0.0418 | snr_weight: 0.4938
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_390.pt
+Epoch 391/500 | Loss: 6.536386 | Val: 6.226430 | LR: 1.23e-05 | Time: 869.2s | Step: 103615
+Epoch 392/500 | Loss: 6.518412 | Val: 6.062462 | LR: 1.21e-05 | Time: 847.6s | Step: 103880
+Epoch 393/500 | Loss: 6.454117 | Val: 6.061157 | LR: 1.19e-05 | Time: 815.1s | Step: 104145
+Epoch 394/500 | Loss: 6.502342 | Val: 6.272392 | LR: 1.17e-05 | Time: 816.1s | Step: 104410
+Epoch 395/500 | Loss: 6.472350 | Val: 6.194428 | LR: 1.15e-05 | Time: 812.2s | Step: 104675
+Epoch 396/500 | Loss: 6.615230 | Val: 6.149259 | LR: 1.13e-05 | Time: 817.1s | Step: 104940
+Epoch 397/500 | Loss: 6.467774 | Val: 6.055531 | LR: 1.11e-05 | Time: 815.3s | Step: 105205
+Epoch 398/500 | Loss: 6.501008 | Val: 6.300700 | LR: 1.09e-05 | Time: 814.4s | Step: 105470
+Epoch 399/500 | Loss: 6.448975 | Val: 6.059354 | LR: 1.07e-05 | Time: 812.8s | Step: 105735
+Epoch 400/500 | Loss: 6.548443 | Val: 5.862837 | LR: 1.05e-05 | Time: 816.0s | Step: 106000
+   Components: noise_mse: 0.0997 | signal_mse: 0.1859 | identity: 0.0697 | spectral: 133.8843 | correlation: 0.1082 | morphology: 0.0410 | snr_weight: 0.4963
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_400.pt
+   🏆 New best val_loss: 5.862837 (saved)
+Epoch 401/500 | Loss: 6.430568 | Val: 5.903931 | LR: 1.03e-05 | Time: 811.3s | Step: 106265
+Epoch 402/500 | Loss: 6.419433 | Val: 5.904080 | LR: 1.01e-05 | Time: 817.5s | Step: 106530
+Epoch 403/500 | Loss: 6.417043 | Val: 6.075988 | LR: 9.86e-06 | Time: 811.9s | Step: 106795
+Epoch 404/500 | Loss: 6.435975 | Val: 5.993480 | LR: 9.67e-06 | Time: 816.8s | Step: 107060
+Epoch 405/500 | Loss: 6.373976 | Val: 5.930830 | LR: 9.48e-06 | Time: 811.4s | Step: 107325
+Epoch 406/500 | Loss: 6.309185 | Val: 5.978723 | LR: 9.29e-06 | Time: 816.2s | Step: 107590
+Epoch 407/500 | Loss: 6.408692 | Val: 6.167449 | LR: 9.10e-06 | Time: 811.4s | Step: 107855
+Epoch 408/500 | Loss: 6.393337 | Val: 5.957960 | LR: 8.91e-06 | Time: 817.1s | Step: 108120
+Epoch 409/500 | Loss: 6.326466 | Val: 6.061938 | LR: 8.73e-06 | Time: 815.3s | Step: 108385
+Epoch 410/500 | Loss: 6.436191 | Val: 6.051489 | LR: 8.54e-06 | Time: 817.9s | Step: 108650
+   Components: noise_mse: 0.0993 | signal_mse: 0.1844 | identity: 0.0691 | spectral: 131.4802 | correlation: 0.1075 | morphology: 0.0412 | snr_weight: 0.4975
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_410.pt
+Epoch 411/500 | Loss: 6.339658 | Val: 6.000106 | LR: 8.36e-06 | Time: 803.7s | Step: 108915
+Epoch 412/500 | Loss: 6.431628 | Val: 5.948470 | LR: 8.18e-06 | Time: 816.3s | Step: 109180
+Epoch 413/500 | Loss: 6.367917 | Val: 6.319883 | LR: 8.01e-06 | Time: 812.9s | Step: 109445
+Epoch 414/500 | Loss: 6.331651 | Val: 5.997115 | LR: 7.83e-06 | Time: 814.4s | Step: 109710
+Epoch 415/500 | Loss: 6.368091 | Val: 5.904116 | LR: 7.66e-06 | Time: 812.9s | Step: 109975
+Epoch 416/500 | Loss: 6.377850 | Val: 6.144473 | LR: 7.48e-06 | Time: 815.4s | Step: 110240
+Epoch 417/500 | Loss: 6.359621 | Val: 6.010393 | LR: 7.31e-06 | Time: 812.5s | Step: 110505
+Epoch 418/500 | Loss: 6.329250 | Val: 5.780688 | LR: 7.14e-06 | Time: 816.4s | Step: 110770
+   🏆 New best val_loss: 5.780688 (saved)
+Epoch 419/500 | Loss: 6.351263 | Val: 5.931525 | LR: 6.98e-06 | Time: 806.3s | Step: 111035
+Epoch 420/500 | Loss: 6.342638 | Val: 6.044792 | LR: 6.81e-06 | Time: 815.2s | Step: 111300
+   Components: noise_mse: 0.0986 | signal_mse: 0.1800 | identity: 0.0677 | spectral: 129.5748 | correlation: 0.1051 | morphology: 0.0404 | snr_weight: 0.4962
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_420.pt
+Epoch 421/500 | Loss: 6.380652 | Val: 6.107764 | LR: 6.65e-06 | Time: 814.6s | Step: 111565
+Epoch 422/500 | Loss: 6.341199 | Val: 6.099340 | LR: 6.49e-06 | Time: 815.5s | Step: 111830
+Epoch 423/500 | Loss: 6.291013 | Val: 5.961041 | LR: 6.33e-06 | Time: 813.4s | Step: 112095
+Epoch 424/500 | Loss: 6.311154 | Val: 5.980909 | LR: 6.17e-06 | Time: 818.5s | Step: 112360
+Epoch 425/500 | Loss: 6.394606 | Val: 6.082563 | LR: 6.01e-06 | Time: 816.3s | Step: 112625
+Epoch 426/500 | Loss: 6.300817 | Val: 5.855600 | LR: 5.86e-06 | Time: 812.7s | Step: 112890
+Epoch 427/500 | Loss: 6.379378 | Val: 5.812841 | LR: 5.71e-06 | Time: 809.1s | Step: 113155
+Epoch 428/500 | Loss: 6.335361 | Val: 5.893114 | LR: 5.56e-06 | Time: 810.1s | Step: 113420
+Epoch 429/500 | Loss: 6.250686 | Val: 5.911862 | LR: 5.41e-06 | Time: 811.6s | Step: 113685
+Epoch 430/500 | Loss: 6.268508 | Val: 5.993316 | LR: 5.26e-06 | Time: 815.3s | Step: 113950
+   Components: noise_mse: 0.0991 | signal_mse: 0.1780 | identity: 0.0675 | spectral: 127.6066 | correlation: 0.1042 | morphology: 0.0398 | snr_weight: 0.4979
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_430.pt
+Epoch 431/500 | Loss: 6.355956 | Val: 6.151094 | LR: 5.12e-06 | Time: 800.6s | Step: 114215
+Epoch 432/500 | Loss: 6.346634 | Val: 5.917763 | LR: 4.98e-06 | Time: 806.2s | Step: 114480
+Epoch 433/500 | Loss: 6.326929 | Val: 6.108806 | LR: 4.84e-06 | Time: 836.1s | Step: 114745
+Epoch 434/500 | Loss: 6.380007 | Val: 6.000318 | LR: 4.70e-06 | Time: 858.0s | Step: 115010
+Epoch 435/500 | Loss: 6.309487 | Val: 5.853435 | LR: 4.56e-06 | Time: 856.7s | Step: 115275
+Epoch 436/500 | Loss: 6.302723 | Val: 5.980059 | LR: 4.43e-06 | Time: 855.1s | Step: 115540
+Epoch 437/500 | Loss: 6.275511 | Val: 5.895785 | LR: 4.29e-06 | Time: 852.7s | Step: 115805
+Epoch 438/500 | Loss: 6.345286 | Val: 6.005458 | LR: 4.16e-06 | Time: 857.5s | Step: 116070
+Epoch 439/500 | Loss: 6.360288 | Val: 6.110934 | LR: 4.03e-06 | Time: 855.2s | Step: 116335
+Epoch 440/500 | Loss: 6.346084 | Val: 5.752085 | LR: 3.90e-06 | Time: 853.2s | Step: 116600
+   Components: noise_mse: 0.0993 | signal_mse: 0.1808 | identity: 0.0676 | spectral: 129.4875 | correlation: 0.1055 | morphology: 0.0401 | snr_weight: 0.4976
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_440.pt
+   🏆 New best val_loss: 5.752085 (saved)
+Epoch 441/500 | Loss: 6.373944 | Val: 6.061612 | LR: 3.78e-06 | Time: 850.7s | Step: 116865
+Epoch 442/500 | Loss: 6.257323 | Val: 5.864202 | LR: 3.66e-06 | Time: 853.6s | Step: 117130
+Epoch 443/500 | Loss: 6.248348 | Val: 5.919559 | LR: 3.53e-06 | Time: 856.9s | Step: 117395
+Epoch 444/500 | Loss: 6.265322 | Val: 5.677109 | LR: 3.42e-06 | Time: 851.7s | Step: 117660
+   🏆 New best val_loss: 5.677109 (saved)
+Epoch 445/500 | Loss: 6.287704 | Val: 6.082636 | LR: 3.30e-06 | Time: 846.9s | Step: 117925
+Epoch 446/500 | Loss: 6.304031 | Val: 5.927097 | LR: 3.18e-06 | Time: 854.4s | Step: 118190
+Epoch 447/500 | Loss: 6.266120 | Val: 5.872121 | LR: 3.07e-06 | Time: 855.6s | Step: 118455
+Epoch 448/500 | Loss: 6.268893 | Val: 5.987728 | LR: 2.96e-06 | Time: 852.1s | Step: 118720
+Epoch 449/500 | Loss: 6.235315 | Val: 5.998123 | LR: 2.85e-06 | Time: 856.8s | Step: 118985
+Epoch 450/500 | Loss: 6.290905 | Val: 5.785286 | LR: 2.74e-06 | Time: 853.5s | Step: 119250
+   Components: noise_mse: 0.0981 | signal_mse: 0.1822 | identity: 0.0678 | spectral: 128.5315 | correlation: 0.1062 | morphology: 0.0403 | snr_weight: 0.4971
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_450.pt
+Epoch 451/500 | Loss: 6.197689 | Val: 5.801609 | LR: 2.64e-06 | Time: 855.1s | Step: 119515
+Epoch 452/500 | Loss: 6.267389 | Val: 5.832137 | LR: 2.53e-06 | Time: 839.5s | Step: 119780
+Epoch 453/500 | Loss: 6.229299 | Val: 5.860408 | LR: 2.43e-06 | Time: 878.4s | Step: 120045
+Epoch 454/500 | Loss: 6.259377 | Val: 5.944790 | LR: 2.33e-06 | Time: 876.7s | Step: 120310
+Epoch 455/500 | Loss: 6.195167 | Val: 5.803484 | LR: 2.23e-06 | Time: 875.1s | Step: 120575
+Epoch 456/500 | Loss: 6.312001 | Val: 5.779551 | LR: 2.14e-06 | Time: 817.6s | Step: 120840
+Epoch 457/500 | Loss: 6.233568 | Val: 5.850488 | LR: 2.05e-06 | Time: 762.8s | Step: 121105
+Epoch 458/500 | Loss: 6.290291 | Val: 5.835086 | LR: 1.95e-06 | Time: 764.3s | Step: 121370
+Epoch 459/500 | Loss: 6.229526 | Val: 5.852411 | LR: 1.87e-06 | Time: 763.9s | Step: 121635
+Epoch 460/500 | Loss: 6.249782 | Val: 5.744294 | LR: 1.78e-06 | Time: 764.5s | Step: 121900
+   Components: noise_mse: 0.0983 | signal_mse: 0.1823 | identity: 0.0679 | spectral: 127.4623 | correlation: 0.1066 | morphology: 0.0404 | snr_weight: 0.4958
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_460.pt
+Epoch 461/500 | Loss: 6.269382 | Val: 5.973756 | LR: 1.69e-06 | Time: 760.0s | Step: 122165
+Epoch 462/500 | Loss: 6.206720 | Val: 5.804062 | LR: 1.61e-06 | Time: 760.1s | Step: 122430
+Epoch 463/500 | Loss: 6.255332 | Val: 5.948159 | LR: 1.53e-06 | Time: 762.3s | Step: 122695
+Epoch 464/500 | Loss: 6.225390 | Val: 5.783438 | LR: 1.45e-06 | Time: 778.5s | Step: 122960
+Epoch 465/500 | Loss: 6.176230 | Val: 5.780926 | LR: 1.37e-06 | Time: 855.6s | Step: 123225
+Epoch 466/500 | Loss: 6.175189 | Val: 5.807486 | LR: 1.30e-06 | Time: 859.8s | Step: 123490
+Epoch 467/500 | Loss: 6.185980 | Val: 5.760835 | LR: 1.23e-06 | Time: 861.0s | Step: 123755
+Epoch 468/500 | Loss: 6.251182 | Val: 5.754712 | LR: 1.16e-06 | Time: 859.5s | Step: 124020
+Epoch 469/500 | Loss: 6.181709 | Val: 5.833386 | LR: 1.09e-06 | Time: 857.3s | Step: 124285
+Epoch 470/500 | Loss: 6.142328 | Val: 5.799043 | LR: 1.02e-06 | Time: 856.1s | Step: 124550
+   Components: noise_mse: 0.0993 | signal_mse: 0.1785 | identity: 0.0671 | spectral: 124.9922 | correlation: 0.1043 | morphology: 0.0392 | snr_weight: 0.4977
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_470.pt
+Epoch 471/500 | Loss: 6.292666 | Val: 5.745466 | LR: 9.56e-07 | Time: 856.7s | Step: 124815
+Epoch 472/500 | Loss: 6.150535 | Val: 5.788396 | LR: 8.94e-07 | Time: 857.2s | Step: 125080
+Epoch 473/500 | Loss: 6.177535 | Val: 5.845834 | LR: 8.33e-07 | Time: 856.9s | Step: 125345
+wandb: updating run metadata
+wandb: uploading config.yaml; uploading history steps 2985-2986, summary, console lines 653-662
+wandb: uploading output.log; uploading wandb-summary.json
+wandb: uploading output.log
+wandb: 
+wandb: Run history:
+wandb:             best_loss █▇▅▄▃▃▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:         best_val_loss █▆▄▃▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: component/correlation █▅▇▄▃▅▅▅▇▆▅▅▄▅▄▂▇▆▄▂▂▁▃▄▃▁▆▁▄▆▁▁▁▄▄▃▄▇▃▅
+wandb:    component/identity █▄▅▆▇▅▆▅▇▄▃▄▄▁▃▄▃▄▄▃▃▃▂▃▃▄▃▂▄▂▂▃▂▂▂▁▁▂▄▂
+wandb:  component/morphology ▂█▁▂▂▂▁▂▂▂▁▂▁▁▁▁▁▁▂▁▁▁▂▁▁▁▁▂▁▁▁▁▁▁▁▁▁▁▂▁
+wandb:   component/noise_mse ▆█▆▃▅▆▄▅▅▆▄▃▃▃▄▃▂▃▃▃▂▂▂▄▂▃▃▃▃▂▂▁▁▄▂▁▂▃▅▃
+wandb:  component/signal_mse ▄▆▂▆▃▆▃▂▃▄▄▅▄▂▃▁▂▃█▂▂▁▃▂▃▁▃▂▃▂▃▂▁▂▁▂▁▂▂▂
+wandb:  component/snr_weight ▅▅▄▂█▄▄▆▂▁▃▆▅▄▆▆▄▄█▄▅▅▄▆▇▄▃▂▃▅▄▄▆▄▆▅▆▄▁▆
+wandb:    component/spectral ▇▅▄▃▃▂▃█▂▂▂▁▂▂▂▂▂▁▁▂▁▂▁▂▂▁▂▁▁▁▂▁▁▁▁▁▂▁▁▁
+wandb:                 epoch ▁▁▁▁▁▂▂▂▂▂▂▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇▇▇██
+wandb:                    +9 ...
+wandb: 
+wandb: Run summary:
+wandb:             best_loss 6.14233
+wandb:         best_val_loss 5.67711
+wandb: component/correlation 0.10501
+wandb:    component/identity 0.06732
+wandb:  component/morphology 0.03972
+wandb:   component/noise_mse 0.09915
+wandb:  component/signal_mse 0.17966
+wandb:  component/snr_weight 0.49992
+wandb:    component/spectral 125.19225
+wandb:                 epoch 474
+wandb:                    +9 ...
+wandb: 
+wandb: 🚀 View run DiT-ECG-B_e500 at: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/7jle943h
+wandb: ⭐️ View project at: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260311_121241-7jle943h/logs
+Epoch 474/500 | Loss: 6.163082 | Val: 5.750052 | LR: 7.75e-07 | Time: 854.9s | Step: 125610
+
+⏹️  Early stopping triggered! No val improvement for 30 epochs.
+   Best val_loss: 5.677109
+
+======================================================================
+✅ Training complete! Best val_loss: 5.677109 | Best train_loss: 6.142328
+💾 EMA model saved: checkpoints/dit_ecg_ema_final.pt
+📋 Config saved: checkpoints/train_config.json
+📊 TensorBoard logs saved.
+📊 W&B run finished.

@@ -1,0 +1,208 @@
+nohup: ignoring input
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /home/user04/.netrc.
+wandb: Currently logged in as: tgijayesh (tgijayesh-dayananda-sagar-university) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: setting up run oxqytlpg
+wandb: Tracking run with wandb version 0.25.1
+wandb: Run data is saved locally in /home/user04/Projects/Cardio/CardioEquation/wandb/run-20260323_010725-oxqytlpg
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run DiT-ECG-B_e500
+wandb: ⭐️ View project at https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation
+wandb: 🚀 View run at https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/oxqytlpg
+🖥️  GPU: NVIDIA A100 80GB PCIe (85.1 GB)
+📊 W&B initialized: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/oxqytlpg
+📊 TensorBoard initialized: checkpoints/runs
+🏗️  Building DiT-ECG-B...
+   📥 Loading pre-trained feature extractor from checkpoints/feature_extractor_contrastive.pt
+   ✅ Pre-trained weights loaded successfully!
+   ❄️  Feature extractor frozen for diffusion training.
+   DiT Parameters: 258.3M
+   FeatureExtractor Parameters: 8.7M
+   EMA: decay=0.9999, warmup=True
+   Noise Schedule: Cosine (1000 discrete steps)
+   Augmentation: ON (amplitude, noise, baseline wander, time-warp)
+📊 Loading MIT-BIH dataset from data/mitbih_forecasting.npz
+   ⚠️  Signal length is 5000, model expects 2500
+   ✂️  Truncated to 2500 samples (first 5s)
+   + Loading PTB-XL from data/ptbxl_processed.npz
+   + Loading Chapman-Shaoxing from data/chapman_processed.npz
+   = Combined dataset: 75540 samples (MIT-BIH: 8592)
+   ❤️  HR labels loaded: mean=75.8, std=27.6 bpm
+   Train: 67986 samples | Val: 7554 samples
+   ❤️  HR-balanced sampling enabled (bins: [ 2488 10400 16731 11073  8429  6810  7199  3703  1153])
+   Batch=64, accum=8, effective=512
+   ❤️  HR Loss: DifferentiableHRLoss (warmup=5000 steps)
+   ❤️  HR Loss weight: 0.05, HR variance weight: 0.5
+   Optimizer: AdamW (lr=0.0001, wd=0.01)
+   LR Schedule: Cosine with 5000-step warmup
+   Total training steps: 66375
+   CFG dropout: 0.1
+   Early stopping: patience=30 epochs
+   Precision: BF16 mixed precision
+
+🚀 Starting training for 500 epochs (early stopping: patience=30)...
+======================================================================
+/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py:513: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
+/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
+Epoch 001/500 | Loss: 415.728019 | Val: 300.681467 | LR: 2.64e-06 | Time: 580.7s | Step: 132
+   🏆 New best val_loss: 300.681467 (saved)
+Epoch 002/500 | Loss: 75.996293 | Val: 5.464078 | LR: 5.28e-06 | Time: 661.9s | Step: 264
+   🏆 New best val_loss: 5.464078 (saved)
+Epoch 003/500 | Loss: 2.947467 | Val: 1.089713 | LR: 7.92e-06 | Time: 585.1s | Step: 396
+   🏆 New best val_loss: 1.089713 (saved)
+Epoch 004/500 | Loss: 2.771788 | Val: 0.967904 | LR: 1.06e-05 | Time: 621.4s | Step: 528
+   🏆 New best val_loss: 0.967904 (saved)
+Epoch 005/500 | Loss: 3.108315 | Val: 0.760190 | LR: 1.32e-05 | Time: 1253.3s | Step: 660
+   🏆 New best val_loss: 0.760190 (saved)
+Epoch 006/500 | Loss: 3.430565 | Val: 0.793698 | LR: 1.58e-05 | Time: 1259.8s | Step: 792
+Epoch 007/500 | Loss: 3.856013 | Val: 0.800386 | LR: 1.85e-05 | Time: 995.8s | Step: 924
+Epoch 008/500 | Loss: 4.365425 | Val: 0.892872 | LR: 2.11e-05 | Time: 1245.3s | Step: 1056
+Epoch 009/500 | Loss: 4.759088 | Val: 0.962480 | LR: 2.38e-05 | Time: 1277.5s | Step: 1188
+Epoch 010/500 | Loss: 5.200087 | Val: 0.859139 | LR: 2.64e-05 | Time: 870.9s | Step: 1320
+   Components: noise_mse: 0.2730 | signal_mse: 0.5877 | identity: 0.2013 | spectral: 1358.2187 | correlation: 0.2168 | morphology: 0.7728 | snr_weight: 0.4949 | hr_loss: 0.4170 | hr_variance_loss: 3.9723 | hr_est_mean: 62.2666 | hr_est_std: 15.3166 | hr_ramp: 0.2508
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_010.pt
+Epoch 011/500 | Loss: 5.655836 | Val: 1.044139 | LR: 2.90e-05 | Time: 640.2s | Step: 1452
+Epoch 012/500 | Loss: 6.147146 | Val: 0.752658 | LR: 3.17e-05 | Time: 944.3s | Step: 1584
+   🏆 New best val_loss: 0.752658 (saved)
+Epoch 013/500 | Loss: 6.556939 | Val: 0.739174 | LR: 3.43e-05 | Time: 931.6s | Step: 1716
+   🏆 New best val_loss: 0.739174 (saved)
+Epoch 014/500 | Loss: 6.960812 | Val: 0.622064 | LR: 3.70e-05 | Time: 949.4s | Step: 1848
+   🏆 New best val_loss: 0.622064 (saved)
+Epoch 015/500 | Loss: 7.505506 | Val: 0.764470 | LR: 3.96e-05 | Time: 943.8s | Step: 1980
+Epoch 016/500 | Loss: 7.860428 | Val: 0.626790 | LR: 4.22e-05 | Time: 938.3s | Step: 2112
+Epoch 017/500 | Loss: 8.318702 | Val: 0.766332 | LR: 4.49e-05 | Time: 587.8s | Step: 2244
+Epoch 018/500 | Loss: 8.851907 | Val: 0.779293 | LR: 4.75e-05 | Time: 620.6s | Step: 2376
+Epoch 019/500 | Loss: 9.294914 | Val: 0.784146 | LR: 5.02e-05 | Time: 630.6s | Step: 2508
+Epoch 020/500 | Loss: 9.629738 | Val: 0.601258 | LR: 5.28e-05 | Time: 624.9s | Step: 2640
+   Components: noise_mse: 0.1984 | signal_mse: 0.5592 | identity: 0.1934 | spectral: 1262.2116 | correlation: 0.2048 | morphology: 0.7182 | snr_weight: 0.4960 | hr_loss: 0.8521 | hr_variance_loss: 8.0696 | hr_est_mean: 62.6489 | hr_est_std: 15.6473 | hr_ramp: 0.5148
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_020.pt
+   🏆 New best val_loss: 0.601258 (saved)
+Epoch 021/500 | Loss: 10.112838 | Val: 0.704652 | LR: 5.54e-05 | Time: 617.4s | Step: 2772
+Epoch 022/500 | Loss: 10.543763 | Val: 0.629442 | LR: 5.81e-05 | Time: 627.3s | Step: 2904
+Epoch 023/500 | Loss: 11.154924 | Val: 0.676031 | LR: 6.07e-05 | Time: 623.0s | Step: 3036
+Epoch 024/500 | Loss: 11.421448 | Val: 0.520967 | LR: 6.34e-05 | Time: 624.6s | Step: 3168
+   🏆 New best val_loss: 0.520967 (saved)
+Epoch 025/500 | Loss: 11.929188 | Val: 0.520222 | LR: 6.60e-05 | Time: 608.2s | Step: 3300
+   🏆 New best val_loss: 0.520222 (saved)
+Epoch 026/500 | Loss: 12.435242 | Val: 0.660276 | LR: 6.86e-05 | Time: 571.7s | Step: 3432
+Epoch 027/500 | Loss: 12.526612 | Val: 0.611539 | LR: 7.13e-05 | Time: 590.6s | Step: 3564
+Epoch 028/500 | Loss: 13.172315 | Val: 0.744091 | LR: 7.39e-05 | Time: 632.7s | Step: 3696
+Epoch 029/500 | Loss: 13.384589 | Val: 0.524994 | LR: 7.66e-05 | Time: 635.0s | Step: 3828
+Epoch 030/500 | Loss: 13.843596 | Val: 0.683217 | LR: 7.92e-05 | Time: 635.6s | Step: 3960
+   Components: noise_mse: 0.1847 | signal_mse: 0.5097 | identity: 0.1877 | spectral: 1043.5403 | correlation: 0.2048 | morphology: 0.4842 | snr_weight: 0.4949 | hr_loss: 1.2730 | hr_variance_loss: 11.9472 | hr_est_mean: 63.9581 | hr_est_std: 16.3169 | hr_ramp: 0.7788
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_030.pt
+Epoch 031/500 | Loss: 14.292576 | Val: 0.594250 | LR: 8.18e-05 | Time: 638.6s | Step: 4092
+Epoch 032/500 | Loss: 14.662143 | Val: 0.559272 | LR: 8.45e-05 | Time: 629.7s | Step: 4224
+Epoch 033/500 | Loss: 15.217555 | Val: 0.584445 | LR: 8.71e-05 | Time: 621.0s | Step: 4356
+Epoch 034/500 | Loss: 15.375720 | Val: 0.670275 | LR: 8.98e-05 | Time: 635.8s | Step: 4488
+Epoch 035/500 | Loss: 15.724083 | Val: 0.494432 | LR: 9.24e-05 | Time: 638.1s | Step: 4620
+   🏆 New best val_loss: 0.494432 (saved)
+Epoch 036/500 | Loss: 16.247318 | Val: 0.579983 | LR: 9.50e-05 | Time: 637.2s | Step: 4752
+Epoch 037/500 | Loss: 16.317348 | Val: 0.731895 | LR: 9.77e-05 | Time: 635.7s | Step: 4884
+Epoch 038/500 | Loss: 16.787435 | Val: 1.187979 | LR: 1.00e-04 | Time: 639.7s | Step: 5016
+Epoch 039/500 | Loss: 17.379720 | Val: 0.538720 | LR: 1.00e-04 | Time: 636.8s | Step: 5148
+Epoch 040/500 | Loss: 16.495582 | Val: 0.532653 | LR: 1.00e-04 | Time: 623.1s | Step: 5280
+   Components: noise_mse: 0.1757 | signal_mse: 0.5955 | identity: 0.1913 | spectral: 1203.4128 | correlation: 0.2101 | morphology: 0.5662 | snr_weight: 0.4947 | hr_loss: 1.5454 | hr_variance_loss: 14.2762 | hr_est_mean: 65.9973 | hr_est_std: 18.4475 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_040.pt
+Epoch 041/500 | Loss: 16.900540 | Val: 0.630824 | LR: 1.00e-04 | Time: 636.8s | Step: 5412
+Epoch 042/500 | Loss: 15.204097 | Val: 0.624125 | LR: 1.00e-04 | Time: 634.5s | Step: 5544
+Epoch 043/500 | Loss: 10.101268 | Val: 0.646582 | LR: 1.00e-04 | Time: 571.6s | Step: 5676
+Epoch 044/500 | Loss: 9.322763 | Val: 0.643641 | LR: 1.00e-04 | Time: 543.0s | Step: 5808
+Epoch 045/500 | Loss: 8.480106 | Val: 0.691833 | LR: 9.99e-05 | Time: 543.7s | Step: 5940
+Epoch 046/500 | Loss: 8.531996 | Val: 0.593241 | LR: 9.99e-05 | Time: 596.4s | Step: 6072
+Epoch 047/500 | Loss: 8.415353 | Val: 0.571353 | LR: 9.99e-05 | Time: 612.4s | Step: 6204
+Epoch 048/500 | Loss: 8.575040 | Val: 0.537116 | LR: 9.99e-05 | Time: 604.7s | Step: 6336
+Epoch 049/500 | Loss: 8.485752 | Val: 0.584358 | LR: 9.99e-05 | Time: 614.4s | Step: 6468
+Epoch 050/500 | Loss: 8.136336 | Val: 0.538948 | LR: 9.98e-05 | Time: 617.8s | Step: 6600
+   Components: noise_mse: 0.2770 | signal_mse: 0.4565 | identity: 0.1763 | spectral: 823.0182 | correlation: 0.2526 | morphology: 0.2066 | snr_weight: 0.4964 | hr_loss: 0.7979 | hr_variance_loss: 6.6985 | hr_est_mean: 80.8321 | hr_est_std: 33.6031 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_050.pt
+Epoch 051/500 | Loss: 8.204170 | Val: 0.526315 | LR: 9.98e-05 | Time: 620.8s | Step: 6732
+Epoch 052/500 | Loss: 8.203136 | Val: 0.597755 | LR: 9.98e-05 | Time: 583.2s | Step: 6864
+Epoch 053/500 | Loss: 7.828013 | Val: 0.546972 | LR: 9.97e-05 | Time: 560.4s | Step: 6996
+Epoch 054/500 | Loss: 7.665034 | Val: 0.660071 | LR: 9.97e-05 | Time: 617.3s | Step: 7128
+Epoch 055/500 | Loss: 7.994074 | Val: 0.565964 | LR: 9.97e-05 | Time: 616.7s | Step: 7260
+Epoch 056/500 | Loss: 7.778668 | Val: 0.621915 | LR: 9.96e-05 | Time: 607.2s | Step: 7392
+Epoch 057/500 | Loss: 7.888698 | Val: 0.476892 | LR: 9.96e-05 | Time: 607.0s | Step: 7524
+   🏆 New best val_loss: 0.476892 (saved)
+Epoch 058/500 | Loss: 7.843808 | Val: 0.605399 | LR: 9.95e-05 | Time: 614.7s | Step: 7656
+Epoch 059/500 | Loss: 7.965012 | Val: 0.558316 | LR: 9.95e-05 | Time: 619.1s | Step: 7788
+Epoch 060/500 | Loss: 7.576195 | Val: 0.693502 | LR: 9.94e-05 | Time: 551.0s | Step: 7920
+   Components: noise_mse: 0.2797 | signal_mse: 0.4633 | identity: 0.1687 | spectral: 816.4557 | correlation: 0.2582 | morphology: 0.1779 | snr_weight: 0.4972 | hr_loss: 0.7205 | hr_variance_loss: 6.2150 | hr_est_mean: 81.6482 | hr_est_std: 34.5700 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_060.pt
+Epoch 061/500 | Loss: 7.538802 | Val: 0.529315 | LR: 9.94e-05 | Time: 589.7s | Step: 8052
+Epoch 062/500 | Loss: 7.604823 | Val: 0.525105 | LR: 9.93e-05 | Time: 616.2s | Step: 8184
+Epoch 063/500 | Loss: 7.618558 | Val: 0.566108 | LR: 9.93e-05 | Time: 615.1s | Step: 8316
+Epoch 064/500 | Loss: 7.722574 | Val: 0.556300 | LR: 9.92e-05 | Time: 617.1s | Step: 8448
+Epoch 065/500 | Loss: 7.431877 | Val: 0.516850 | LR: 9.92e-05 | Time: 602.0s | Step: 8580
+Epoch 066/500 | Loss: 7.476531 | Val: 0.534314 | LR: 9.91e-05 | Time: 616.2s | Step: 8712
+Epoch 067/500 | Loss: 7.584924 | Val: 0.559796 | LR: 9.90e-05 | Time: 600.0s | Step: 8844
+Epoch 068/500 | Loss: 7.516866 | Val: 0.515956 | LR: 9.90e-05 | Time: 548.6s | Step: 8976
+Epoch 069/500 | Loss: 7.456720 | Val: 0.518555 | LR: 9.89e-05 | Time: 613.0s | Step: 9108
+Epoch 070/500 | Loss: 7.602628 | Val: 0.517777 | LR: 9.88e-05 | Time: 623.7s | Step: 9240
+   Components: noise_mse: 0.2745 | signal_mse: 0.4205 | identity: 0.1623 | spectral: 714.1721 | correlation: 0.2600 | morphology: 0.1263 | snr_weight: 0.4960 | hr_loss: 0.6889 | hr_variance_loss: 6.3137 | hr_est_mean: 81.2550 | hr_est_std: 34.3726 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_070.pt
+Epoch 071/500 | Loss: 7.276337 | Val: 0.562261 | LR: 9.88e-05 | Time: 614.3s | Step: 9372
+Epoch 072/500 | Loss: 7.244845 | Val: 0.513763 | LR: 9.87e-05 | Time: 617.7s | Step: 9504
+Epoch 073/500 | Loss: 7.643704 | Val: 0.547791 | LR: 9.86e-05 | Time: 605.3s | Step: 9636
+Epoch 074/500 | Loss: 7.350154 | Val: 0.527190 | LR: 9.85e-05 | Time: 607.4s | Step: 9768
+Epoch 075/500 | Loss: 7.465766 | Val: 0.539802 | LR: 9.84e-05 | Time: 569.7s | Step: 9900
+Epoch 076/500 | Loss: 7.357893 | Val: 0.515368 | LR: 9.84e-05 | Time: 573.6s | Step: 10032
+Epoch 077/500 | Loss: 7.549535 | Val: 0.504666 | LR: 9.83e-05 | Time: 616.5s | Step: 10164
+Epoch 078/500 | Loss: 7.223509 | Val: 0.540702 | LR: 9.82e-05 | Time: 617.4s | Step: 10296
+Epoch 079/500 | Loss: 7.594648 | Val: 0.502293 | LR: 9.81e-05 | Time: 613.0s | Step: 10428
+Epoch 080/500 | Loss: 7.321249 | Val: 0.565011 | LR: 9.80e-05 | Time: 615.3s | Step: 10560
+   Components: noise_mse: 0.2824 | signal_mse: 0.4370 | identity: 0.1602 | spectral: 758.9241 | correlation: 0.2620 | morphology: 0.1538 | snr_weight: 0.4976 | hr_loss: 0.6701 | hr_variance_loss: 6.0283 | hr_est_mean: 81.9784 | hr_est_std: 34.9434 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_080.pt
+Epoch 081/500 | Loss: 8.219260 | Val: 0.523016 | LR: 9.79e-05 | Time: 603.0s | Step: 10692
+Epoch 082/500 | Loss: 7.345626 | Val: 0.532532 | LR: 9.78e-05 | Time: 598.0s | Step: 10824
+Epoch 083/500 | Loss: 7.248698 | Val: 0.478121 | LR: 9.77e-05 | Time: 553.8s | Step: 10956
+Epoch 084/500 | Loss: 7.772349 | Val: 0.541259 | LR: 9.76e-05 | Time: 580.7s | Step: 11088
+Epoch 085/500 | Loss: 7.431388 | Val: 0.561482 | LR: 9.75e-05 | Time: 619.5s | Step: 11220
+Epoch 086/500 | Loss: 7.283401 | Val: 0.510583 | LR: 9.74e-05 | Time: 617.7s | Step: 11352
+wandb: updating run metadata
+wandb: uploading output.log; uploading wandb-summary.json; uploading config.yaml
+wandb: uploading history steps 316-316, summary, console lines 152-160
+wandb: 
+wandb: Run history:
+wandb:                  best_loss █▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:              best_val_loss █▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      component/correlation ▆▄▄▅▃▄▁▆▂▄▄▄▁▄▃▅▃▅▂▃▃▆▄▆▃▆▄▅▆▇▄▆▄▄▆▇▅▆█▆
+wandb:      component/hr_est_mean ▁▂▂▂▂▂▂▃▂▂▃▂▃▃▂▆▆▆▅▅▅▆█▆▅▆▅▆▅▅▆▆█▆▆▆█▆▇▆
+wandb:       component/hr_est_std ▁▁▂▁▄▂▂▂▂▂▂▂▁▂▂▂▃▄▂▅▆▇▆█▆▆▇▆▇▆▆█▇▇▅▆█▅█▅
+wandb:          component/hr_loss ▁▁▁▂▂▂▃▃▃▃▅▅▇▇█▇██▇▇▅▅▅▅▅▅▄▄▄▄▃▅▄▄▄▄▄▄▃▄
+wandb:          component/hr_ramp ▁▁▂▂▂▃▃▄▄▄▅▅▅▆▅█████████████████████████
+wandb: component/hr_variance_loss ▁▁▂▂▂▃▅▄▅▅▅▅▆▆█▄▃▄▄▄▄▃▂▂▄▂▃▃▃▆▃▄▄▄▄▄▄▂▂▃
+wandb:         component/identity █▆▅▆▆▄▄▄▆▃▁▃▃▄▄▄▄▄▅▄▃▄▃▄▂▄▃▃▂▂▃▃▂▃▃▂▃▁▂▂
+wandb:       component/morphology █▁▁▁▁▁▁▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:                        +14 ...
+wandb: 
+wandb: Run summary:
+wandb:                  best_loss 2.77179
+wandb:              best_val_loss 0.47689
+wandb:      component/correlation 0.26735
+wandb:      component/hr_est_mean 82.26989
+wandb:       component/hr_est_std 35.02731
+wandb:          component/hr_loss 0.6483
+wandb:          component/hr_ramp 1
+wandb: component/hr_variance_loss 5.98634
+wandb:         component/identity 0.16176
+wandb:       component/morphology 0.11022
+wandb:                        +14 ...
+wandb: 
+wandb: 🚀 View run DiT-ECG-B_e500 at: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/oxqytlpg
+wandb: ⭐️ View project at: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260323_010725-oxqytlpg/logs
+Epoch 087/500 | Loss: 7.248830 | Val: 0.517683 | LR: 9.73e-05 | Time: 618.2s | Step: 11484
+
+⏹️  Early stopping triggered! No val improvement for 30 epochs.
+   Best val_loss: 0.476892
+
+======================================================================
+✅ Training complete! Best val_loss: 0.476892 | Best train_loss: 2.771788
+💾 EMA model saved: checkpoints/dit_ecg_ema_final.pt
+📋 Config saved: checkpoints/train_config.json
+📊 TensorBoard logs saved.
+📊 W&B run finished.
