@@ -77,7 +77,7 @@ def parse_args():
     parser.add_argument('--no_tensorboard', action='store_true', default=False, help='Disable TensorBoard')
     # ── V2.1: Validation + Early Stopping ──
     parser.add_argument('--val_split', type=float, default=0.1, help='Fraction of data for validation')
-    parser.add_argument('--patience', type=int, default=30, help='Early stopping patience (epochs)')
+    parser.add_argument('--patience', type=int, default=60, help='Early stopping patience (epochs)')
     # ── V2.1: Augmentation ──
     parser.add_argument('--no_augment', action='store_true', default=False, help='Disable DiT augmentation')
     return parser.parse_args()
@@ -434,9 +434,9 @@ def train(args):
     hr_loss_fn = DifferentiableHRLoss(
         fs=500.0, hr_min=30.0, hr_max=200.0, softmax_temp=10.0
     ).to(device)
-    hr_warmup_steps = 5000  # Ramp weight from 0→1
+    hr_warmup_steps = 2000  # Ramp weight from 0→1 (was 5000, converges fast on A100)
     hr_loss_weight = 0.05   # Max weight after warmup
-    hr_var_weight = 0.5     # HR variance loss weight
+    hr_var_weight = 0.2     # HR variance loss weight (was 0.5, reduced to lower noise)
     print(f"   ❤️  HR Loss: DifferentiableHRLoss (warmup={hr_warmup_steps} steps)")
     print(f"   ❤️  HR Loss weight: {hr_loss_weight}, HR variance weight: {hr_var_weight}")
 
@@ -485,6 +485,8 @@ def train(args):
     best_loss = float('inf')
     best_val_loss = float('inf')
     patience_counter = 0
+    val_loss_ema = None  # EMA-smoothed val loss for more stable early stopping
+    val_loss_ema_decay = 0.8  # Smoothing factor (0.8 = slow-moving average)
 
     for epoch in range(start_epoch, args.epochs):
         model.train()
@@ -648,15 +650,26 @@ def train(args):
                         alpha_bar_t=alpha_bar_t.squeeze(),
                     )
 
+                    # Add HR losses to validation (Run 5b fix: val must track HR too)
+                    v_hr_loss, _ = hr_loss_fn(x_0_pred, hr_v, weight=hr_loss_weight)
+                    v_loss = v_loss + v_hr_loss
+
                 val_loss += v_loss.item()
                 val_batches += 1
         model.train()
 
         avg_val_loss = val_loss / max(val_batches, 1)
 
+        # EMA-smoothed val loss for more stable early stopping
+        if val_loss_ema is None:
+            val_loss_ema = avg_val_loss
+        else:
+            val_loss_ema = val_loss_ema_decay * val_loss_ema + (1 - val_loss_ema_decay) * avg_val_loss
+
         print(f"Epoch {epoch+1:03d}/{args.epochs} | "
               f"Loss: {avg_loss:.6f} | "
               f"Val: {avg_val_loss:.6f} | "
+              f"Val(EMA): {val_loss_ema:.6f} | "
               f"LR: {current_lr:.2e} | "
               f"Time: {elapsed:.1f}s | "
               f"Step: {global_step}")
@@ -703,9 +716,9 @@ def train(args):
             }, ckpt_path)
             print(f"   💾 Checkpoint saved: {ckpt_path}")
 
-        # Best model (by validation loss)
-        if avg_val_loss < best_val_loss:
-            best_val_loss = avg_val_loss
+        # Best model (by EMA-smoothed validation loss for stability)
+        if val_loss_ema < best_val_loss:
+            best_val_loss = val_loss_ema
             patience_counter = 0
             best_path = os.path.join(args.output_dir, "dit_ecg_best.pt")
             torch.save({
@@ -714,14 +727,15 @@ def train(args):
                 'model': model.state_dict(),
                 'ema': ema.state_dict(),
                 'loss': avg_loss,
-                'val_loss': best_val_loss,
+                'val_loss': avg_val_loss,
+                'val_loss_ema': val_loss_ema,
             }, best_path)
-            print(f"   🏆 New best val_loss: {best_val_loss:.6f} (saved)")
+            print(f"   🏆 New best val_loss(EMA): {val_loss_ema:.6f} (saved)")
         else:
             patience_counter += 1
             if patience_counter >= args.patience:
                 print(f"\n⏹️  Early stopping triggered! No val improvement for {args.patience} epochs.")
-                print(f"   Best val_loss: {best_val_loss:.6f}")
+                print(f"   Best val_loss(EMA): {best_val_loss:.6f}")
                 break
 
         # Also track best train loss
