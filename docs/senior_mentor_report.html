@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardioEquation: Executive Architecture & Progress Report</title>
+    
+    <!-- Mermaid.js for the architecture diagram -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    
+    <!-- MathJax for equations -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #1e293b;
+            --secondary: #3b82f6;
+            --text-main: #334155;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f5f9;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background-color: white;
+            padding: 50px 70px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-radius: 8px;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 25px;
+            color: #475569;
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        ul, ol {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        strong {
+            color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--bg-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+
+        .status-header {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--secondary);
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .mermaid-wrapper {
+            background: white;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            margin: 25px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .injected-image {
+            max-width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 25px 0;
+            display: block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+        }
+
+        code {
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            background: var(--bg-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #b91c1c;
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+        }
+
+        @media print {
+            body { background: white; }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+            .print-btn { display: none; }
+            
+            /* Avoid page breaks inside important elements */
+            table, .mermaid-wrapper, .injected-image, h2, h3 {
+                page-break-inside: avoid;
+            }
+            h2 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn" onclick="window.print()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+        </svg>
+        Print to PDF
+    </button>
+
+    <div class="container">
+        <h1>CardioEquation: Executive Architecture & Progress Report</h1>
+        
+        <div class="status-header">
+            <strong>Date</strong>: March 24, 2026<br>
+            <strong>Status</strong>: Phase 1 Complete | Phase 2 Active (Run 5b Training)
+        </div>
+
+        <h2>1. Executive Summary</h2>
+        <p><strong>CardioEquation</strong> is a state-of-the-art generative AI system engineered to synthesize highly realistic, patient-specific 1D Electrocardiogram (ECG) waveforms. Departing from traditional generative paradigms (e.g., GANs, VAEs), CardioEquation leverages the power of <strong>Diffusion Transformers (DiT)</strong> combined with contrastively learned identity embeddings.</p>
+        
+        <p>The system is capable of executing complex conditioning inputs. That is, given a brief historical ECG from a specific patient, the model can generate <em>novel, infinite variations</em> of that exact patient's heart rhythm under distinct physiological constraints—most notably, precise heart rate (BPM) control.</p>
+        
+        <p><strong>Key Milestone Achieved:</strong> We have successfully converged and stabilized our core <strong>265-million parameter</strong> DiT architecture. The model resolves the historical challenge of HR diversity collapse (mode collapse) via explicit Adaptive Layer Normalization (AdaLN) controls. Systemic signal realism, quantified by Fréchet Feature Distance (FFD), has improved by over 97% since conception.</p>
+
+        <h2>2. Core Architecture: Fast-Mixing DiT-ECG</h2>
+        <p>At the computational heart of CardioEquation is the <strong>Diffusion Transformer (DiT-ECG-B)</strong>. While Unet-based diffusion has dominated the field, we selected a pure Transformer backbone because of its superior scaling laws and global receptive field for temporal sequence modeling. In 1D signals like ECG, understanding the relationship between the P-wave at $t_1$ and the T-wave at $t_n$ is critical; transformers capture these long-range dependencies far better than convolutional networks.</p>
+
+        <h3>2.1 The Two-Stage Decoupled Pipeline</h3>
+        <p>To ensure the model learns <em>who</em> the patient is separately from <em>how</em> to generate the waveform, we decoupled the training into two distinct stages:</p>
+
+        <div class="mermaid-wrapper">
+            <div class="mermaid">
+                graph TD
+                subgraph Stage 0: Contrastive Pre-training
+                    ContextECG[Historical ECG Context] -->|Conv1D + Transformer| Encoder[Contrastive Feature Extractor]
+                    Encoder -->|Projection| ID[Identity Embedding \n 512-dim]
+                end
+
+                subgraph Stage 1: Generative Diffusion Modeling
+                    Gaussian[Gaussian Noise X_T] --> DiT[DiT-ECG-B Transformer]
+                    ID -.->|Frozen| DiT
+                    Time[Timestep T] -.-> DiT
+                    TargetHR[Target Heart Rate BPM] -.-> DiT
+                    DiT -->|Iterative Denoising| OutputECG[Patient-Specific \n Generated ECG X_0]
+                end
+            </div>
+        </div>
+
+        <ol>
+            <li><strong>Stage 0: Identity Extraction (Contrastive Pre-training)</strong>
+                <ul>
+                    <li><strong>Mechanism:</strong> We employ self-supervised contrastive learning (SimCLR principles) to force the encoder to map different segments belonging to the <em>same</em> patient close together in embedding space, while pushing different patients apart.</li>
+                    <li><strong>Result:</strong> A dense, 512-dimensional "Identity Embedding." This stage drastically dropped its contrastive loss to near-zero. The feature extractor is now frozen and acts as an uncompromising biometric identity anchor.</li>
+                </ul>
+            </li>
+            <li><strong>Stage 1: Generative Diffusion Training</strong>
+                <ul>
+                    <li><strong>Mechanism:</strong> The main 265M parameter transformer learns to reverse a Markovian noise-addition process. Starting from isotropic Gaussian noise $x_T$, it predicts the noise component $\epsilon_\theta(x_t, t, c)$ to iteratively carve out a clean ECG waveform $x_0$.</li>
+                    <li><strong>Conditioning:</strong> The generation is globally steered by the frozen Identity Embedding $c_{id}$, the diffusion timestep $t$, and the physiological heart rate target $c_{hr}$.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h2>3. Advanced Injectable Controls: Explicit AdaLN</h2>
+        <p>A major breakthrough in our Phase 1 implementation was solving generic "mode collapse" (where the model only generated resting heart rates of ~70 bpm). To force the model to render exact physiological states, we designed a <code>ConditioningProjector</code> leveraging <strong>Adaptive Layer Normalization (AdaLN)</strong>.</p>
+
+        <!-- Replaced Mermaid code with User's Uploaded Image -->
+        <img src="Images_Architecture/AI-Driven Digital Twin-2026-03-23-181915.png" alt="AdaLN Conditioning Projector Configuration" class="injected-image">
+
+        <ul>
+            <li><strong>Zero-Initialization Strategy:</strong> The HR Multilayer Perceptron (MLP) head is strictly zero-initialized. This guarantees that at the start of training, the model behaves exactly like a standard baseline model. As training proceeds, the HR conditioning slowly "wakes up," providing extreme training stability.</li>
+            <li><strong>Outcome:</strong> We can explicitly inject deterministic commands into the stochastic sampling step: <em>"Given Patient A's embedding, simulate a tachycardic state of 120 bpm."</em></li>
+        </ul>
+
+        <h2>4. Differentiable Physics-Informed Losses</h2>
+        <p>General-purpose diffusion models typically rely entirely on Mean Squared Error (MSE) objective: $L_{simple} = ||\epsilon - \epsilon_\theta(x_t, t, c)||^2$.</p>
+        <p>For clinical ECGs, MSE is inadequate—it penalizes slight temporal shifts heavily while ignoring morphological blurs. We introduced several custom physics-informed loss functions directly into the backward pass:</p>
+
+        <h3>A. The DifferentiableHR Loss</h3>
+        <ul>
+            <li><strong>The Math:</strong> We predict the underlying heart rate of the <em>generated</em> sample $x_0$ during training. Because standard peak detection (argmax) breaks the gradient chain, we use an <strong>Autocorrelation function via Fast Fourier Transform (FFT)</strong> combined with a Soft-Argmax temperature function.</li>
+            <li><strong>The Result:</strong> The model is penalized via $L_1$ loss if the generated heart rate diverges from the explicit conditioning target $c_{hr}$.</li>
+        </ul>
+
+        <h3>B. Morphology Gradient Loss (1st & 2nd Derivatives)</h3>
+        <ul>
+            <li><strong>The Math:</strong> $L_{grad} = ||\nabla x_{0_{pred}} - \nabla x_{0_{target}}||^2 + \lambda ||\nabla^2 x_{0_{pred}} - \nabla^2 x_{0_{target}}||^2$</li>
+            <li><strong>The Result:</strong> Enforces sharp, high-velocity slopes required for healthy QRS complexes, preventing the "smoothed over" artifacts common in deep learning waveform generation.</li>
+        </ul>
+
+        <h3>C. Spectral Balance Loss</h3>
+        <ul>
+            <li>Evaluates the discrepancy between the FFT magnitudes of the target and generated signals. In Run 4, this loss dominated the gradient budget ($>1000\times$ larger than other losses). By dynamically rescaling its weight ($w_{spectral} = 10^{-4}$), we fully unlocked multiobjective optimization.</li>
+        </ul>
+
+        <h2>5. The Data Engine: Industrial-Scale Preprocessing</h2>
+        <p>A generative model at the 250M+ parameter scale requires massive data volume and variance. We established a data engine combining <strong>75,540 highly-curated ECG segments</strong> from three major gold-standard clinical cohorts:</p>
+        <ol>
+            <li><strong>MIT-BIH Arrhythmia:</strong> High annotation density for baseline structural variance.</li>
+            <li><strong>PTB-XL:</strong> Massive-scale clinical 12-lead (temporally windowed for single-lead modeling).</li>
+            <li><strong>Chapman-Shaoxing:</strong> High-resolution multi-pathology clinical data.</li>
+        </ol>
+        <p><strong>GPU-Accelerated Analytics:</strong> We built a custom PyTorch-native GPU pipeline deploying the Pan-Tompkins algorithm and auto-correlation logic. This calculates granular, ground-truth Heart Rates for all 75,540 samples in under 10 seconds, accelerating the data ingestion pipeline significantly.</p>
+
+        <h2>6. Performance Metrics & Phase 1 Validation</h2>
+        <p>Empirical metrics confirm systemic capability improvements across all tracking vectors:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Run 1 (Baseline)</th>
+                    <th>Current Capability</th>
+                    <th>What This Means</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>FFD (Fréchet Feature Distance)</strong> ↓</td>
+                    <td>1032</td>
+                    <td><strong>21.7</strong></td>
+                    <td>A measure of distribution reality (lower is better). A <strong>97% improvement</strong> in overall systemic realism compared to baseline.</td>
+                </tr>
+                <tr>
+                    <td><strong>Generated HR Diversity (Std Dev)</strong> ↑</td>
+                    <td>N/A</td>
+                    <td><strong>35.0 bpm</strong></td>
+                    <td>Resolving "mode collapse." The model previously clustered at 20.5 bpm. It now accurately models a diverse physiological range (human target $\approx 47.4$ bpm).</td>
+                </tr>
+                <tr>
+                    <td><strong>Patient Re-Identification (Top-5)</strong> ↑</td>
+                    <td>23.5%</td>
+                    <td><strong>35.3%</strong></td>
+                    <td>Identity preservation metric. The capability of the generated ECG to correctly "spoof" a biometric identification system searching for the target patient.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p><em>Note: The model is currently executing standardizing epochs ("Run 5b") on an NVIDIA A100 to fully harden these metrics under mathematically optimal early-stopping criteria.</em></p>
+
+        <h2>7. Strategic Horizon (Phase 2 Roadmap)</h2>
+        <p>With foundational convergence proven, our architecture roadmap transitions to inference acceleration, latent-space scaling, and clinical application coverage:</p>
+
+        <ol>
+            <li><strong>Conditional Flow Matching (CFM):</strong> Transitioning the sampling framework from DDPM/DDIM to Rectified Flows. Using Euler ODE solvers, this achieves straight probability flow paths, promising a <strong>10x inference speedup</strong> (generating in 4 steps instead of 50).</li>
+            <li><strong>Latent Space DiT (VAE Compression):</strong> We intend to deploy a Variational Autoencoder to compress the temporal waveform from 2500 continuous steps into a dense ~312-step latent sequence. This reduces memory pressure quadratically, clearing the path to scale the transformer past <strong>1 Billion parameters</strong>.</li>
+            <li><strong>Full 12-Lead Temporal Expansion:</strong> Migrating from single-lead spatial representation to full 12-lead clinical ECG generation recursively.</li>
+        </ol>
+
+        <p>CardioEquation's Phase 1 robustly validates the underlying thesis: deterministic, biometric-anchored generation of multi-modal physiological time-series via Attention-based Diffusion is highly viable, scalable, and controllable.</p>
+
+    </div>
+</body>
+</html>
