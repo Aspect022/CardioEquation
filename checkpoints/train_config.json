@@ -23,6 +23,6 @@
   "no_wandb": false,
   "no_tensorboard": false,
   "val_split": 0.1,
-  "patience": 30,
+  "patience": 60,
   "no_augment": false
 }

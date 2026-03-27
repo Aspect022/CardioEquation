@@ -1,0 +1,878 @@
+nohup: ignoring input
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /home/user04/.netrc.
+wandb: Currently logged in as: tgijayesh (tgijayesh-dayananda-sagar-university) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: setting up run a3hc28s3
+wandb: Tracking run with wandb version 0.25.1
+wandb: Run data is saved locally in /home/user04/Projects/Cardio/CardioEquation/wandb/run-20260323_233811-a3hc28s3
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run DiT-ECG-B_e500
+wandb: ⭐️ View project at https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation
+wandb: 🚀 View run at https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/a3hc28s3
+🖥️  GPU: NVIDIA A100 80GB PCIe (85.1 GB)
+📊 W&B initialized: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/a3hc28s3
+📊 TensorBoard initialized: checkpoints/runs
+🏗️  Building DiT-ECG-B...
+   📥 Loading pre-trained feature extractor from checkpoints/feature_extractor_contrastive.pt
+   ✅ Pre-trained weights loaded successfully!
+   ❄️  Feature extractor frozen for diffusion training.
+   DiT Parameters: 258.3M
+   FeatureExtractor Parameters: 8.7M
+   EMA: decay=0.9999, warmup=True
+   Noise Schedule: Cosine (1000 discrete steps)
+   Augmentation: ON (amplitude, noise, baseline wander, time-warp)
+📊 Loading MIT-BIH dataset from data/mitbih_forecasting.npz
+   ⚠️  Signal length is 5000, model expects 2500
+   ✂️  Truncated to 2500 samples (first 5s)
+   + Loading PTB-XL from data/ptbxl_processed.npz
+   + Loading Chapman-Shaoxing from data/chapman_processed.npz
+   = Combined dataset: 75540 samples (MIT-BIH: 8592)
+   ❤️  HR labels loaded: mean=75.8, std=27.6 bpm
+   Train: 67986 samples | Val: 7554 samples
+   ❤️  HR-balanced sampling enabled (bins: [ 2488 10400 16731 11073  8429  6810  7199  3703  1153])
+   Batch=64, accum=8, effective=512
+   ❤️  HR Loss: DifferentiableHRLoss (warmup=2000 steps)
+   ❤️  HR Loss weight: 0.05, HR variance weight: 0.2
+   Optimizer: AdamW (lr=0.0001, wd=0.01)
+   LR Schedule: Cosine with 5000-step warmup
+   Total training steps: 66375
+   CFG dropout: 0.1
+   Early stopping: patience=60 epochs
+   Precision: BF16 mixed precision
+
+🚀 Starting training for 500 epochs (early stopping: patience=60)...
+======================================================================
+/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py:515: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
+/home/user04/Projects/Cardio/CardioEquation/src/training/train_dit.py:632: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=torch.bfloat16 if args.use_bf16 else torch.float32):
+Epoch 001/500 | Loss: 415.764410 | Val: 301.848408 | Val(EMA): 301.848408 | LR: 2.64e-06 | Time: 1174.0s | Step: 132
+   🏆 New best val_loss(EMA): 301.848408 (saved)
+Epoch 002/500 | Loss: 76.100141 | Val: 6.592659 | Val(EMA): 242.797258 | LR: 5.28e-06 | Time: 1228.0s | Step: 264
+   🏆 New best val_loss(EMA): 242.797258 (saved)
+Epoch 003/500 | Loss: 3.121630 | Val: 2.221198 | Val(EMA): 194.682046 | LR: 7.92e-06 | Time: 1244.8s | Step: 396
+   🏆 New best val_loss(EMA): 194.682046 (saved)
+Epoch 004/500 | Loss: 3.004535 | Val: 2.178184 | Val(EMA): 156.181274 | LR: 1.06e-05 | Time: 1233.6s | Step: 528
+   🏆 New best val_loss(EMA): 156.181274 (saved)
+Epoch 005/500 | Loss: 3.401146 | Val: 1.869061 | Val(EMA): 125.318831 | LR: 1.32e-05 | Time: 1039.5s | Step: 660
+   🏆 New best val_loss(EMA): 125.318831 (saved)
+Epoch 006/500 | Loss: 3.784681 | Val: 1.815518 | Val(EMA): 100.618169 | LR: 1.58e-05 | Time: 805.7s | Step: 792
+   🏆 New best val_loss(EMA): 100.618169 (saved)
+Epoch 007/500 | Loss: 4.254227 | Val: 1.870543 | Val(EMA): 80.868643 | LR: 1.85e-05 | Time: 792.2s | Step: 924
+   🏆 New best val_loss(EMA): 80.868643 (saved)
+Epoch 008/500 | Loss: 4.875427 | Val: 2.107757 | Val(EMA): 65.116466 | LR: 2.11e-05 | Time: 786.1s | Step: 1056
+   🏆 New best val_loss(EMA): 65.116466 (saved)
+Epoch 009/500 | Loss: 5.333025 | Val: 1.896835 | Val(EMA): 52.472540 | LR: 2.38e-05 | Time: 791.6s | Step: 1188
+   🏆 New best val_loss(EMA): 52.472540 (saved)
+Epoch 010/500 | Loss: 5.859863 | Val: 2.035035 | Val(EMA): 42.385039 | LR: 2.64e-05 | Time: 700.4s | Step: 1320
+   Components: noise_mse: 0.2659 | signal_mse: 0.6379 | identity: 0.2009 | spectral: 1485.6395 | correlation: 0.2168 | morphology: 0.8739 | snr_weight: 0.4949 | hr_loss: 1.0418 | hr_variance_loss: 3.9687 | hr_est_mean: 62.1994 | hr_est_std: 15.3448 | hr_ramp: 0.6269
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_010.pt
+   🏆 New best val_loss(EMA): 42.385039 (saved)
+Epoch 011/500 | Loss: 6.398676 | Val: 1.856251 | Val(EMA): 34.279281 | LR: 2.90e-05 | Time: 591.0s | Step: 1452
+   🏆 New best val_loss(EMA): 34.279281 (saved)
+Epoch 012/500 | Loss: 6.912419 | Val: 1.663901 | Val(EMA): 27.756205 | LR: 3.17e-05 | Time: 541.8s | Step: 1584
+   🏆 New best val_loss(EMA): 27.756205 (saved)
+Epoch 013/500 | Loss: 7.374466 | Val: 1.815918 | Val(EMA): 22.568148 | LR: 3.43e-05 | Time: 616.1s | Step: 1716
+   🏆 New best val_loss(EMA): 22.568148 (saved)
+Epoch 014/500 | Loss: 8.020894 | Val: 1.765885 | Val(EMA): 18.407695 | LR: 3.70e-05 | Time: 601.0s | Step: 1848
+   🏆 New best val_loss(EMA): 18.407695 (saved)
+Epoch 015/500 | Loss: 8.534534 | Val: 1.827688 | Val(EMA): 15.091694 | LR: 3.96e-05 | Time: 577.0s | Step: 1980
+   🏆 New best val_loss(EMA): 15.091694 (saved)
+Epoch 016/500 | Loss: 8.978169 | Val: 1.887054 | Val(EMA): 12.450766 | LR: 4.22e-05 | Time: 574.9s | Step: 2112
+   🏆 New best val_loss(EMA): 12.450766 (saved)
+Epoch 017/500 | Loss: 8.726718 | Val: 2.301548 | Val(EMA): 10.420922 | LR: 4.49e-05 | Time: 584.5s | Step: 2244
+   🏆 New best val_loss(EMA): 10.420922 (saved)
+Epoch 018/500 | Loss: 8.836615 | Val: 1.765078 | Val(EMA): 8.689754 | LR: 4.75e-05 | Time: 577.5s | Step: 2376
+   🏆 New best val_loss(EMA): 8.689754 (saved)
+Epoch 019/500 | Loss: 8.744978 | Val: 1.773560 | Val(EMA): 7.306515 | LR: 5.02e-05 | Time: 579.4s | Step: 2508
+   🏆 New best val_loss(EMA): 7.306515 (saved)
+Epoch 020/500 | Loss: 8.636133 | Val: 1.710001 | Val(EMA): 6.187212 | LR: 5.28e-05 | Time: 543.3s | Step: 2640
+   Components: noise_mse: 0.1998 | signal_mse: 0.6853 | identity: 0.1984 | spectral: 1572.6907 | correlation: 0.2099 | morphology: 0.8465 | snr_weight: 0.4960 | hr_loss: 1.6396 | hr_variance_loss: 6.1887 | hr_est_mean: 63.6570 | hr_est_std: 16.0565 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_020.pt
+   🏆 New best val_loss(EMA): 6.187212 (saved)
+Epoch 021/500 | Loss: 8.500615 | Val: 1.748664 | Val(EMA): 5.299502 | LR: 5.54e-05 | Time: 594.8s | Step: 2772
+   🏆 New best val_loss(EMA): 5.299502 (saved)
+Epoch 022/500 | Loss: 8.407138 | Val: 1.663752 | Val(EMA): 4.572352 | LR: 5.81e-05 | Time: 583.4s | Step: 2904
+   🏆 New best val_loss(EMA): 4.572352 (saved)
+Epoch 023/500 | Loss: 8.398116 | Val: 1.799640 | Val(EMA): 4.017810 | LR: 6.07e-05 | Time: 575.8s | Step: 3036
+   🏆 New best val_loss(EMA): 4.017810 (saved)
+Epoch 024/500 | Loss: 8.367905 | Val: 1.531089 | Val(EMA): 3.520466 | LR: 6.34e-05 | Time: 583.3s | Step: 3168
+   🏆 New best val_loss(EMA): 3.520466 (saved)
+Epoch 025/500 | Loss: 8.705707 | Val: 1.617395 | Val(EMA): 3.139852 | LR: 6.60e-05 | Time: 574.6s | Step: 3300
+   🏆 New best val_loss(EMA): 3.139852 (saved)
+Epoch 026/500 | Loss: 8.423711 | Val: 2.315715 | Val(EMA): 2.975024 | LR: 6.86e-05 | Time: 584.8s | Step: 3432
+   🏆 New best val_loss(EMA): 2.975024 (saved)
+Epoch 027/500 | Loss: 8.440968 | Val: 1.760025 | Val(EMA): 2.732024 | LR: 7.13e-05 | Time: 569.2s | Step: 3564
+   🏆 New best val_loss(EMA): 2.732024 (saved)
+Epoch 028/500 | Loss: 8.348958 | Val: 1.626588 | Val(EMA): 2.510937 | LR: 7.39e-05 | Time: 530.9s | Step: 3696
+   🏆 New best val_loss(EMA): 2.510937 (saved)
+Epoch 029/500 | Loss: 8.422553 | Val: 1.607707 | Val(EMA): 2.330291 | LR: 7.66e-05 | Time: 572.7s | Step: 3828
+   🏆 New best val_loss(EMA): 2.330291 (saved)
+Epoch 030/500 | Loss: 8.344418 | Val: 1.621583 | Val(EMA): 2.188550 | LR: 7.92e-05 | Time: 578.8s | Step: 3960
+   Components: noise_mse: 0.1874 | signal_mse: 0.5625 | identity: 0.2004 | spectral: 1172.5366 | correlation: 0.2170 | morphology: 0.4704 | snr_weight: 0.4949 | hr_loss: 1.5931 | hr_variance_loss: 6.0911 | hr_est_mean: 65.1357 | hr_est_std: 16.5444 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_030.pt
+   🏆 New best val_loss(EMA): 2.188550 (saved)
+Epoch 031/500 | Loss: 8.149036 | Val: 1.654134 | Val(EMA): 2.081666 | LR: 8.18e-05 | Time: 580.7s | Step: 4092
+   🏆 New best val_loss(EMA): 2.081666 (saved)
+Epoch 032/500 | Loss: 8.602369 | Val: 1.861749 | Val(EMA): 2.037683 | LR: 8.45e-05 | Time: 581.6s | Step: 4224
+   🏆 New best val_loss(EMA): 2.037683 (saved)
+Epoch 033/500 | Loss: 8.380986 | Val: 1.546564 | Val(EMA): 1.939459 | LR: 8.71e-05 | Time: 576.6s | Step: 4356
+   🏆 New best val_loss(EMA): 1.939459 (saved)
+Epoch 034/500 | Loss: 8.365594 | Val: 1.676781 | Val(EMA): 1.886924 | LR: 8.98e-05 | Time: 586.0s | Step: 4488
+   🏆 New best val_loss(EMA): 1.886924 (saved)
+Epoch 035/500 | Loss: 8.225876 | Val: 1.536291 | Val(EMA): 1.816797 | LR: 9.24e-05 | Time: 561.7s | Step: 4620
+   🏆 New best val_loss(EMA): 1.816797 (saved)
+Epoch 036/500 | Loss: 8.146658 | Val: 1.479373 | Val(EMA): 1.749312 | LR: 9.50e-05 | Time: 536.6s | Step: 4752
+   🏆 New best val_loss(EMA): 1.749312 (saved)
+Epoch 037/500 | Loss: 8.116131 | Val: 1.622274 | Val(EMA): 1.723905 | LR: 9.77e-05 | Time: 578.3s | Step: 4884
+   🏆 New best val_loss(EMA): 1.723905 (saved)
+Epoch 038/500 | Loss: 8.016909 | Val: 1.748836 | Val(EMA): 1.728891 | LR: 1.00e-04 | Time: 576.3s | Step: 5016
+Epoch 039/500 | Loss: 7.891596 | Val: 1.596246 | Val(EMA): 1.702362 | LR: 1.00e-04 | Time: 584.6s | Step: 5148
+   🏆 New best val_loss(EMA): 1.702362 (saved)
+Epoch 040/500 | Loss: 7.876912 | Val: 1.590307 | Val(EMA): 1.679951 | LR: 1.00e-04 | Time: 575.1s | Step: 5280
+   Components: noise_mse: 0.1844 | signal_mse: 0.6096 | identity: 0.2115 | spectral: 1266.4806 | correlation: 0.2355 | morphology: 0.4825 | snr_weight: 0.4947 | hr_loss: 1.4948 | hr_variance_loss: 5.6943 | hr_est_mean: 66.9417 | hr_est_std: 18.5286 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_040.pt
+   🏆 New best val_loss(EMA): 1.679951 (saved)
+Epoch 041/500 | Loss: 7.716305 | Val: 1.470297 | Val(EMA): 1.638020 | LR: 1.00e-04 | Time: 578.4s | Step: 5412
+   🏆 New best val_loss(EMA): 1.638020 (saved)
+Epoch 042/500 | Loss: 6.678697 | Val: 1.590805 | Val(EMA): 1.628577 | LR: 1.00e-04 | Time: 577.5s | Step: 5544
+   🏆 New best val_loss(EMA): 1.628577 (saved)
+Epoch 043/500 | Loss: 5.511382 | Val: 1.292227 | Val(EMA): 1.561307 | LR: 1.00e-04 | Time: 553.8s | Step: 5676
+   🏆 New best val_loss(EMA): 1.561307 (saved)
+Epoch 044/500 | Loss: 4.765150 | Val: 1.544521 | Val(EMA): 1.557950 | LR: 1.00e-04 | Time: 543.3s | Step: 5808
+   🏆 New best val_loss(EMA): 1.557950 (saved)
+Epoch 045/500 | Loss: 4.439458 | Val: 1.317004 | Val(EMA): 1.509761 | LR: 9.99e-05 | Time: 578.6s | Step: 5940
+   🏆 New best val_loss(EMA): 1.509761 (saved)
+Epoch 046/500 | Loss: 4.397877 | Val: 1.253051 | Val(EMA): 1.458419 | LR: 9.99e-05 | Time: 579.2s | Step: 6072
+   🏆 New best val_loss(EMA): 1.458419 (saved)
+Epoch 047/500 | Loss: 4.434400 | Val: 1.201920 | Val(EMA): 1.407119 | LR: 9.99e-05 | Time: 574.6s | Step: 6204
+   🏆 New best val_loss(EMA): 1.407119 (saved)
+Epoch 048/500 | Loss: 4.434123 | Val: 1.177160 | Val(EMA): 1.361127 | LR: 9.99e-05 | Time: 581.2s | Step: 6336
+   🏆 New best val_loss(EMA): 1.361127 (saved)
+Epoch 049/500 | Loss: 4.239911 | Val: 1.130965 | Val(EMA): 1.315095 | LR: 9.99e-05 | Time: 581.9s | Step: 6468
+   🏆 New best val_loss(EMA): 1.315095 (saved)
+Epoch 050/500 | Loss: 4.103694 | Val: 1.189448 | Val(EMA): 1.289965 | LR: 9.98e-05 | Time: 581.4s | Step: 6600
+   Components: noise_mse: 0.2814 | signal_mse: 0.5332 | identity: 0.1777 | spectral: 998.5918 | correlation: 0.2612 | morphology: 0.2785 | snr_weight: 0.4964 | hr_loss: 0.7959 | hr_variance_loss: 2.6062 | hr_est_mean: 81.0602 | hr_est_std: 33.9692 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_050.pt
+   🏆 New best val_loss(EMA): 1.289965 (saved)
+Epoch 051/500 | Loss: 4.155512 | Val: 1.119038 | Val(EMA): 1.255780 | LR: 9.98e-05 | Time: 547.9s | Step: 6732
+   🏆 New best val_loss(EMA): 1.255780 (saved)
+Epoch 052/500 | Loss: 4.298072 | Val: 1.276190 | Val(EMA): 1.259862 | LR: 9.98e-05 | Time: 548.2s | Step: 6864
+Epoch 053/500 | Loss: 4.075271 | Val: 1.086811 | Val(EMA): 1.225252 | LR: 9.97e-05 | Time: 582.8s | Step: 6996
+   🏆 New best val_loss(EMA): 1.225252 (saved)
+Epoch 054/500 | Loss: 4.066943 | Val: 1.377473 | Val(EMA): 1.255696 | LR: 9.97e-05 | Time: 580.8s | Step: 7128
+Epoch 055/500 | Loss: 4.126793 | Val: 1.024879 | Val(EMA): 1.209533 | LR: 9.97e-05 | Time: 578.9s | Step: 7260
+   🏆 New best val_loss(EMA): 1.209533 (saved)
+Epoch 056/500 | Loss: 3.899973 | Val: 1.225432 | Val(EMA): 1.212713 | LR: 9.96e-05 | Time: 578.2s | Step: 7392
+Epoch 057/500 | Loss: 3.970370 | Val: 1.100895 | Val(EMA): 1.190349 | LR: 9.96e-05 | Time: 582.0s | Step: 7524
+   🏆 New best val_loss(EMA): 1.190349 (saved)
+Epoch 058/500 | Loss: 3.918473 | Val: 1.090589 | Val(EMA): 1.170397 | LR: 9.95e-05 | Time: 584.5s | Step: 7656
+   🏆 New best val_loss(EMA): 1.170397 (saved)
+Epoch 059/500 | Loss: 3.894375 | Val: 1.077816 | Val(EMA): 1.151881 | LR: 9.95e-05 | Time: 544.3s | Step: 7788
+   🏆 New best val_loss(EMA): 1.151881 (saved)
+Epoch 060/500 | Loss: 3.836982 | Val: 1.065557 | Val(EMA): 1.134616 | LR: 9.94e-05 | Time: 560.4s | Step: 7920
+   Components: noise_mse: 0.2864 | signal_mse: 0.4606 | identity: 0.1689 | spectral: 809.3228 | correlation: 0.2591 | morphology: 0.1725 | snr_weight: 0.4972 | hr_loss: 0.6992 | hr_variance_loss: 2.4925 | hr_est_mean: 81.8860 | hr_est_std: 34.5376 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_060.pt
+   🏆 New best val_loss(EMA): 1.134616 (saved)
+Epoch 061/500 | Loss: 3.911674 | Val: 0.961236 | Val(EMA): 1.099940 | LR: 9.94e-05 | Time: 577.0s | Step: 8052
+   🏆 New best val_loss(EMA): 1.099940 (saved)
+Epoch 062/500 | Loss: 3.868455 | Val: 1.027209 | Val(EMA): 1.085394 | LR: 9.93e-05 | Time: 578.1s | Step: 8184
+   🏆 New best val_loss(EMA): 1.085394 (saved)
+Epoch 063/500 | Loss: 3.847202 | Val: 1.009131 | Val(EMA): 1.070141 | LR: 9.93e-05 | Time: 585.9s | Step: 8316
+   🏆 New best val_loss(EMA): 1.070141 (saved)
+Epoch 064/500 | Loss: 3.836315 | Val: 0.975071 | Val(EMA): 1.051127 | LR: 9.92e-05 | Time: 580.9s | Step: 8448
+   🏆 New best val_loss(EMA): 1.051127 (saved)
+Epoch 065/500 | Loss: 3.922720 | Val: 0.983085 | Val(EMA): 1.037519 | LR: 9.92e-05 | Time: 579.8s | Step: 8580
+   🏆 New best val_loss(EMA): 1.037519 (saved)
+Epoch 066/500 | Loss: 3.770095 | Val: 1.029123 | Val(EMA): 1.035840 | LR: 9.91e-05 | Time: 578.9s | Step: 8712
+   🏆 New best val_loss(EMA): 1.035840 (saved)
+Epoch 067/500 | Loss: 3.799129 | Val: 1.067219 | Val(EMA): 1.042116 | LR: 9.90e-05 | Time: 540.6s | Step: 8844
+Epoch 068/500 | Loss: 3.820616 | Val: 0.991619 | Val(EMA): 1.032016 | LR: 9.90e-05 | Time: 572.6s | Step: 8976
+   🏆 New best val_loss(EMA): 1.032016 (saved)
+Epoch 069/500 | Loss: 3.726247 | Val: 1.044962 | Val(EMA): 1.034605 | LR: 9.89e-05 | Time: 579.6s | Step: 9108
+Epoch 070/500 | Loss: 3.702295 | Val: 0.958531 | Val(EMA): 1.019391 | LR: 9.88e-05 | Time: 582.4s | Step: 9240
+   Components: noise_mse: 0.2881 | signal_mse: 0.4280 | identity: 0.1628 | spectral: 734.0950 | correlation: 0.2619 | morphology: 0.1412 | snr_weight: 0.4960 | hr_loss: 0.6451 | hr_variance_loss: 2.4363 | hr_est_mean: 82.2634 | hr_est_std: 34.8185 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_070.pt
+   🏆 New best val_loss(EMA): 1.019391 (saved)
+Epoch 071/500 | Loss: 3.752081 | Val: 1.003328 | Val(EMA): 1.016178 | LR: 9.88e-05 | Time: 581.2s | Step: 9372
+   🏆 New best val_loss(EMA): 1.016178 (saved)
+Epoch 072/500 | Loss: 3.688405 | Val: 0.920720 | Val(EMA): 0.997086 | LR: 9.87e-05 | Time: 584.5s | Step: 9504
+   🏆 New best val_loss(EMA): 0.997086 (saved)
+Epoch 073/500 | Loss: 3.763920 | Val: 1.018502 | Val(EMA): 1.001370 | LR: 9.86e-05 | Time: 581.9s | Step: 9636
+Epoch 074/500 | Loss: 3.845747 | Val: 1.088073 | Val(EMA): 1.018710 | LR: 9.85e-05 | Time: 566.9s | Step: 9768
+Epoch 075/500 | Loss: 3.704857 | Val: 0.942725 | Val(EMA): 1.003513 | LR: 9.84e-05 | Time: 538.8s | Step: 9900
+Epoch 076/500 | Loss: 3.687337 | Val: 0.951330 | Val(EMA): 0.993077 | LR: 9.84e-05 | Time: 577.6s | Step: 10032
+   🏆 New best val_loss(EMA): 0.993077 (saved)
+Epoch 077/500 | Loss: 3.806162 | Val: 1.133955 | Val(EMA): 1.021252 | LR: 9.83e-05 | Time: 586.6s | Step: 10164
+Epoch 078/500 | Loss: 3.734277 | Val: 1.031092 | Val(EMA): 1.023220 | LR: 9.82e-05 | Time: 582.6s | Step: 10296
+Epoch 079/500 | Loss: 3.686466 | Val: 0.924277 | Val(EMA): 1.003432 | LR: 9.81e-05 | Time: 582.9s | Step: 10428
+Epoch 080/500 | Loss: 3.675149 | Val: 1.063664 | Val(EMA): 1.015478 | LR: 9.80e-05 | Time: 587.2s | Step: 10560
+   Components: noise_mse: 0.2823 | signal_mse: 0.4307 | identity: 0.1597 | spectral: 735.2387 | correlation: 0.2581 | morphology: 0.1449 | snr_weight: 0.4976 | hr_loss: 0.6560 | hr_variance_loss: 2.4022 | hr_est_mean: 82.3044 | hr_est_std: 34.9890 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_080.pt
+Epoch 081/500 | Loss: 3.743712 | Val: 0.985620 | Val(EMA): 1.009506 | LR: 9.79e-05 | Time: 580.7s | Step: 10692
+Epoch 082/500 | Loss: 3.797513 | Val: 0.981282 | Val(EMA): 1.003862 | LR: 9.78e-05 | Time: 567.6s | Step: 10824
+Epoch 083/500 | Loss: 3.685211 | Val: 0.982740 | Val(EMA): 0.999637 | LR: 9.77e-05 | Time: 539.8s | Step: 10956
+Epoch 084/500 | Loss: 3.998471 | Val: 0.985378 | Val(EMA): 0.996785 | LR: 9.76e-05 | Time: 583.8s | Step: 11088
+Epoch 085/500 | Loss: 3.694795 | Val: 1.001490 | Val(EMA): 0.997726 | LR: 9.75e-05 | Time: 585.5s | Step: 11220
+Epoch 086/500 | Loss: 3.705498 | Val: 0.937985 | Val(EMA): 0.985778 | LR: 9.74e-05 | Time: 581.2s | Step: 11352
+   🏆 New best val_loss(EMA): 0.985778 (saved)
+Epoch 087/500 | Loss: 3.731181 | Val: 0.942253 | Val(EMA): 0.977073 | LR: 9.73e-05 | Time: 584.0s | Step: 11484
+   🏆 New best val_loss(EMA): 0.977073 (saved)
+Epoch 088/500 | Loss: 3.706412 | Val: 0.941850 | Val(EMA): 0.970028 | LR: 9.72e-05 | Time: 582.8s | Step: 11616
+   🏆 New best val_loss(EMA): 0.970028 (saved)
+Epoch 089/500 | Loss: 3.585552 | Val: 0.936582 | Val(EMA): 0.963339 | LR: 9.70e-05 | Time: 583.1s | Step: 11748
+   🏆 New best val_loss(EMA): 0.963339 (saved)
+Epoch 090/500 | Loss: 3.704504 | Val: 1.010679 | Val(EMA): 0.972807 | LR: 9.69e-05 | Time: 557.6s | Step: 11880
+   Components: noise_mse: 0.2821 | signal_mse: 0.4326 | identity: 0.1629 | spectral: 785.0634 | correlation: 0.2636 | morphology: 0.1195 | snr_weight: 0.4988 | hr_loss: 0.6584 | hr_variance_loss: 2.4280 | hr_est_mean: 81.8665 | hr_est_std: 34.8602 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_090.pt
+Epoch 091/500 | Loss: 3.550508 | Val: 1.007738 | Val(EMA): 0.979793 | LR: 9.68e-05 | Time: 539.1s | Step: 12012
+Epoch 092/500 | Loss: 3.554435 | Val: 0.899137 | Val(EMA): 0.963662 | LR: 9.67e-05 | Time: 578.3s | Step: 12144
+Epoch 093/500 | Loss: 3.439430 | Val: 0.919016 | Val(EMA): 0.954733 | LR: 9.66e-05 | Time: 583.5s | Step: 12276
+   🏆 New best val_loss(EMA): 0.954733 (saved)
+Epoch 094/500 | Loss: 3.533276 | Val: 0.902416 | Val(EMA): 0.944270 | LR: 9.64e-05 | Time: 579.5s | Step: 12408
+   🏆 New best val_loss(EMA): 0.944270 (saved)
+Epoch 095/500 | Loss: 3.467286 | Val: 1.022520 | Val(EMA): 0.959920 | LR: 9.63e-05 | Time: 580.9s | Step: 12540
+Epoch 096/500 | Loss: 3.469078 | Val: 0.928927 | Val(EMA): 0.953721 | LR: 9.62e-05 | Time: 581.6s | Step: 12672
+Epoch 097/500 | Loss: 3.411174 | Val: 0.912324 | Val(EMA): 0.945442 | LR: 9.61e-05 | Time: 583.5s | Step: 12804
+Epoch 098/500 | Loss: 3.476373 | Val: 0.908481 | Val(EMA): 0.938050 | LR: 9.59e-05 | Time: 547.6s | Step: 12936
+   🏆 New best val_loss(EMA): 0.938050 (saved)
+Epoch 099/500 | Loss: 3.390592 | Val: 0.918161 | Val(EMA): 0.934072 | LR: 9.58e-05 | Time: 549.8s | Step: 13068
+   🏆 New best val_loss(EMA): 0.934072 (saved)
+Epoch 100/500 | Loss: 3.490319 | Val: 0.909928 | Val(EMA): 0.929243 | LR: 9.57e-05 | Time: 583.7s | Step: 13200
+   Components: noise_mse: 0.2899 | signal_mse: 0.4101 | identity: 0.1552 | spectral: 697.1391 | correlation: 0.2661 | morphology: 0.1058 | snr_weight: 0.4985 | hr_loss: 0.6103 | hr_variance_loss: 2.2731 | hr_est_mean: 81.1785 | hr_est_std: 35.6346 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_100.pt
+   🏆 New best val_loss(EMA): 0.929243 (saved)
+Epoch 101/500 | Loss: 3.547618 | Val: 0.974386 | Val(EMA): 0.938272 | LR: 9.55e-05 | Time: 575.3s | Step: 13332
+Epoch 102/500 | Loss: 3.888018 | Val: 1.025701 | Val(EMA): 0.955758 | LR: 9.54e-05 | Time: 580.8s | Step: 13464
+Epoch 103/500 | Loss: 3.758374 | Val: 0.925210 | Val(EMA): 0.949648 | LR: 9.52e-05 | Time: 577.9s | Step: 13596
+Epoch 104/500 | Loss: 3.503686 | Val: 1.007986 | Val(EMA): 0.961316 | LR: 9.51e-05 | Time: 583.6s | Step: 13728
+Epoch 105/500 | Loss: 3.593708 | Val: 0.933319 | Val(EMA): 0.955716 | LR: 9.49e-05 | Time: 583.9s | Step: 13860
+Epoch 106/500 | Loss: 3.594964 | Val: 1.011697 | Val(EMA): 0.966912 | LR: 9.48e-05 | Time: 544.9s | Step: 13992
+Epoch 107/500 | Loss: 3.476908 | Val: 0.927714 | Val(EMA): 0.959073 | LR: 9.46e-05 | Time: 560.2s | Step: 14124
+Epoch 108/500 | Loss: 3.420984 | Val: 0.909356 | Val(EMA): 0.949129 | LR: 9.45e-05 | Time: 577.7s | Step: 14256
+Epoch 109/500 | Loss: 3.484106 | Val: 0.906568 | Val(EMA): 0.940617 | LR: 9.43e-05 | Time: 582.7s | Step: 14388
+Epoch 110/500 | Loss: 3.476588 | Val: 0.940598 | Val(EMA): 0.940613 | LR: 9.42e-05 | Time: 584.6s | Step: 14520
+   Components: noise_mse: 0.2962 | signal_mse: 0.4359 | identity: 0.1559 | spectral: 740.4450 | correlation: 0.2677 | morphology: 0.1327 | snr_weight: 0.4983 | hr_loss: 0.5875 | hr_variance_loss: 2.2571 | hr_est_mean: 81.5315 | hr_est_std: 35.7146 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_110.pt
+Epoch 111/500 | Loss: 3.461437 | Val: 1.018567 | Val(EMA): 0.956204 | LR: 9.40e-05 | Time: 573.2s | Step: 14652
+Epoch 112/500 | Loss: 3.466917 | Val: 1.007767 | Val(EMA): 0.966517 | LR: 9.39e-05 | Time: 582.1s | Step: 14784
+Epoch 113/500 | Loss: 3.586589 | Val: 0.973484 | Val(EMA): 0.967910 | LR: 9.37e-05 | Time: 576.0s | Step: 14916
+Epoch 114/500 | Loss: 3.491586 | Val: 0.914316 | Val(EMA): 0.957191 | LR: 9.35e-05 | Time: 538.0s | Step: 15048
+Epoch 115/500 | Loss: 3.461778 | Val: 1.022775 | Val(EMA): 0.970308 | LR: 9.34e-05 | Time: 561.6s | Step: 15180
+Epoch 116/500 | Loss: 3.524580 | Val: 0.939519 | Val(EMA): 0.964150 | LR: 9.32e-05 | Time: 578.9s | Step: 15312
+Epoch 117/500 | Loss: 3.486667 | Val: 0.942056 | Val(EMA): 0.959731 | LR: 9.30e-05 | Time: 581.1s | Step: 15444
+Epoch 118/500 | Loss: 3.700439 | Val: 0.971278 | Val(EMA): 0.962041 | LR: 9.29e-05 | Time: 579.7s | Step: 15576
+Epoch 119/500 | Loss: 3.524713 | Val: 0.930972 | Val(EMA): 0.955827 | LR: 9.27e-05 | Time: 567.2s | Step: 15708
+Epoch 120/500 | Loss: 3.443909 | Val: 0.926409 | Val(EMA): 0.949943 | LR: 9.25e-05 | Time: 572.8s | Step: 15840
+   Components: noise_mse: 0.2940 | signal_mse: 0.4106 | identity: 0.1530 | spectral: 684.3794 | correlation: 0.2689 | morphology: 0.0939 | snr_weight: 0.4976 | hr_loss: 0.5691 | hr_variance_loss: 2.2666 | hr_est_mean: 81.3409 | hr_est_std: 35.6671 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_120.pt
+Epoch 121/500 | Loss: 3.445331 | Val: 0.919561 | Val(EMA): 0.943867 | LR: 9.23e-05 | Time: 570.5s | Step: 15972
+Epoch 122/500 | Loss: 3.492413 | Val: 0.903891 | Val(EMA): 0.935872 | LR: 9.21e-05 | Time: 534.2s | Step: 16104
+Epoch 123/500 | Loss: 3.511889 | Val: 1.003091 | Val(EMA): 0.949316 | LR: 9.20e-05 | Time: 641.4s | Step: 16236
+Epoch 124/500 | Loss: 3.559713 | Val: 0.911813 | Val(EMA): 0.941815 | LR: 9.18e-05 | Time: 703.9s | Step: 16368
+Epoch 125/500 | Loss: 3.457952 | Val: 0.943218 | Val(EMA): 0.942096 | LR: 9.16e-05 | Time: 802.0s | Step: 16500
+Epoch 126/500 | Loss: 3.509421 | Val: 0.854879 | Val(EMA): 0.924652 | LR: 9.14e-05 | Time: 794.6s | Step: 16632
+   🏆 New best val_loss(EMA): 0.924652 (saved)
+Epoch 127/500 | Loss: 3.406051 | Val: 0.962949 | Val(EMA): 0.932312 | LR: 9.12e-05 | Time: 797.0s | Step: 16764
+Epoch 128/500 | Loss: 3.480556 | Val: 0.950100 | Val(EMA): 0.935869 | LR: 9.10e-05 | Time: 921.6s | Step: 16896
+Epoch 129/500 | Loss: 3.518258 | Val: 0.925080 | Val(EMA): 0.933711 | LR: 9.08e-05 | Time: 1054.7s | Step: 17028
+Epoch 130/500 | Loss: 3.461814 | Val: 0.972099 | Val(EMA): 0.941389 | LR: 9.06e-05 | Time: 1107.8s | Step: 17160
+   Components: noise_mse: 0.2870 | signal_mse: 0.4403 | identity: 0.1578 | spectral: 780.2174 | correlation: 0.2690 | morphology: 0.1326 | snr_weight: 0.4953 | hr_loss: 0.5828 | hr_variance_loss: 2.2528 | hr_est_mean: 81.6351 | hr_est_std: 35.7361 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_130.pt
+Epoch 131/500 | Loss: 3.514360 | Val: 0.944232 | Val(EMA): 0.941958 | LR: 9.04e-05 | Time: 963.0s | Step: 17292
+Epoch 132/500 | Loss: 3.526791 | Val: 0.982447 | Val(EMA): 0.950055 | LR: 9.02e-05 | Time: 784.2s | Step: 17424
+Epoch 133/500 | Loss: 3.477245 | Val: 0.884290 | Val(EMA): 0.936902 | LR: 9.00e-05 | Time: 722.5s | Step: 17556
+Epoch 134/500 | Loss: 3.486908 | Val: 0.899841 | Val(EMA): 0.929490 | LR: 8.98e-05 | Time: 915.0s | Step: 17688
+Epoch 135/500 | Loss: 3.464195 | Val: 0.939218 | Val(EMA): 0.931436 | LR: 8.96e-05 | Time: 933.4s | Step: 17820
+Epoch 136/500 | Loss: 3.566690 | Val: 0.900878 | Val(EMA): 0.925324 | LR: 8.94e-05 | Time: 935.1s | Step: 17952
+Epoch 137/500 | Loss: 3.494851 | Val: 0.888009 | Val(EMA): 0.917861 | LR: 8.92e-05 | Time: 936.0s | Step: 18084
+   🏆 New best val_loss(EMA): 0.917861 (saved)
+Epoch 138/500 | Loss: 3.381267 | Val: 0.905106 | Val(EMA): 0.915310 | LR: 8.90e-05 | Time: 890.5s | Step: 18216
+   🏆 New best val_loss(EMA): 0.915310 (saved)
+Epoch 139/500 | Loss: 3.440434 | Val: 0.907737 | Val(EMA): 0.913795 | LR: 8.88e-05 | Time: 927.4s | Step: 18348
+   🏆 New best val_loss(EMA): 0.913795 (saved)
+Epoch 140/500 | Loss: 3.392356 | Val: 0.880271 | Val(EMA): 0.907091 | LR: 8.86e-05 | Time: 591.0s | Step: 18480
+   Components: noise_mse: 0.2950 | signal_mse: 0.4098 | identity: 0.1516 | spectral: 680.7937 | correlation: 0.2700 | morphology: 0.0837 | snr_weight: 0.4968 | hr_loss: 0.5610 | hr_variance_loss: 2.2251 | hr_est_mean: 81.6681 | hr_est_std: 35.8746 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_140.pt
+   🏆 New best val_loss(EMA): 0.907091 (saved)
+Epoch 141/500 | Loss: 3.385402 | Val: 0.897565 | Val(EMA): 0.905186 | LR: 8.83e-05 | Time: 578.8s | Step: 18612
+   🏆 New best val_loss(EMA): 0.905186 (saved)
+Epoch 142/500 | Loss: 3.367044 | Val: 0.928007 | Val(EMA): 0.909750 | LR: 8.81e-05 | Time: 576.9s | Step: 18744
+Epoch 143/500 | Loss: 3.418074 | Val: 0.979444 | Val(EMA): 0.923689 | LR: 8.79e-05 | Time: 579.2s | Step: 18876
+Epoch 144/500 | Loss: 3.429820 | Val: 0.911090 | Val(EMA): 0.921169 | LR: 8.77e-05 | Time: 578.0s | Step: 19008
+Epoch 145/500 | Loss: 3.371006 | Val: 0.879549 | Val(EMA): 0.912845 | LR: 8.75e-05 | Time: 545.4s | Step: 19140
+Epoch 146/500 | Loss: 3.385376 | Val: 0.965056 | Val(EMA): 0.923287 | LR: 8.72e-05 | Time: 552.3s | Step: 19272
+Epoch 147/500 | Loss: 3.463342 | Val: 0.894227 | Val(EMA): 0.917475 | LR: 8.70e-05 | Time: 578.5s | Step: 19404
+Epoch 148/500 | Loss: 3.336280 | Val: 0.863489 | Val(EMA): 0.906678 | LR: 8.68e-05 | Time: 580.9s | Step: 19536
+Epoch 149/500 | Loss: 3.340554 | Val: 0.888498 | Val(EMA): 0.903042 | LR: 8.66e-05 | Time: 580.7s | Step: 19668
+   🏆 New best val_loss(EMA): 0.903042 (saved)
+Epoch 150/500 | Loss: 3.470769 | Val: 0.872282 | Val(EMA): 0.896890 | LR: 8.63e-05 | Time: 578.2s | Step: 19800
+   Components: noise_mse: 0.2784 | signal_mse: 0.4000 | identity: 0.1528 | spectral: 676.1083 | correlation: 0.2664 | morphology: 0.0825 | snr_weight: 0.4962 | hr_loss: 0.5762 | hr_variance_loss: 2.3103 | hr_est_mean: 81.1999 | hr_est_std: 35.4492 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_150.pt
+   🏆 New best val_loss(EMA): 0.896890 (saved)
+Epoch 151/500 | Loss: 3.380612 | Val: 0.909497 | Val(EMA): 0.899411 | LR: 8.61e-05 | Time: 576.8s | Step: 19932
+Epoch 152/500 | Loss: 3.525174 | Val: 0.962650 | Val(EMA): 0.912059 | LR: 8.59e-05 | Time: 584.4s | Step: 20064
+Epoch 153/500 | Loss: 3.471118 | Val: 0.894629 | Val(EMA): 0.908573 | LR: 8.56e-05 | Time: 540.8s | Step: 20196
+Epoch 154/500 | Loss: 3.479139 | Val: 0.887821 | Val(EMA): 0.904423 | LR: 8.54e-05 | Time: 549.5s | Step: 20328
+Epoch 155/500 | Loss: 3.366318 | Val: 0.892570 | Val(EMA): 0.902052 | LR: 8.51e-05 | Time: 581.2s | Step: 20460
+Epoch 156/500 | Loss: 3.488753 | Val: 0.900808 | Val(EMA): 0.901803 | LR: 8.49e-05 | Time: 585.4s | Step: 20592
+Epoch 157/500 | Loss: 3.464019 | Val: 0.898044 | Val(EMA): 0.901051 | LR: 8.47e-05 | Time: 580.8s | Step: 20724
+Epoch 158/500 | Loss: 3.353582 | Val: 0.885115 | Val(EMA): 0.897864 | LR: 8.44e-05 | Time: 579.4s | Step: 20856
+Epoch 159/500 | Loss: 3.417821 | Val: 0.912081 | Val(EMA): 0.900708 | LR: 8.42e-05 | Time: 581.4s | Step: 20988
+Epoch 160/500 | Loss: 3.452225 | Val: 0.872173 | Val(EMA): 0.895001 | LR: 8.39e-05 | Time: 569.9s | Step: 21120
+   Components: noise_mse: 0.2947 | signal_mse: 0.4167 | identity: 0.1561 | spectral: 714.4873 | correlation: 0.2772 | morphology: 0.0835 | snr_weight: 0.4967 | hr_loss: 0.5564 | hr_variance_loss: 2.2830 | hr_est_mean: 81.1799 | hr_est_std: 35.5850 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_160.pt
+   🏆 New best val_loss(EMA): 0.895001 (saved)
+Epoch 161/500 | Loss: 3.377439 | Val: 0.957022 | Val(EMA): 0.907405 | LR: 8.37e-05 | Time: 539.9s | Step: 21252
+Epoch 162/500 | Loss: 3.350951 | Val: 0.864379 | Val(EMA): 0.898800 | LR: 8.34e-05 | Time: 555.1s | Step: 21384
+Epoch 163/500 | Loss: 3.411792 | Val: 0.853781 | Val(EMA): 0.889796 | LR: 8.32e-05 | Time: 577.5s | Step: 21516
+   🏆 New best val_loss(EMA): 0.889796 (saved)
+Epoch 164/500 | Loss: 3.403958 | Val: 0.897439 | Val(EMA): 0.891324 | LR: 8.29e-05 | Time: 580.7s | Step: 21648
+Epoch 165/500 | Loss: 3.325649 | Val: 0.909571 | Val(EMA): 0.894974 | LR: 8.27e-05 | Time: 577.6s | Step: 21780
+Epoch 166/500 | Loss: 3.381479 | Val: 0.890465 | Val(EMA): 0.894072 | LR: 8.24e-05 | Time: 579.5s | Step: 21912
+Epoch 167/500 | Loss: 3.373888 | Val: 0.901248 | Val(EMA): 0.895507 | LR: 8.21e-05 | Time: 577.4s | Step: 22044
+Epoch 168/500 | Loss: 3.327829 | Val: 0.842331 | Val(EMA): 0.884872 | LR: 8.19e-05 | Time: 580.2s | Step: 22176
+   🏆 New best val_loss(EMA): 0.884872 (saved)
+Epoch 169/500 | Loss: 3.356693 | Val: 0.899137 | Val(EMA): 0.887725 | LR: 8.16e-05 | Time: 542.4s | Step: 22308
+Epoch 170/500 | Loss: 3.296347 | Val: 0.850843 | Val(EMA): 0.880349 | LR: 8.14e-05 | Time: 553.2s | Step: 22440
+   Components: noise_mse: 0.3020 | signal_mse: 0.4024 | identity: 0.1466 | spectral: 670.1728 | correlation: 0.2705 | morphology: 0.0777 | snr_weight: 0.4987 | hr_loss: 0.5266 | hr_variance_loss: 2.1613 | hr_est_mean: 82.1011 | hr_est_std: 36.1942 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_170.pt
+   🏆 New best val_loss(EMA): 0.880349 (saved)
+Epoch 171/500 | Loss: 3.350351 | Val: 0.897452 | Val(EMA): 0.883769 | LR: 8.11e-05 | Time: 573.7s | Step: 22572
+Epoch 172/500 | Loss: 3.322445 | Val: 0.869689 | Val(EMA): 0.880953 | LR: 8.08e-05 | Time: 579.0s | Step: 22704
+Epoch 173/500 | Loss: 3.359098 | Val: 0.975568 | Val(EMA): 0.899876 | LR: 8.06e-05 | Time: 576.8s | Step: 22836
+Epoch 174/500 | Loss: 3.307864 | Val: 0.849303 | Val(EMA): 0.889761 | LR: 8.03e-05 | Time: 582.3s | Step: 22968
+Epoch 175/500 | Loss: 3.278669 | Val: 0.879077 | Val(EMA): 0.887625 | LR: 8.00e-05 | Time: 576.0s | Step: 23100
+Epoch 176/500 | Loss: 3.424293 | Val: 0.867106 | Val(EMA): 0.883521 | LR: 7.98e-05 | Time: 576.0s | Step: 23232
+Epoch 177/500 | Loss: 3.350711 | Val: 0.864591 | Val(EMA): 0.879735 | LR: 7.95e-05 | Time: 535.6s | Step: 23364
+   🏆 New best val_loss(EMA): 0.879735 (saved)
+Epoch 178/500 | Loss: 3.378110 | Val: 0.850677 | Val(EMA): 0.873923 | LR: 7.92e-05 | Time: 560.0s | Step: 23496
+   🏆 New best val_loss(EMA): 0.873923 (saved)
+Epoch 179/500 | Loss: 3.266627 | Val: 0.849024 | Val(EMA): 0.868944 | LR: 7.89e-05 | Time: 576.9s | Step: 23628
+   🏆 New best val_loss(EMA): 0.868944 (saved)
+Epoch 180/500 | Loss: 3.322910 | Val: 0.854935 | Val(EMA): 0.866142 | LR: 7.87e-05 | Time: 573.6s | Step: 23760
+   Components: noise_mse: 0.2910 | signal_mse: 0.3959 | identity: 0.1451 | spectral: 655.7577 | correlation: 0.2660 | morphology: 0.0784 | snr_weight: 0.4976 | hr_loss: 0.5321 | hr_variance_loss: 2.1986 | hr_est_mean: 81.7449 | hr_est_std: 36.0072 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_180.pt
+   🏆 New best val_loss(EMA): 0.866142 (saved)
+Epoch 181/500 | Loss: 3.315545 | Val: 0.840048 | Val(EMA): 0.860923 | LR: 7.84e-05 | Time: 576.0s | Step: 23892
+   🏆 New best val_loss(EMA): 0.860923 (saved)
+Epoch 182/500 | Loss: 3.300977 | Val: 0.894598 | Val(EMA): 0.867658 | LR: 7.81e-05 | Time: 576.9s | Step: 24024
+Epoch 183/500 | Loss: 3.295814 | Val: 0.867468 | Val(EMA): 0.867620 | LR: 7.78e-05 | Time: 579.3s | Step: 24156
+Epoch 184/500 | Loss: 3.314911 | Val: 0.852306 | Val(EMA): 0.864557 | LR: 7.75e-05 | Time: 574.5s | Step: 24288
+Epoch 185/500 | Loss: 3.318979 | Val: 0.862053 | Val(EMA): 0.864056 | LR: 7.73e-05 | Time: 535.1s | Step: 24420
+Epoch 186/500 | Loss: 3.331672 | Val: 0.902994 | Val(EMA): 0.871844 | LR: 7.70e-05 | Time: 574.5s | Step: 24552
+Epoch 187/500 | Loss: 3.357299 | Val: 0.870668 | Val(EMA): 0.871609 | LR: 7.67e-05 | Time: 580.1s | Step: 24684
+Epoch 188/500 | Loss: 3.322014 | Val: 0.865094 | Val(EMA): 0.870306 | LR: 7.64e-05 | Time: 581.1s | Step: 24816
+Epoch 189/500 | Loss: 3.398788 | Val: 0.878496 | Val(EMA): 0.871944 | LR: 7.61e-05 | Time: 583.5s | Step: 24948
+Epoch 190/500 | Loss: 3.288019 | Val: 0.893571 | Val(EMA): 0.876269 | LR: 7.58e-05 | Time: 577.5s | Step: 25080
+   Components: noise_mse: 0.2977 | signal_mse: 0.3992 | identity: 0.1465 | spectral: 666.1100 | correlation: 0.2710 | morphology: 0.0723 | snr_weight: 0.4956 | hr_loss: 0.5130 | hr_variance_loss: 2.1752 | hr_est_mean: 82.1527 | hr_est_std: 36.1242 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_190.pt
+Epoch 191/500 | Loss: 3.316661 | Val: 0.885397 | Val(EMA): 0.878095 | LR: 7.55e-05 | Time: 581.3s | Step: 25212
+Epoch 192/500 | Loss: 3.323153 | Val: 0.902404 | Val(EMA): 0.882957 | LR: 7.53e-05 | Time: 579.6s | Step: 25344
+Epoch 193/500 | Loss: 3.281413 | Val: 0.861689 | Val(EMA): 0.878703 | LR: 7.50e-05 | Time: 583.9s | Step: 25476
+Epoch 194/500 | Loss: 3.295779 | Val: 0.919761 | Val(EMA): 0.886915 | LR: 7.47e-05 | Time: 584.5s | Step: 25608
+Epoch 195/500 | Loss: 3.287366 | Val: 0.855834 | Val(EMA): 0.880698 | LR: 7.44e-05 | Time: 578.4s | Step: 25740
+Epoch 196/500 | Loss: 3.289130 | Val: 0.853970 | Val(EMA): 0.875353 | LR: 7.41e-05 | Time: 582.1s | Step: 25872
+Epoch 197/500 | Loss: 3.260416 | Val: 0.844119 | Val(EMA): 0.869106 | LR: 7.38e-05 | Time: 573.8s | Step: 26004
+Epoch 198/500 | Loss: 3.286579 | Val: 0.835678 | Val(EMA): 0.862420 | LR: 7.35e-05 | Time: 580.2s | Step: 26136
+Epoch 199/500 | Loss: 3.327235 | Val: 0.852242 | Val(EMA): 0.860385 | LR: 7.32e-05 | Time: 581.9s | Step: 26268
+   🏆 New best val_loss(EMA): 0.860385 (saved)
+Epoch 200/500 | Loss: 3.340442 | Val: 0.876086 | Val(EMA): 0.863525 | LR: 7.29e-05 | Time: 559.9s | Step: 26400
+   Components: noise_mse: 0.2954 | signal_mse: 0.3932 | identity: 0.1439 | spectral: 659.5821 | correlation: 0.2656 | morphology: 0.0723 | snr_weight: 0.4971 | hr_loss: 0.5226 | hr_variance_loss: 2.2238 | hr_est_mean: 81.9823 | hr_est_std: 35.8825 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_200.pt
+Epoch 201/500 | Loss: 3.240080 | Val: 0.862704 | Val(EMA): 0.863361 | LR: 7.26e-05 | Time: 541.2s | Step: 26532
+Epoch 202/500 | Loss: 3.273196 | Val: 0.847412 | Val(EMA): 0.860171 | LR: 7.23e-05 | Time: 580.8s | Step: 26664
+   🏆 New best val_loss(EMA): 0.860171 (saved)
+Epoch 203/500 | Loss: 3.309842 | Val: 0.846963 | Val(EMA): 0.857529 | LR: 7.20e-05 | Time: 578.6s | Step: 26796
+   🏆 New best val_loss(EMA): 0.857529 (saved)
+Epoch 204/500 | Loss: 3.253773 | Val: 0.868456 | Val(EMA): 0.859715 | LR: 7.17e-05 | Time: 575.1s | Step: 26928
+Epoch 205/500 | Loss: 3.284305 | Val: 0.842162 | Val(EMA): 0.856204 | LR: 7.14e-05 | Time: 574.2s | Step: 27060
+   🏆 New best val_loss(EMA): 0.856204 (saved)
+Epoch 206/500 | Loss: 3.270563 | Val: 0.842589 | Val(EMA): 0.853481 | LR: 7.11e-05 | Time: 571.5s | Step: 27192
+   🏆 New best val_loss(EMA): 0.853481 (saved)
+Epoch 207/500 | Loss: 3.253429 | Val: 0.854157 | Val(EMA): 0.853616 | LR: 7.08e-05 | Time: 566.6s | Step: 27324
+Epoch 208/500 | Loss: 3.328473 | Val: 0.867909 | Val(EMA): 0.856475 | LR: 7.04e-05 | Time: 556.6s | Step: 27456
+Epoch 209/500 | Loss: 3.334687 | Val: 0.850954 | Val(EMA): 0.855371 | LR: 7.01e-05 | Time: 539.2s | Step: 27588
+Epoch 210/500 | Loss: 3.335809 | Val: 0.905362 | Val(EMA): 0.865369 | LR: 6.98e-05 | Time: 574.6s | Step: 27720
+   Components: noise_mse: 0.2866 | signal_mse: 0.3909 | identity: 0.1436 | spectral: 645.7111 | correlation: 0.2646 | morphology: 0.0706 | snr_weight: 0.4981 | hr_loss: 0.5387 | hr_variance_loss: 2.2138 | hr_est_mean: 81.4738 | hr_est_std: 35.9310 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_210.pt
+Epoch 211/500 | Loss: 3.348245 | Val: 0.857651 | Val(EMA): 0.863825 | LR: 6.95e-05 | Time: 575.6s | Step: 27852
+Epoch 212/500 | Loss: 3.332954 | Val: 0.864627 | Val(EMA): 0.863986 | LR: 6.92e-05 | Time: 574.0s | Step: 27984
+Epoch 213/500 | Loss: 3.243925 | Val: 0.845562 | Val(EMA): 0.860301 | LR: 6.89e-05 | Time: 583.2s | Step: 28116
+Epoch 214/500 | Loss: 3.292612 | Val: 0.860984 | Val(EMA): 0.860438 | LR: 6.86e-05 | Time: 579.6s | Step: 28248
+Epoch 215/500 | Loss: 3.352979 | Val: 0.839478 | Val(EMA): 0.856246 | LR: 6.83e-05 | Time: 582.0s | Step: 28380
+Epoch 216/500 | Loss: 3.248415 | Val: 0.847046 | Val(EMA): 0.854406 | LR: 6.80e-05 | Time: 562.2s | Step: 28512
+Epoch 217/500 | Loss: 3.251916 | Val: 0.859771 | Val(EMA): 0.855479 | LR: 6.76e-05 | Time: 545.2s | Step: 28644
+Epoch 218/500 | Loss: 3.261298 | Val: 0.836002 | Val(EMA): 0.851583 | LR: 6.73e-05 | Time: 582.2s | Step: 28776
+   🏆 New best val_loss(EMA): 0.851583 (saved)
+Epoch 219/500 | Loss: 3.280466 | Val: 0.842624 | Val(EMA): 0.849791 | LR: 6.70e-05 | Time: 575.7s | Step: 28908
+   🏆 New best val_loss(EMA): 0.849791 (saved)
+Epoch 220/500 | Loss: 3.244097 | Val: 0.874727 | Val(EMA): 0.854778 | LR: 6.67e-05 | Time: 577.0s | Step: 29040
+   Components: noise_mse: 0.2925 | signal_mse: 0.3900 | identity: 0.1412 | spectral: 644.4639 | correlation: 0.2674 | morphology: 0.0690 | snr_weight: 0.4966 | hr_loss: 0.5051 | hr_variance_loss: 2.1515 | hr_est_mean: 82.1331 | hr_est_std: 36.2424 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_220.pt
+Epoch 221/500 | Loss: 3.270730 | Val: 0.837713 | Val(EMA): 0.851365 | LR: 6.64e-05 | Time: 582.1s | Step: 29172
+Epoch 222/500 | Loss: 3.234458 | Val: 0.829391 | Val(EMA): 0.846970 | LR: 6.60e-05 | Time: 579.8s | Step: 29304
+   🏆 New best val_loss(EMA): 0.846970 (saved)
+Epoch 223/500 | Loss: 3.234303 | Val: 0.848570 | Val(EMA): 0.847290 | LR: 6.57e-05 | Time: 581.0s | Step: 29436
+Epoch 224/500 | Loss: 3.327690 | Val: 0.910637 | Val(EMA): 0.859960 | LR: 6.54e-05 | Time: 558.5s | Step: 29568
+Epoch 225/500 | Loss: 3.266395 | Val: 0.833795 | Val(EMA): 0.854727 | LR: 6.51e-05 | Time: 550.1s | Step: 29700
+Epoch 226/500 | Loss: 3.188988 | Val: 0.837868 | Val(EMA): 0.851355 | LR: 6.48e-05 | Time: 585.4s | Step: 29832
+Epoch 227/500 | Loss: 3.224283 | Val: 0.838700 | Val(EMA): 0.848824 | LR: 6.44e-05 | Time: 584.2s | Step: 29964
+Epoch 228/500 | Loss: 3.223866 | Val: 0.813296 | Val(EMA): 0.841718 | LR: 6.41e-05 | Time: 584.3s | Step: 30096
+   🏆 New best val_loss(EMA): 0.841718 (saved)
+Epoch 229/500 | Loss: 3.283051 | Val: 0.843973 | Val(EMA): 0.842169 | LR: 6.38e-05 | Time: 581.3s | Step: 30228
+Epoch 230/500 | Loss: 3.327772 | Val: 0.872008 | Val(EMA): 0.848137 | LR: 6.35e-05 | Time: 589.4s | Step: 30360
+   Components: noise_mse: 0.2981 | signal_mse: 0.3959 | identity: 0.1398 | spectral: 654.3993 | correlation: 0.2662 | morphology: 0.0792 | snr_weight: 0.4961 | hr_loss: 0.4936 | hr_variance_loss: 2.2371 | hr_est_mean: 81.8353 | hr_est_std: 35.8144 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_230.pt
+Epoch 231/500 | Loss: 3.249919 | Val: 0.826760 | Val(EMA): 0.843862 | LR: 6.31e-05 | Time: 582.1s | Step: 30492
+Epoch 232/500 | Loss: 3.309906 | Val: 0.891515 | Val(EMA): 0.853392 | LR: 6.28e-05 | Time: 552.6s | Step: 30624
+Epoch 233/500 | Loss: 3.248656 | Val: 0.834459 | Val(EMA): 0.849606 | LR: 6.25e-05 | Time: 553.6s | Step: 30756
+Epoch 234/500 | Loss: 3.282196 | Val: 0.815455 | Val(EMA): 0.842776 | LR: 6.22e-05 | Time: 581.2s | Step: 30888
+Epoch 235/500 | Loss: 3.222005 | Val: 0.820039 | Val(EMA): 0.838228 | LR: 6.18e-05 | Time: 582.5s | Step: 31020
+   🏆 New best val_loss(EMA): 0.838228 (saved)
+Epoch 236/500 | Loss: 3.288756 | Val: 0.822332 | Val(EMA): 0.835049 | LR: 6.15e-05 | Time: 584.1s | Step: 31152
+   🏆 New best val_loss(EMA): 0.835049 (saved)
+Epoch 237/500 | Loss: 3.228545 | Val: 0.825051 | Val(EMA): 0.833049 | LR: 6.12e-05 | Time: 583.5s | Step: 31284
+   🏆 New best val_loss(EMA): 0.833049 (saved)
+Epoch 238/500 | Loss: 3.225515 | Val: 0.832168 | Val(EMA): 0.832873 | LR: 6.08e-05 | Time: 583.6s | Step: 31416
+   🏆 New best val_loss(EMA): 0.832873 (saved)
+Epoch 239/500 | Loss: 3.277450 | Val: 0.816690 | Val(EMA): 0.829636 | LR: 6.05e-05 | Time: 581.0s | Step: 31548
+   🏆 New best val_loss(EMA): 0.829636 (saved)
+Epoch 240/500 | Loss: 3.230719 | Val: 0.839433 | Val(EMA): 0.831596 | LR: 6.02e-05 | Time: 543.6s | Step: 31680
+   Components: noise_mse: 0.2918 | signal_mse: 0.3833 | identity: 0.1390 | spectral: 638.6571 | correlation: 0.2660 | morphology: 0.0601 | snr_weight: 0.4947 | hr_loss: 0.4913 | hr_variance_loss: 2.1591 | hr_est_mean: 82.0691 | hr_est_std: 36.2048 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_240.pt
+Epoch 241/500 | Loss: 3.234392 | Val: 0.824787 | Val(EMA): 0.830234 | LR: 5.99e-05 | Time: 557.4s | Step: 31812
+Epoch 242/500 | Loss: 3.222024 | Val: 0.834052 | Val(EMA): 0.830997 | LR: 5.95e-05 | Time: 582.2s | Step: 31944
+Epoch 243/500 | Loss: 3.288592 | Val: 0.881425 | Val(EMA): 0.841083 | LR: 5.92e-05 | Time: 590.2s | Step: 32076
+Epoch 244/500 | Loss: 3.296206 | Val: 0.836352 | Val(EMA): 0.840137 | LR: 5.89e-05 | Time: 581.9s | Step: 32208
+Epoch 245/500 | Loss: 3.262902 | Val: 0.826748 | Val(EMA): 0.837459 | LR: 5.85e-05 | Time: 584.2s | Step: 32340
+Epoch 246/500 | Loss: 3.233963 | Val: 0.811559 | Val(EMA): 0.832279 | LR: 5.82e-05 | Time: 582.9s | Step: 32472
+Epoch 247/500 | Loss: 3.267280 | Val: 0.838541 | Val(EMA): 0.833531 | LR: 5.79e-05 | Time: 582.5s | Step: 32604
+Epoch 248/500 | Loss: 3.221757 | Val: 0.820908 | Val(EMA): 0.831007 | LR: 5.75e-05 | Time: 541.3s | Step: 32736
+Epoch 249/500 | Loss: 3.274516 | Val: 0.836437 | Val(EMA): 0.832093 | LR: 5.72e-05 | Time: 556.2s | Step: 32868
+Epoch 250/500 | Loss: 3.307864 | Val: 0.843811 | Val(EMA): 0.834436 | LR: 5.69e-05 | Time: 583.5s | Step: 33000
+   Components: noise_mse: 0.2834 | signal_mse: 0.3800 | identity: 0.1410 | spectral: 641.1001 | correlation: 0.2613 | morphology: 0.0652 | snr_weight: 0.4956 | hr_loss: 0.5114 | hr_variance_loss: 2.2250 | hr_est_mean: 82.0072 | hr_est_std: 35.8752 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_250.pt
+Epoch 251/500 | Loss: 3.296425 | Val: 0.852329 | Val(EMA): 0.838015 | LR: 5.65e-05 | Time: 581.1s | Step: 33132
+Epoch 252/500 | Loss: 3.238733 | Val: 0.867310 | Val(EMA): 0.843874 | LR: 5.62e-05 | Time: 581.0s | Step: 33264
+Epoch 253/500 | Loss: 3.258466 | Val: 0.819654 | Val(EMA): 0.839030 | LR: 5.59e-05 | Time: 585.3s | Step: 33396
+Epoch 254/500 | Loss: 3.253108 | Val: 0.822342 | Val(EMA): 0.835692 | LR: 5.55e-05 | Time: 580.4s | Step: 33528
+Epoch 255/500 | Loss: 3.209649 | Val: 0.824673 | Val(EMA): 0.833489 | LR: 5.52e-05 | Time: 582.2s | Step: 33660
+Epoch 256/500 | Loss: 3.223222 | Val: 0.831949 | Val(EMA): 0.833181 | LR: 5.48e-05 | Time: 541.2s | Step: 33792
+Epoch 257/500 | Loss: 3.197123 | Val: 0.837679 | Val(EMA): 0.834080 | LR: 5.45e-05 | Time: 563.9s | Step: 33924
+Epoch 258/500 | Loss: 3.187771 | Val: 0.856078 | Val(EMA): 0.838480 | LR: 5.42e-05 | Time: 584.9s | Step: 34056
+Epoch 259/500 | Loss: 3.295935 | Val: 0.873883 | Val(EMA): 0.845561 | LR: 5.38e-05 | Time: 577.7s | Step: 34188
+Epoch 260/500 | Loss: 3.282265 | Val: 0.873663 | Val(EMA): 0.851181 | LR: 5.35e-05 | Time: 583.5s | Step: 34320
+   Components: noise_mse: 0.2850 | signal_mse: 0.3875 | identity: 0.1415 | spectral: 655.0054 | correlation: 0.2620 | morphology: 0.0620 | snr_weight: 0.4963 | hr_loss: 0.5103 | hr_variance_loss: 2.1946 | hr_est_mean: 81.7669 | hr_est_std: 36.0271 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_260.pt
+Epoch 261/500 | Loss: 3.403923 | Val: 0.822989 | Val(EMA): 0.845543 | LR: 5.32e-05 | Time: 584.4s | Step: 34452
+Epoch 262/500 | Loss: 3.297082 | Val: 0.799860 | Val(EMA): 0.836406 | LR: 5.28e-05 | Time: 579.7s | Step: 34584
+Epoch 263/500 | Loss: 3.225686 | Val: 0.841765 | Val(EMA): 0.837478 | LR: 5.25e-05 | Time: 598.9s | Step: 34716
+Epoch 264/500 | Loss: 3.206249 | Val: 0.815200 | Val(EMA): 0.833022 | LR: 5.21e-05 | Time: 551.5s | Step: 34848
+Epoch 265/500 | Loss: 3.251858 | Val: 0.821144 | Val(EMA): 0.830647 | LR: 5.18e-05 | Time: 728.8s | Step: 34980
+Epoch 266/500 | Loss: 3.217904 | Val: 0.815547 | Val(EMA): 0.827627 | LR: 5.15e-05 | Time: 778.4s | Step: 35112
+   🏆 New best val_loss(EMA): 0.827627 (saved)
+Epoch 267/500 | Loss: 3.291373 | Val: 0.818909 | Val(EMA): 0.825883 | LR: 5.11e-05 | Time: 864.6s | Step: 35244
+   🏆 New best val_loss(EMA): 0.825883 (saved)
+Epoch 268/500 | Loss: 3.272619 | Val: 0.838379 | Val(EMA): 0.828382 | LR: 5.08e-05 | Time: 785.7s | Step: 35376
+Epoch 269/500 | Loss: 3.324784 | Val: 0.838704 | Val(EMA): 0.830447 | LR: 5.05e-05 | Time: 813.1s | Step: 35508
+Epoch 270/500 | Loss: 3.240440 | Val: 0.826884 | Val(EMA): 0.829734 | LR: 5.01e-05 | Time: 735.3s | Step: 35640
+   Components: noise_mse: 0.2889 | signal_mse: 0.3836 | identity: 0.1390 | spectral: 640.7787 | correlation: 0.2653 | morphology: 0.0594 | snr_weight: 0.4944 | hr_loss: 0.4971 | hr_variance_loss: 2.1663 | hr_est_mean: 82.1932 | hr_est_std: 36.1688 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_270.pt
+Epoch 271/500 | Loss: 3.202399 | Val: 0.805952 | Val(EMA): 0.824978 | LR: 4.98e-05 | Time: 834.2s | Step: 35772
+   🏆 New best val_loss(EMA): 0.824978 (saved)
+Epoch 272/500 | Loss: 3.223687 | Val: 0.850511 | Val(EMA): 0.830084 | LR: 4.94e-05 | Time: 937.6s | Step: 35904
+Epoch 273/500 | Loss: 3.297086 | Val: 0.842108 | Val(EMA): 0.832489 | LR: 4.91e-05 | Time: 956.0s | Step: 36036
+Epoch 274/500 | Loss: 3.233253 | Val: 0.817420 | Val(EMA): 0.829475 | LR: 4.88e-05 | Time: 950.9s | Step: 36168
+Epoch 275/500 | Loss: 3.277120 | Val: 0.829282 | Val(EMA): 0.829437 | LR: 4.84e-05 | Time: 900.7s | Step: 36300
+Epoch 276/500 | Loss: 3.229353 | Val: 0.839950 | Val(EMA): 0.831539 | LR: 4.81e-05 | Time: 941.4s | Step: 36432
+Epoch 277/500 | Loss: 3.232664 | Val: 0.817519 | Val(EMA): 0.828735 | LR: 4.78e-05 | Time: 816.9s | Step: 36564
+Epoch 278/500 | Loss: 3.188451 | Val: 0.814988 | Val(EMA): 0.825986 | LR: 4.74e-05 | Time: 586.4s | Step: 36696
+Epoch 279/500 | Loss: 3.300640 | Val: 0.807907 | Val(EMA): 0.822370 | LR: 4.71e-05 | Time: 590.9s | Step: 36828
+   🏆 New best val_loss(EMA): 0.822370 (saved)
+Epoch 280/500 | Loss: 3.234507 | Val: 0.836261 | Val(EMA): 0.825148 | LR: 4.67e-05 | Time: 587.6s | Step: 36960
+   Components: noise_mse: 0.2885 | signal_mse: 0.3771 | identity: 0.1348 | spectral: 629.5194 | correlation: 0.2634 | morphology: 0.0553 | snr_weight: 0.4964 | hr_loss: 0.4826 | hr_variance_loss: 2.1797 | hr_est_mean: 82.1369 | hr_est_std: 36.1017 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_280.pt
+Epoch 281/500 | Loss: 3.237555 | Val: 0.796471 | Val(EMA): 0.819413 | LR: 4.64e-05 | Time: 580.1s | Step: 37092
+   🏆 New best val_loss(EMA): 0.819413 (saved)
+Epoch 282/500 | Loss: 3.210850 | Val: 0.787206 | Val(EMA): 0.812971 | LR: 4.61e-05 | Time: 545.0s | Step: 37224
+   🏆 New best val_loss(EMA): 0.812971 (saved)
+Epoch 283/500 | Loss: 3.199125 | Val: 0.812777 | Val(EMA): 0.812932 | LR: 4.57e-05 | Time: 574.5s | Step: 37356
+   🏆 New best val_loss(EMA): 0.812932 (saved)
+Epoch 284/500 | Loss: 3.224023 | Val: 0.836048 | Val(EMA): 0.817555 | LR: 4.54e-05 | Time: 589.2s | Step: 37488
+Epoch 285/500 | Loss: 3.307471 | Val: 0.844414 | Val(EMA): 0.822927 | LR: 4.51e-05 | Time: 586.3s | Step: 37620
+Epoch 286/500 | Loss: 3.314514 | Val: 0.813047 | Val(EMA): 0.820951 | LR: 4.47e-05 | Time: 589.7s | Step: 37752
+Epoch 287/500 | Loss: 3.303065 | Val: 0.833919 | Val(EMA): 0.823545 | LR: 4.44e-05 | Time: 589.5s | Step: 37884
+Epoch 288/500 | Loss: 3.277398 | Val: 0.818230 | Val(EMA): 0.822482 | LR: 4.41e-05 | Time: 583.6s | Step: 38016
+Epoch 289/500 | Loss: 3.232000 | Val: 0.820202 | Val(EMA): 0.822026 | LR: 4.37e-05 | Time: 578.9s | Step: 38148
+Epoch 290/500 | Loss: 3.224797 | Val: 0.819966 | Val(EMA): 0.821614 | LR: 4.34e-05 | Time: 544.2s | Step: 38280
+   Components: noise_mse: 0.2870 | signal_mse: 0.3761 | identity: 0.1392 | spectral: 642.0494 | correlation: 0.2603 | morphology: 0.0598 | snr_weight: 0.4946 | hr_loss: 0.4907 | hr_variance_loss: 2.1632 | hr_est_mean: 82.4715 | hr_est_std: 36.1846 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_290.pt
+Epoch 291/500 | Loss: 3.282549 | Val: 0.823056 | Val(EMA): 0.821902 | LR: 4.30e-05 | Time: 590.8s | Step: 38412
+Epoch 292/500 | Loss: 3.255758 | Val: 0.831314 | Val(EMA): 0.823785 | LR: 4.27e-05 | Time: 589.9s | Step: 38544
+Epoch 293/500 | Loss: 3.243001 | Val: 0.819146 | Val(EMA): 0.822857 | LR: 4.24e-05 | Time: 584.4s | Step: 38676
+Epoch 294/500 | Loss: 3.201448 | Val: 0.829744 | Val(EMA): 0.824234 | LR: 4.20e-05 | Time: 590.4s | Step: 38808
+Epoch 295/500 | Loss: 3.271293 | Val: 0.816503 | Val(EMA): 0.822688 | LR: 4.17e-05 | Time: 587.2s | Step: 38940
+Epoch 296/500 | Loss: 3.244655 | Val: 0.823653 | Val(EMA): 0.822881 | LR: 4.14e-05 | Time: 590.1s | Step: 39072
+Epoch 297/500 | Loss: 3.171068 | Val: 0.810574 | Val(EMA): 0.820420 | LR: 4.10e-05 | Time: 565.1s | Step: 39204
+Epoch 298/500 | Loss: 3.193451 | Val: 0.812088 | Val(EMA): 0.818753 | LR: 4.07e-05 | Time: 553.8s | Step: 39336
+Epoch 299/500 | Loss: 3.171607 | Val: 0.806909 | Val(EMA): 0.816385 | LR: 4.04e-05 | Time: 587.1s | Step: 39468
+Epoch 300/500 | Loss: 3.126877 | Val: 0.797529 | Val(EMA): 0.812613 | LR: 4.01e-05 | Time: 588.3s | Step: 39600
+   Components: noise_mse: 0.2892 | signal_mse: 0.3690 | identity: 0.1302 | spectral: 623.2365 | correlation: 0.2575 | morphology: 0.0530 | snr_weight: 0.4977 | hr_loss: 0.4749 | hr_variance_loss: 2.0844 | hr_est_mean: 82.6170 | hr_est_std: 36.5780 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_300.pt
+   🏆 New best val_loss(EMA): 0.812613 (saved)
+Epoch 301/500 | Loss: 3.164550 | Val: 0.820700 | Val(EMA): 0.814231 | LR: 3.97e-05 | Time: 587.1s | Step: 39732
+Epoch 302/500 | Loss: 3.238305 | Val: 0.791570 | Val(EMA): 0.809699 | LR: 3.94e-05 | Time: 587.6s | Step: 39864
+   🏆 New best val_loss(EMA): 0.809699 (saved)
+Epoch 303/500 | Loss: 3.186022 | Val: 0.807984 | Val(EMA): 0.809356 | LR: 3.91e-05 | Time: 590.4s | Step: 39996
+   🏆 New best val_loss(EMA): 0.809356 (saved)
+Epoch 304/500 | Loss: 3.190518 | Val: 0.791828 | Val(EMA): 0.805850 | LR: 3.87e-05 | Time: 588.4s | Step: 40128
+   🏆 New best val_loss(EMA): 0.805850 (saved)
+Epoch 305/500 | Loss: 3.222604 | Val: 0.801821 | Val(EMA): 0.805044 | LR: 3.84e-05 | Time: 551.5s | Step: 40260
+   🏆 New best val_loss(EMA): 0.805044 (saved)
+Epoch 306/500 | Loss: 3.266147 | Val: 0.804345 | Val(EMA): 0.804904 | LR: 3.81e-05 | Time: 561.2s | Step: 40392
+   🏆 New best val_loss(EMA): 0.804904 (saved)
+Epoch 307/500 | Loss: 3.200917 | Val: 0.815314 | Val(EMA): 0.806986 | LR: 3.77e-05 | Time: 585.6s | Step: 40524
+Epoch 308/500 | Loss: 3.190407 | Val: 0.802396 | Val(EMA): 0.806068 | LR: 3.74e-05 | Time: 591.4s | Step: 40656
+Epoch 309/500 | Loss: 3.272587 | Val: 0.824833 | Val(EMA): 0.809821 | LR: 3.71e-05 | Time: 588.2s | Step: 40788
+Epoch 310/500 | Loss: 3.304942 | Val: 0.803170 | Val(EMA): 0.808491 | LR: 3.68e-05 | Time: 586.4s | Step: 40920
+   Components: noise_mse: 0.2815 | signal_mse: 0.3716 | identity: 0.1355 | spectral: 630.7740 | correlation: 0.2522 | morphology: 0.0593 | snr_weight: 0.4989 | hr_loss: 0.4947 | hr_variance_loss: 2.2466 | hr_est_mean: 81.8622 | hr_est_std: 35.7670 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_310.pt
+Epoch 311/500 | Loss: 3.307344 | Val: 0.813790 | Val(EMA): 0.809551 | LR: 3.64e-05 | Time: 588.6s | Step: 41052
+Epoch 312/500 | Loss: 3.240229 | Val: 0.812534 | Val(EMA): 0.810148 | LR: 3.61e-05 | Time: 584.8s | Step: 41184
+Epoch 313/500 | Loss: 3.258695 | Val: 0.827867 | Val(EMA): 0.813691 | LR: 3.58e-05 | Time: 548.8s | Step: 41316
+Epoch 314/500 | Loss: 3.221366 | Val: 0.797420 | Val(EMA): 0.810437 | LR: 3.55e-05 | Time: 565.9s | Step: 41448
+Epoch 315/500 | Loss: 3.211448 | Val: 0.807702 | Val(EMA): 0.809890 | LR: 3.51e-05 | Time: 582.7s | Step: 41580
+Epoch 316/500 | Loss: 3.206548 | Val: 0.791653 | Val(EMA): 0.806243 | LR: 3.48e-05 | Time: 589.2s | Step: 41712
+Epoch 317/500 | Loss: 3.235896 | Val: 0.809993 | Val(EMA): 0.806993 | LR: 3.45e-05 | Time: 583.5s | Step: 41844
+Epoch 318/500 | Loss: 3.222453 | Val: 0.799862 | Val(EMA): 0.805567 | LR: 3.42e-05 | Time: 591.2s | Step: 41976
+Epoch 319/500 | Loss: 3.203163 | Val: 0.812587 | Val(EMA): 0.806971 | LR: 3.39e-05 | Time: 585.1s | Step: 42108
+Epoch 320/500 | Loss: 3.156845 | Val: 0.772916 | Val(EMA): 0.800160 | LR: 3.35e-05 | Time: 588.8s | Step: 42240
+   Components: noise_mse: 0.2820 | signal_mse: 0.3669 | identity: 0.1272 | spectral: 612.2416 | correlation: 0.2555 | morphology: 0.0522 | snr_weight: 0.4949 | hr_loss: 0.4775 | hr_variance_loss: 2.1234 | hr_est_mean: 82.3548 | hr_est_std: 36.3829 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_320.pt
+   🏆 New best val_loss(EMA): 0.800160 (saved)
+Epoch 321/500 | Loss: 3.199001 | Val: 0.776238 | Val(EMA): 0.795376 | LR: 3.32e-05 | Time: 549.9s | Step: 42372
+   🏆 New best val_loss(EMA): 0.795376 (saved)
+Epoch 322/500 | Loss: 3.138860 | Val: 0.788164 | Val(EMA): 0.793933 | LR: 3.29e-05 | Time: 568.8s | Step: 42504
+   🏆 New best val_loss(EMA): 0.793933 (saved)
+Epoch 323/500 | Loss: 3.211174 | Val: 0.784920 | Val(EMA): 0.792130 | LR: 3.26e-05 | Time: 589.6s | Step: 42636
+   🏆 New best val_loss(EMA): 0.792130 (saved)
+Epoch 324/500 | Loss: 3.200480 | Val: 0.782993 | Val(EMA): 0.790303 | LR: 3.23e-05 | Time: 588.0s | Step: 42768
+   🏆 New best val_loss(EMA): 0.790303 (saved)
+Epoch 325/500 | Loss: 3.171910 | Val: 0.776716 | Val(EMA): 0.787586 | LR: 3.20e-05 | Time: 588.7s | Step: 42900
+   🏆 New best val_loss(EMA): 0.787586 (saved)
+Epoch 326/500 | Loss: 3.192462 | Val: 0.797922 | Val(EMA): 0.789653 | LR: 3.16e-05 | Time: 590.4s | Step: 43032
+Epoch 327/500 | Loss: 3.189617 | Val: 0.793956 | Val(EMA): 0.790513 | LR: 3.13e-05 | Time: 588.2s | Step: 43164
+Epoch 328/500 | Loss: 3.175635 | Val: 0.802292 | Val(EMA): 0.792869 | LR: 3.10e-05 | Time: 580.8s | Step: 43296
+Epoch 329/500 | Loss: 3.174775 | Val: 0.770151 | Val(EMA): 0.788326 | LR: 3.07e-05 | Time: 543.6s | Step: 43428
+Epoch 330/500 | Loss: 3.120157 | Val: 0.781515 | Val(EMA): 0.786963 | LR: 3.04e-05 | Time: 596.2s | Step: 43560
+   Components: noise_mse: 0.2850 | signal_mse: 0.3587 | identity: 0.1205 | spectral: 597.5494 | correlation: 0.2490 | morphology: 0.0512 | snr_weight: 0.4993 | hr_loss: 0.4751 | hr_variance_loss: 2.0908 | hr_est_mean: 82.6762 | hr_est_std: 36.5474 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_330.pt
+   🏆 New best val_loss(EMA): 0.786963 (saved)
+Epoch 331/500 | Loss: 3.149123 | Val: 0.775572 | Val(EMA): 0.784685 | LR: 3.01e-05 | Time: 636.5s | Step: 43692
+   🏆 New best val_loss(EMA): 0.784685 (saved)
+Epoch 332/500 | Loss: 3.201104 | Val: 0.801965 | Val(EMA): 0.788141 | LR: 2.98e-05 | Time: 593.8s | Step: 43824
+Epoch 333/500 | Loss: 3.242428 | Val: 0.781565 | Val(EMA): 0.786826 | LR: 2.95e-05 | Time: 592.6s | Step: 43956
+Epoch 334/500 | Loss: 3.174805 | Val: 0.785510 | Val(EMA): 0.786563 | LR: 2.92e-05 | Time: 587.4s | Step: 44088
+Epoch 335/500 | Loss: 3.143313 | Val: 0.778024 | Val(EMA): 0.784855 | LR: 2.89e-05 | Time: 590.4s | Step: 44220
+Epoch 336/500 | Loss: 3.223226 | Val: 0.785663 | Val(EMA): 0.785016 | LR: 2.85e-05 | Time: 568.0s | Step: 44352
+Epoch 337/500 | Loss: 3.199346 | Val: 0.790790 | Val(EMA): 0.786171 | LR: 2.82e-05 | Time: 536.6s | Step: 44484
+Epoch 338/500 | Loss: 3.164311 | Val: 0.773656 | Val(EMA): 0.783668 | LR: 2.79e-05 | Time: 590.7s | Step: 44616
+   🏆 New best val_loss(EMA): 0.783668 (saved)
+Epoch 339/500 | Loss: 3.191913 | Val: 0.772627 | Val(EMA): 0.781460 | LR: 2.76e-05 | Time: 584.3s | Step: 44748
+   🏆 New best val_loss(EMA): 0.781460 (saved)
+Epoch 340/500 | Loss: 3.133650 | Val: 0.797553 | Val(EMA): 0.784679 | LR: 2.73e-05 | Time: 591.3s | Step: 44880
+   Components: noise_mse: 0.2775 | signal_mse: 0.3578 | identity: 0.1192 | spectral: 602.6076 | correlation: 0.2510 | morphology: 0.0485 | snr_weight: 0.4952 | hr_loss: 0.4607 | hr_variance_loss: 2.1293 | hr_est_mean: 82.2617 | hr_est_std: 36.3534 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_340.pt
+Epoch 341/500 | Loss: 3.167658 | Val: 0.769493 | Val(EMA): 0.781642 | LR: 2.70e-05 | Time: 590.9s | Step: 45012
+Epoch 342/500 | Loss: 3.151390 | Val: 0.766653 | Val(EMA): 0.778644 | LR: 2.67e-05 | Time: 588.8s | Step: 45144
+   🏆 New best val_loss(EMA): 0.778644 (saved)
+Epoch 343/500 | Loss: 3.172710 | Val: 0.770942 | Val(EMA): 0.777104 | LR: 2.64e-05 | Time: 592.2s | Step: 45276
+   🏆 New best val_loss(EMA): 0.777104 (saved)
+Epoch 344/500 | Loss: 3.124148 | Val: 0.770453 | Val(EMA): 0.775774 | LR: 2.61e-05 | Time: 558.7s | Step: 45408
+   🏆 New best val_loss(EMA): 0.775774 (saved)
+Epoch 345/500 | Loss: 3.157611 | Val: 0.778761 | Val(EMA): 0.776371 | LR: 2.58e-05 | Time: 543.9s | Step: 45540
+Epoch 346/500 | Loss: 3.123900 | Val: 0.772778 | Val(EMA): 0.775652 | LR: 2.55e-05 | Time: 539.8s | Step: 45672
+   🏆 New best val_loss(EMA): 0.775652 (saved)
+Epoch 347/500 | Loss: 3.170268 | Val: 0.766984 | Val(EMA): 0.773919 | LR: 2.53e-05 | Time: 555.0s | Step: 45804
+   🏆 New best val_loss(EMA): 0.773919 (saved)
+Epoch 348/500 | Loss: 3.150304 | Val: 0.779960 | Val(EMA): 0.775127 | LR: 2.50e-05 | Time: 569.9s | Step: 45936
+Epoch 349/500 | Loss: 3.180089 | Val: 0.767384 | Val(EMA): 0.773578 | LR: 2.47e-05 | Time: 575.5s | Step: 46068
+   🏆 New best val_loss(EMA): 0.773578 (saved)
+Epoch 350/500 | Loss: 3.147045 | Val: 0.757635 | Val(EMA): 0.770390 | LR: 2.44e-05 | Time: 578.8s | Step: 46200
+   Components: noise_mse: 0.2782 | signal_mse: 0.3564 | identity: 0.1171 | spectral: 606.5530 | correlation: 0.2520 | morphology: 0.0472 | snr_weight: 0.4961 | hr_loss: 0.4613 | hr_variance_loss: 2.1419 | hr_est_mean: 82.4127 | hr_est_std: 36.2904 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_350.pt
+   🏆 New best val_loss(EMA): 0.770390 (saved)
+Epoch 351/500 | Loss: 3.137373 | Val: 0.772978 | Val(EMA): 0.770907 | LR: 2.41e-05 | Time: 574.5s | Step: 46332
+Epoch 352/500 | Loss: 3.149807 | Val: 0.748771 | Val(EMA): 0.766480 | LR: 2.38e-05 | Time: 573.6s | Step: 46464
+   🏆 New best val_loss(EMA): 0.766480 (saved)
+Epoch 353/500 | Loss: 3.132986 | Val: 0.764448 | Val(EMA): 0.766074 | LR: 2.35e-05 | Time: 570.3s | Step: 46596
+   🏆 New best val_loss(EMA): 0.766074 (saved)
+Epoch 354/500 | Loss: 3.087604 | Val: 0.752096 | Val(EMA): 0.763278 | LR: 2.32e-05 | Time: 569.0s | Step: 46728
+   🏆 New best val_loss(EMA): 0.763278 (saved)
+Epoch 355/500 | Loss: 3.174090 | Val: 0.765113 | Val(EMA): 0.763645 | LR: 2.29e-05 | Time: 578.8s | Step: 46860
+Epoch 356/500 | Loss: 3.136803 | Val: 0.760103 | Val(EMA): 0.762937 | LR: 2.27e-05 | Time: 541.6s | Step: 46992
+   🏆 New best val_loss(EMA): 0.762937 (saved)
+Epoch 357/500 | Loss: 3.118448 | Val: 0.750709 | Val(EMA): 0.760491 | LR: 2.24e-05 | Time: 557.6s | Step: 47124
+   🏆 New best val_loss(EMA): 0.760491 (saved)
+Epoch 358/500 | Loss: 3.158726 | Val: 0.759066 | Val(EMA): 0.760206 | LR: 2.21e-05 | Time: 574.7s | Step: 47256
+   🏆 New best val_loss(EMA): 0.760206 (saved)
+Epoch 359/500 | Loss: 3.163528 | Val: 0.753842 | Val(EMA): 0.758933 | LR: 2.18e-05 | Time: 578.0s | Step: 47388
+   🏆 New best val_loss(EMA): 0.758933 (saved)
+Epoch 360/500 | Loss: 3.201094 | Val: 0.770970 | Val(EMA): 0.761341 | LR: 2.15e-05 | Time: 584.2s | Step: 47520
+   Components: noise_mse: 0.2755 | signal_mse: 0.3529 | identity: 0.1128 | spectral: 591.0594 | correlation: 0.2477 | morphology: 0.0485 | snr_weight: 0.4971 | hr_loss: 0.4658 | hr_variance_loss: 2.1973 | hr_est_mean: 82.1782 | hr_est_std: 36.0135 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_360.pt
+Epoch 361/500 | Loss: 3.117616 | Val: 0.744654 | Val(EMA): 0.758003 | LR: 2.13e-05 | Time: 589.2s | Step: 47652
+   🏆 New best val_loss(EMA): 0.758003 (saved)
+Epoch 362/500 | Loss: 3.121062 | Val: 0.767243 | Val(EMA): 0.759851 | LR: 2.10e-05 | Time: 586.9s | Step: 47784
+Epoch 363/500 | Loss: 3.160754 | Val: 0.751874 | Val(EMA): 0.758256 | LR: 2.07e-05 | Time: 587.6s | Step: 47916
+Epoch 364/500 | Loss: 3.080643 | Val: 0.762393 | Val(EMA): 0.759083 | LR: 2.04e-05 | Time: 546.5s | Step: 48048
+Epoch 365/500 | Loss: 3.222104 | Val: 0.758212 | Val(EMA): 0.758909 | LR: 2.02e-05 | Time: 578.4s | Step: 48180
+Epoch 366/500 | Loss: 3.177088 | Val: 0.765924 | Val(EMA): 0.760312 | LR: 1.99e-05 | Time: 591.4s | Step: 48312
+Epoch 367/500 | Loss: 3.157051 | Val: 0.775674 | Val(EMA): 0.763384 | LR: 1.96e-05 | Time: 596.2s | Step: 48444
+Epoch 368/500 | Loss: 3.148922 | Val: 0.748283 | Val(EMA): 0.760364 | LR: 1.94e-05 | Time: 593.1s | Step: 48576
+Epoch 369/500 | Loss: 3.132315 | Val: 0.740503 | Val(EMA): 0.756392 | LR: 1.91e-05 | Time: 591.6s | Step: 48708
+   🏆 New best val_loss(EMA): 0.756392 (saved)
+Epoch 370/500 | Loss: 3.177165 | Val: 0.746917 | Val(EMA): 0.754497 | LR: 1.88e-05 | Time: 594.1s | Step: 48840
+   Components: noise_mse: 0.2681 | signal_mse: 0.3432 | identity: 0.1122 | spectral: 580.8108 | correlation: 0.2404 | morphology: 0.0462 | snr_weight: 0.4974 | hr_loss: 0.4602 | hr_variance_loss: 2.1930 | hr_est_mean: 82.2433 | hr_est_std: 36.0352 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_370.pt
+   🏆 New best val_loss(EMA): 0.754497 (saved)
+Epoch 371/500 | Loss: 3.130800 | Val: 0.756617 | Val(EMA): 0.754921 | LR: 1.86e-05 | Time: 567.9s | Step: 48972
+Epoch 372/500 | Loss: 3.129054 | Val: 0.745642 | Val(EMA): 0.753065 | LR: 1.83e-05 | Time: 552.0s | Step: 49104
+   🏆 New best val_loss(EMA): 0.753065 (saved)
+Epoch 373/500 | Loss: 3.138586 | Val: 0.749659 | Val(EMA): 0.752384 | LR: 1.80e-05 | Time: 591.9s | Step: 49236
+   🏆 New best val_loss(EMA): 0.752384 (saved)
+Epoch 374/500 | Loss: 3.092740 | Val: 0.749633 | Val(EMA): 0.751834 | LR: 1.78e-05 | Time: 590.3s | Step: 49368
+   🏆 New best val_loss(EMA): 0.751834 (saved)
+Epoch 375/500 | Loss: 3.147100 | Val: 0.770436 | Val(EMA): 0.755554 | LR: 1.75e-05 | Time: 593.2s | Step: 49500
+Epoch 376/500 | Loss: 3.130267 | Val: 0.732482 | Val(EMA): 0.750940 | LR: 1.73e-05 | Time: 588.8s | Step: 49632
+   🏆 New best val_loss(EMA): 0.750940 (saved)
+Epoch 377/500 | Loss: 3.110686 | Val: 0.740644 | Val(EMA): 0.748881 | LR: 1.70e-05 | Time: 594.5s | Step: 49764
+   🏆 New best val_loss(EMA): 0.748881 (saved)
+Epoch 378/500 | Loss: 3.084638 | Val: 0.738056 | Val(EMA): 0.746716 | LR: 1.68e-05 | Time: 593.5s | Step: 49896
+   🏆 New best val_loss(EMA): 0.746716 (saved)
+Epoch 379/500 | Loss: 3.097796 | Val: 0.732980 | Val(EMA): 0.743969 | LR: 1.65e-05 | Time: 559.7s | Step: 50028
+   🏆 New best val_loss(EMA): 0.743969 (saved)
+Epoch 380/500 | Loss: 3.114462 | Val: 0.730871 | Val(EMA): 0.741349 | LR: 1.63e-05 | Time: 558.1s | Step: 50160
+   Components: noise_mse: 0.2700 | signal_mse: 0.3424 | identity: 0.1095 | spectral: 583.8498 | correlation: 0.2422 | morphology: 0.0417 | snr_weight: 0.4964 | hr_loss: 0.4460 | hr_variance_loss: 2.1443 | hr_est_mean: 82.4236 | hr_est_std: 36.2784 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_380.pt
+   🏆 New best val_loss(EMA): 0.741349 (saved)
+Epoch 381/500 | Loss: 3.086651 | Val: 0.744899 | Val(EMA): 0.742059 | LR: 1.60e-05 | Time: 587.6s | Step: 50292
+Epoch 382/500 | Loss: 3.112310 | Val: 0.739103 | Val(EMA): 0.741468 | LR: 1.58e-05 | Time: 593.2s | Step: 50424
+Epoch 383/500 | Loss: 3.131431 | Val: 0.738856 | Val(EMA): 0.740946 | LR: 1.55e-05 | Time: 593.0s | Step: 50556
+   🏆 New best val_loss(EMA): 0.740946 (saved)
+Epoch 384/500 | Loss: 3.108918 | Val: 0.749433 | Val(EMA): 0.742643 | LR: 1.53e-05 | Time: 591.4s | Step: 50688
+Epoch 385/500 | Loss: 3.078087 | Val: 0.738170 | Val(EMA): 0.741749 | LR: 1.50e-05 | Time: 588.7s | Step: 50820
+Epoch 386/500 | Loss: 3.071366 | Val: 0.723568 | Val(EMA): 0.738112 | LR: 1.48e-05 | Time: 588.5s | Step: 50952
+   🏆 New best val_loss(EMA): 0.738112 (saved)
+Epoch 387/500 | Loss: 3.101596 | Val: 0.744286 | Val(EMA): 0.739347 | LR: 1.45e-05 | Time: 551.5s | Step: 51084
+Epoch 388/500 | Loss: 3.103406 | Val: 0.744516 | Val(EMA): 0.740381 | LR: 1.43e-05 | Time: 563.4s | Step: 51216
+Epoch 389/500 | Loss: 3.097265 | Val: 0.748940 | Val(EMA): 0.742093 | LR: 1.41e-05 | Time: 592.9s | Step: 51348
+Epoch 390/500 | Loss: 3.105890 | Val: 0.737424 | Val(EMA): 0.741159 | LR: 1.38e-05 | Time: 591.2s | Step: 51480
+   Components: noise_mse: 0.2635 | signal_mse: 0.3370 | identity: 0.1081 | spectral: 573.2621 | correlation: 0.2374 | morphology: 0.0418 | snr_weight: 0.4953 | hr_loss: 0.4506 | hr_variance_loss: 2.1421 | hr_est_mean: 82.4756 | hr_est_std: 36.2895 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_390.pt
+Epoch 391/500 | Loss: 3.123380 | Val: 0.737134 | Val(EMA): 0.740354 | LR: 1.36e-05 | Time: 588.7s | Step: 51612
+Epoch 392/500 | Loss: 3.107466 | Val: 0.740689 | Val(EMA): 0.740421 | LR: 1.34e-05 | Time: 587.0s | Step: 51744
+Epoch 393/500 | Loss: 3.084152 | Val: 0.748808 | Val(EMA): 0.742098 | LR: 1.31e-05 | Time: 576.8s | Step: 51876
+Epoch 394/500 | Loss: 3.162142 | Val: 0.725962 | Val(EMA): 0.738871 | LR: 1.29e-05 | Time: 579.7s | Step: 52008
+Epoch 395/500 | Loss: 3.077095 | Val: 0.739800 | Val(EMA): 0.739057 | LR: 1.27e-05 | Time: 541.0s | Step: 52140
+Epoch 396/500 | Loss: 3.081704 | Val: 0.732349 | Val(EMA): 0.737715 | LR: 1.25e-05 | Time: 558.1s | Step: 52272
+   🏆 New best val_loss(EMA): 0.737715 (saved)
+Epoch 397/500 | Loss: 3.060231 | Val: 0.732185 | Val(EMA): 0.736609 | LR: 1.22e-05 | Time: 710.7s | Step: 52404
+   🏆 New best val_loss(EMA): 0.736609 (saved)
+Epoch 398/500 | Loss: 3.062414 | Val: 0.731175 | Val(EMA): 0.735522 | LR: 1.20e-05 | Time: 791.5s | Step: 52536
+   🏆 New best val_loss(EMA): 0.735522 (saved)
+Epoch 399/500 | Loss: 3.097317 | Val: 0.739134 | Val(EMA): 0.736245 | LR: 1.18e-05 | Time: 799.2s | Step: 52668
+Epoch 400/500 | Loss: 3.118113 | Val: 0.730290 | Val(EMA): 0.735054 | LR: 1.16e-05 | Time: 779.8s | Step: 52800
+   Components: noise_mse: 0.2684 | signal_mse: 0.3383 | identity: 0.1065 | spectral: 574.3957 | correlation: 0.2386 | morphology: 0.0413 | snr_weight: 0.4966 | hr_loss: 0.4398 | hr_variance_loss: 2.1595 | hr_est_mean: 82.4544 | hr_est_std: 36.2024 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_400.pt
+   🏆 New best val_loss(EMA): 0.735054 (saved)
+Epoch 401/500 | Loss: 3.119314 | Val: 0.738209 | Val(EMA): 0.735685 | LR: 1.14e-05 | Time: 753.1s | Step: 52932
+Epoch 402/500 | Loss: 3.090737 | Val: 0.734066 | Val(EMA): 0.735361 | LR: 1.12e-05 | Time: 748.4s | Step: 53064
+Epoch 403/500 | Loss: 3.112222 | Val: 0.723157 | Val(EMA): 0.732920 | LR: 1.10e-05 | Time: 788.0s | Step: 53196
+   🏆 New best val_loss(EMA): 0.732920 (saved)
+Epoch 404/500 | Loss: 3.134136 | Val: 0.724464 | Val(EMA): 0.731229 | LR: 1.07e-05 | Time: 773.5s | Step: 53328
+   🏆 New best val_loss(EMA): 0.731229 (saved)
+Epoch 405/500 | Loss: 3.078237 | Val: 0.725026 | Val(EMA): 0.729988 | LR: 1.05e-05 | Time: 801.2s | Step: 53460
+   🏆 New best val_loss(EMA): 0.729988 (saved)
+Epoch 406/500 | Loss: 3.106176 | Val: 0.711640 | Val(EMA): 0.726319 | LR: 1.03e-05 | Time: 774.1s | Step: 53592
+   🏆 New best val_loss(EMA): 0.726319 (saved)
+Epoch 407/500 | Loss: 3.086766 | Val: 0.723668 | Val(EMA): 0.725789 | LR: 1.01e-05 | Time: 747.8s | Step: 53724
+   🏆 New best val_loss(EMA): 0.725789 (saved)
+Epoch 408/500 | Loss: 3.058728 | Val: 0.725018 | Val(EMA): 0.725634 | LR: 9.92e-06 | Time: 742.7s | Step: 53856
+   🏆 New best val_loss(EMA): 0.725634 (saved)
+Epoch 409/500 | Loss: 3.062393 | Val: 0.730272 | Val(EMA): 0.726562 | LR: 9.72e-06 | Time: 787.7s | Step: 53988
+Epoch 410/500 | Loss: 3.043666 | Val: 0.730418 | Val(EMA): 0.727333 | LR: 9.52e-06 | Time: 783.8s | Step: 54120
+   Components: noise_mse: 0.2686 | signal_mse: 0.3370 | identity: 0.1043 | spectral: 569.5502 | correlation: 0.2375 | morphology: 0.0400 | snr_weight: 0.4974 | hr_loss: 0.4447 | hr_variance_loss: 2.0811 | hr_est_mean: 82.8867 | hr_est_std: 36.5961 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_410.pt
+Epoch 411/500 | Loss: 3.066271 | Val: 0.706494 | Val(EMA): 0.723165 | LR: 9.32e-06 | Time: 788.9s | Step: 54252
+   🏆 New best val_loss(EMA): 0.723165 (saved)
+Epoch 412/500 | Loss: 3.107450 | Val: 0.722152 | Val(EMA): 0.722963 | LR: 9.13e-06 | Time: 784.1s | Step: 54384
+   🏆 New best val_loss(EMA): 0.722963 (saved)
+Epoch 413/500 | Loss: 3.063362 | Val: 0.722455 | Val(EMA): 0.722861 | LR: 8.93e-06 | Time: 733.3s | Step: 54516
+   🏆 New best val_loss(EMA): 0.722861 (saved)
+Epoch 414/500 | Loss: 3.064359 | Val: 0.705685 | Val(EMA): 0.719426 | LR: 8.74e-06 | Time: 759.2s | Step: 54648
+   🏆 New best val_loss(EMA): 0.719426 (saved)
+Epoch 415/500 | Loss: 3.073174 | Val: 0.730103 | Val(EMA): 0.721561 | LR: 8.55e-06 | Time: 792.6s | Step: 54780
+Epoch 416/500 | Loss: 3.078184 | Val: 0.712930 | Val(EMA): 0.719835 | LR: 8.36e-06 | Time: 781.9s | Step: 54912
+Epoch 417/500 | Loss: 3.085518 | Val: 0.721982 | Val(EMA): 0.720265 | LR: 8.18e-06 | Time: 788.6s | Step: 55044
+Epoch 418/500 | Loss: 3.064051 | Val: 0.730095 | Val(EMA): 0.722231 | LR: 7.99e-06 | Time: 598.4s | Step: 55176
+Epoch 419/500 | Loss: 3.061430 | Val: 0.721548 | Val(EMA): 0.722094 | LR: 7.81e-06 | Time: 571.1s | Step: 55308
+Epoch 420/500 | Loss: 3.060699 | Val: 0.713351 | Val(EMA): 0.720345 | LR: 7.63e-06 | Time: 546.2s | Step: 55440
+   Components: noise_mse: 0.2675 | signal_mse: 0.3342 | identity: 0.1036 | spectral: 564.4435 | correlation: 0.2359 | morphology: 0.0394 | snr_weight: 0.4965 | hr_loss: 0.4297 | hr_variance_loss: 2.1167 | hr_est_mean: 82.7573 | hr_est_std: 36.4174 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_420.pt
+Epoch 421/500 | Loss: 3.064098 | Val: 0.719425 | Val(EMA): 0.720161 | LR: 7.45e-06 | Time: 581.9s | Step: 55572
+Epoch 422/500 | Loss: 3.017934 | Val: 0.734904 | Val(EMA): 0.723110 | LR: 7.28e-06 | Time: 586.0s | Step: 55704
+Epoch 423/500 | Loss: 3.068390 | Val: 0.722108 | Val(EMA): 0.722910 | LR: 7.10e-06 | Time: 585.9s | Step: 55836
+Epoch 424/500 | Loss: 3.090301 | Val: 0.720033 | Val(EMA): 0.722334 | LR: 6.93e-06 | Time: 589.8s | Step: 55968
+Epoch 425/500 | Loss: 3.090441 | Val: 0.710419 | Val(EMA): 0.719951 | LR: 6.76e-06 | Time: 588.4s | Step: 56100
+Epoch 426/500 | Loss: 3.075388 | Val: 0.717258 | Val(EMA): 0.719412 | LR: 6.59e-06 | Time: 582.7s | Step: 56232
+   🏆 New best val_loss(EMA): 0.719412 (saved)
+Epoch 427/500 | Loss: 3.053496 | Val: 0.722400 | Val(EMA): 0.720010 | LR: 6.42e-06 | Time: 560.3s | Step: 56364
+Epoch 428/500 | Loss: 3.075472 | Val: 0.704508 | Val(EMA): 0.716910 | LR: 6.26e-06 | Time: 545.0s | Step: 56496
+   🏆 New best val_loss(EMA): 0.716910 (saved)
+Epoch 429/500 | Loss: 3.064966 | Val: 0.719439 | Val(EMA): 0.717415 | LR: 6.09e-06 | Time: 585.8s | Step: 56628
+Epoch 430/500 | Loss: 3.051317 | Val: 0.719588 | Val(EMA): 0.717850 | LR: 5.93e-06 | Time: 588.0s | Step: 56760
+   Components: noise_mse: 0.2607 | signal_mse: 0.3269 | identity: 0.1039 | spectral: 557.7782 | correlation: 0.2291 | morphology: 0.0395 | snr_weight: 0.4959 | hr_loss: 0.4372 | hr_variance_loss: 2.1117 | hr_est_mean: 82.7635 | hr_est_std: 36.4417 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_430.pt
+Epoch 431/500 | Loss: 3.064764 | Val: 0.720902 | Val(EMA): 0.718460 | LR: 5.78e-06 | Time: 583.3s | Step: 56892
+Epoch 432/500 | Loss: 3.034556 | Val: 0.728203 | Val(EMA): 0.720409 | LR: 5.62e-06 | Time: 586.1s | Step: 57024
+Epoch 433/500 | Loss: 3.054643 | Val: 0.705741 | Val(EMA): 0.717475 | LR: 5.46e-06 | Time: 584.5s | Step: 57156
+Epoch 434/500 | Loss: 3.067787 | Val: 0.718263 | Val(EMA): 0.717633 | LR: 5.31e-06 | Time: 588.3s | Step: 57288
+Epoch 435/500 | Loss: 3.052379 | Val: 0.706699 | Val(EMA): 0.715446 | LR: 5.16e-06 | Time: 557.8s | Step: 57420
+   🏆 New best val_loss(EMA): 0.715446 (saved)
+Epoch 436/500 | Loss: 3.078665 | Val: 0.716064 | Val(EMA): 0.715570 | LR: 5.01e-06 | Time: 552.0s | Step: 57552
+Epoch 437/500 | Loss: 3.002750 | Val: 0.714415 | Val(EMA): 0.715339 | LR: 4.87e-06 | Time: 588.8s | Step: 57684
+   🏆 New best val_loss(EMA): 0.715339 (saved)
+Epoch 438/500 | Loss: 3.036591 | Val: 0.703640 | Val(EMA): 0.712999 | LR: 4.72e-06 | Time: 581.1s | Step: 57816
+   🏆 New best val_loss(EMA): 0.712999 (saved)
+Epoch 439/500 | Loss: 3.042872 | Val: 0.705255 | Val(EMA): 0.711450 | LR: 4.58e-06 | Time: 585.3s | Step: 57948
+   🏆 New best val_loss(EMA): 0.711450 (saved)
+Epoch 440/500 | Loss: 3.077505 | Val: 0.710743 | Val(EMA): 0.711309 | LR: 4.44e-06 | Time: 582.7s | Step: 58080
+   Components: noise_mse: 0.2634 | signal_mse: 0.3292 | identity: 0.1022 | spectral: 561.3207 | correlation: 0.2325 | morphology: 0.0388 | snr_weight: 0.4950 | hr_loss: 0.4250 | hr_variance_loss: 2.1465 | hr_est_mean: 82.6028 | hr_est_std: 36.2706 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_440.pt
+   🏆 New best val_loss(EMA): 0.711309 (saved)
+Epoch 441/500 | Loss: 3.049960 | Val: 0.710632 | Val(EMA): 0.711174 | LR: 4.30e-06 | Time: 585.4s | Step: 58212
+   🏆 New best val_loss(EMA): 0.711174 (saved)
+Epoch 442/500 | Loss: 3.051505 | Val: 0.715500 | Val(EMA): 0.712039 | LR: 4.17e-06 | Time: 583.7s | Step: 58344
+Epoch 443/500 | Loss: 3.097365 | Val: 0.713945 | Val(EMA): 0.712420 | LR: 4.03e-06 | Time: 549.4s | Step: 58476
+Epoch 444/500 | Loss: 3.055859 | Val: 0.714389 | Val(EMA): 0.712814 | LR: 3.90e-06 | Time: 563.9s | Step: 58608
+Epoch 445/500 | Loss: 3.081008 | Val: 0.718927 | Val(EMA): 0.714036 | LR: 3.77e-06 | Time: 587.6s | Step: 58740
+Epoch 446/500 | Loss: 3.009390 | Val: 0.709196 | Val(EMA): 0.713068 | LR: 3.64e-06 | Time: 590.2s | Step: 58872
+Epoch 447/500 | Loss: 3.029674 | Val: 0.693730 | Val(EMA): 0.709201 | LR: 3.52e-06 | Time: 594.1s | Step: 59004
+   🏆 New best val_loss(EMA): 0.709201 (saved)
+Epoch 448/500 | Loss: 3.026650 | Val: 0.695266 | Val(EMA): 0.706414 | LR: 3.39e-06 | Time: 587.9s | Step: 59136
+   🏆 New best val_loss(EMA): 0.706414 (saved)
+Epoch 449/500 | Loss: 3.083230 | Val: 0.716214 | Val(EMA): 0.708374 | LR: 3.27e-06 | Time: 593.2s | Step: 59268
+Epoch 450/500 | Loss: 3.037359 | Val: 0.709713 | Val(EMA): 0.708642 | LR: 3.15e-06 | Time: 590.1s | Step: 59400
+   Components: noise_mse: 0.2622 | signal_mse: 0.3253 | identity: 0.1024 | spectral: 558.7682 | correlation: 0.2283 | morphology: 0.0394 | snr_weight: 0.4949 | hr_loss: 0.4248 | hr_variance_loss: 2.1100 | hr_est_mean: 82.8038 | hr_est_std: 36.4498 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_450.pt
+Epoch 451/500 | Loss: 3.046713 | Val: 0.723790 | Val(EMA): 0.711671 | LR: 3.04e-06 | Time: 548.9s | Step: 59532
+Epoch 452/500 | Loss: 3.099326 | Val: 0.722276 | Val(EMA): 0.713792 | LR: 2.92e-06 | Time: 573.0s | Step: 59664
+Epoch 453/500 | Loss: 3.071557 | Val: 0.703696 | Val(EMA): 0.711773 | LR: 2.81e-06 | Time: 589.2s | Step: 59796
+Epoch 454/500 | Loss: 3.066350 | Val: 0.700052 | Val(EMA): 0.709429 | LR: 2.70e-06 | Time: 595.7s | Step: 59928
+Epoch 455/500 | Loss: 3.063985 | Val: 0.700030 | Val(EMA): 0.707549 | LR: 2.59e-06 | Time: 588.5s | Step: 60060
+Epoch 456/500 | Loss: 3.072439 | Val: 0.699084 | Val(EMA): 0.705856 | LR: 2.48e-06 | Time: 591.2s | Step: 60192
+   🏆 New best val_loss(EMA): 0.705856 (saved)
+Epoch 457/500 | Loss: 3.081064 | Val: 0.708507 | Val(EMA): 0.706386 | LR: 2.38e-06 | Time: 591.5s | Step: 60324
+Epoch 458/500 | Loss: 3.050075 | Val: 0.704354 | Val(EMA): 0.705980 | LR: 2.28e-06 | Time: 584.3s | Step: 60456
+Epoch 459/500 | Loss: 3.056681 | Val: 0.710885 | Val(EMA): 0.706961 | LR: 2.18e-06 | Time: 550.8s | Step: 60588
+Epoch 460/500 | Loss: 3.004957 | Val: 0.713072 | Val(EMA): 0.708183 | LR: 2.08e-06 | Time: 578.9s | Step: 60720
+   Components: noise_mse: 0.2624 | signal_mse: 0.3240 | identity: 0.1014 | spectral: 555.7909 | correlation: 0.2285 | morphology: 0.0382 | snr_weight: 0.4981 | hr_loss: 0.4237 | hr_variance_loss: 2.0781 | hr_est_mean: 82.8626 | hr_est_std: 36.6099 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_460.pt
+Epoch 461/500 | Loss: 3.018456 | Val: 0.691017 | Val(EMA): 0.704750 | LR: 1.98e-06 | Time: 590.4s | Step: 60852
+   🏆 New best val_loss(EMA): 0.704750 (saved)
+Epoch 462/500 | Loss: 3.035815 | Val: 0.711670 | Val(EMA): 0.706134 | LR: 1.89e-06 | Time: 589.9s | Step: 60984
+Epoch 463/500 | Loss: 3.013612 | Val: 0.705798 | Val(EMA): 0.706067 | LR: 1.80e-06 | Time: 588.0s | Step: 61116
+Epoch 464/500 | Loss: 3.057935 | Val: 0.696168 | Val(EMA): 0.704087 | LR: 1.71e-06 | Time: 594.3s | Step: 61248
+   🏆 New best val_loss(EMA): 0.704087 (saved)
+Epoch 465/500 | Loss: 3.042878 | Val: 0.709670 | Val(EMA): 0.705203 | LR: 1.63e-06 | Time: 587.8s | Step: 61380
+Epoch 466/500 | Loss: 3.054333 | Val: 0.708491 | Val(EMA): 0.705861 | LR: 1.54e-06 | Time: 577.9s | Step: 61512
+Epoch 467/500 | Loss: 3.036302 | Val: 0.685165 | Val(EMA): 0.701722 | LR: 1.46e-06 | Time: 551.0s | Step: 61644
+   🏆 New best val_loss(EMA): 0.701722 (saved)
+Epoch 468/500 | Loss: 3.033128 | Val: 0.703953 | Val(EMA): 0.702168 | LR: 1.38e-06 | Time: 593.5s | Step: 61776
+Epoch 469/500 | Loss: 3.013403 | Val: 0.712879 | Val(EMA): 0.704310 | LR: 1.30e-06 | Time: 595.9s | Step: 61908
+Epoch 470/500 | Loss: 3.053081 | Val: 0.716890 | Val(EMA): 0.706826 | LR: 1.23e-06 | Time: 591.9s | Step: 62040
+   Components: noise_mse: 0.2632 | signal_mse: 0.3240 | identity: 0.1009 | spectral: 553.6268 | correlation: 0.2283 | morphology: 0.0382 | snr_weight: 0.4976 | hr_loss: 0.4224 | hr_variance_loss: 2.1274 | hr_est_mean: 82.8775 | hr_est_std: 36.3638 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_470.pt
+Epoch 471/500 | Loss: 3.055705 | Val: 0.706836 | Val(EMA): 0.706828 | LR: 1.15e-06 | Time: 592.6s | Step: 62172
+Epoch 472/500 | Loss: 3.002572 | Val: 0.700314 | Val(EMA): 0.705525 | LR: 1.08e-06 | Time: 590.4s | Step: 62304
+Epoch 473/500 | Loss: 3.001684 | Val: 0.692947 | Val(EMA): 0.703010 | LR: 1.01e-06 | Time: 594.5s | Step: 62436
+Epoch 474/500 | Loss: 3.050525 | Val: 0.690196 | Val(EMA): 0.700447 | LR: 9.46e-07 | Time: 568.5s | Step: 62568
+   🏆 New best val_loss(EMA): 0.700447 (saved)
+Epoch 475/500 | Loss: 3.065624 | Val: 0.711457 | Val(EMA): 0.702649 | LR: 8.82e-07 | Time: 549.7s | Step: 62700
+Epoch 476/500 | Loss: 3.046287 | Val: 0.712177 | Val(EMA): 0.704554 | LR: 8.20e-07 | Time: 595.7s | Step: 62832
+Epoch 477/500 | Loss: 3.013398 | Val: 0.703599 | Val(EMA): 0.704363 | LR: 7.60e-07 | Time: 593.1s | Step: 62964
+Epoch 478/500 | Loss: 3.019445 | Val: 0.706209 | Val(EMA): 0.704732 | LR: 7.03e-07 | Time: 593.7s | Step: 63096
+Epoch 479/500 | Loss: 3.036967 | Val: 0.702405 | Val(EMA): 0.704267 | LR: 6.47e-07 | Time: 594.0s | Step: 63228
+Epoch 480/500 | Loss: 2.996968 | Val: 0.704796 | Val(EMA): 0.704373 | LR: 5.94e-07 | Time: 591.8s | Step: 63360
+   Components: noise_mse: 0.2637 | signal_mse: 0.3256 | identity: 0.1012 | spectral: 557.8931 | correlation: 0.2294 | morphology: 0.0376 | snr_weight: 0.4971 | hr_loss: 0.4236 | hr_variance_loss: 2.0686 | hr_est_mean: 83.0149 | hr_est_std: 36.6573 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_480.pt
+Epoch 481/500 | Loss: 3.079493 | Val: 0.696441 | Val(EMA): 0.702786 | LR: 5.43e-07 | Time: 593.4s | Step: 63492
+Epoch 482/500 | Loss: 3.003189 | Val: 0.700302 | Val(EMA): 0.702290 | LR: 4.95e-07 | Time: 555.4s | Step: 63624
+Epoch 483/500 | Loss: 3.052978 | Val: 0.704369 | Val(EMA): 0.702706 | LR: 4.49e-07 | Time: 565.9s | Step: 63756
+Epoch 484/500 | Loss: 3.020900 | Val: 0.707983 | Val(EMA): 0.703761 | LR: 4.05e-07 | Time: 590.7s | Step: 63888
+Epoch 485/500 | Loss: 3.033729 | Val: 0.707520 | Val(EMA): 0.704513 | LR: 3.63e-07 | Time: 762.6s | Step: 64020
+Epoch 486/500 | Loss: 3.037340 | Val: 0.705905 | Val(EMA): 0.704791 | LR: 3.23e-07 | Time: 726.8s | Step: 64152
+Epoch 487/500 | Loss: 3.024965 | Val: 0.701199 | Val(EMA): 0.704073 | LR: 2.86e-07 | Time: 787.5s | Step: 64284
+Epoch 488/500 | Loss: 3.006539 | Val: 0.705957 | Val(EMA): 0.704450 | LR: 2.51e-07 | Time: 779.6s | Step: 64416
+Epoch 489/500 | Loss: 3.042404 | Val: 0.688291 | Val(EMA): 0.701218 | LR: 2.18e-07 | Time: 722.6s | Step: 64548
+Epoch 490/500 | Loss: 3.059712 | Val: 0.704220 | Val(EMA): 0.701818 | LR: 1.88e-07 | Time: 769.8s | Step: 64680
+   Components: noise_mse: 0.2617 | signal_mse: 0.3223 | identity: 0.1003 | spectral: 551.6519 | correlation: 0.2267 | morphology: 0.0377 | snr_weight: 0.4977 | hr_loss: 0.4255 | hr_variance_loss: 2.1337 | hr_est_mean: 82.5396 | hr_est_std: 36.3315 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_490.pt
+Epoch 491/500 | Loss: 3.015992 | Val: 0.704245 | Val(EMA): 0.702304 | LR: 1.60e-07 | Time: 795.6s | Step: 64812
+Epoch 492/500 | Loss: 3.036039 | Val: 0.712394 | Val(EMA): 0.704322 | LR: 1.34e-07 | Time: 785.9s | Step: 64944
+Epoch 493/500 | Loss: 3.048465 | Val: 0.691166 | Val(EMA): 0.701691 | LR: 1.10e-07 | Time: 793.0s | Step: 65076
+Epoch 494/500 | Loss: 3.036669 | Val: 0.698172 | Val(EMA): 0.700987 | LR: 8.92e-08 | Time: 794.5s | Step: 65208
+Epoch 495/500 | Loss: 3.072468 | Val: 0.697668 | Val(EMA): 0.700323 | LR: 7.02e-08 | Time: 714.7s | Step: 65340
+   🏆 New best val_loss(EMA): 0.700323 (saved)
+Epoch 496/500 | Loss: 3.014336 | Val: 0.696068 | Val(EMA): 0.699472 | LR: 5.34e-08 | Time: 781.5s | Step: 65472
+   🏆 New best val_loss(EMA): 0.699472 (saved)
+Epoch 497/500 | Loss: 3.017497 | Val: 0.704168 | Val(EMA): 0.700411 | LR: 3.89e-08 | Time: 791.4s | Step: 65604
+Epoch 498/500 | Loss: 3.010052 | Val: 0.711575 | Val(EMA): 0.702644 | LR: 2.67e-08 | Time: 787.7s | Step: 65736
+Epoch 499/500 | Loss: 3.056113 | Val: 0.706590 | Val(EMA): 0.703433 | LR: 1.68e-08 | Time: 783.8s | Step: 65868
+wandb: updating run metadata
+wandb: uploading output.log; uploading wandb-summary.json; uploading config.yaml
+wandb: uploading output.log
+wandb: uploading history steps 1820-1820, summary, console lines 827-829
+wandb: 
+wandb: Run history:
+wandb:                  best_loss ████████████████████████████████████▁▁▁▁
+wandb:              best_val_loss █▆▆▇▃▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      component/correlation █▄▂▂▂▇▃▄▃▃▄▄▆▅▂▄▄▄▅▃▃▅▂▄▂▃▂▃▄▃▄▄▂▃▃▄▃▄▁▃
+wandb:      component/hr_est_mean ▁▁▂▂▃▆▅▇▆▅▆▆▆▆▅▆▅▄▆▅▅▆▅▆▇▆▇▆▅▅▆▅▆█▅▆▅▇▆▇
+wandb:       component/hr_est_std ▂▁▁▂▁▄▅▆▆▇▆▆▆▄▆▆▅▇▅▆▆▄▆▄▇▆▅▆▆▄▆▅▆▆█▅▆▆▆▆
+wandb:          component/hr_loss ▁▆█▃▂▃▃▄▃▃▃▃▃▃▃▃▂▂▄▃▂▂▃▂▂▂▂▂▃▂▂▂▂▂▂▂▂▂▂▂
+wandb:          component/hr_ramp ▁▅▅█████████████████████████████████████
+wandb: component/hr_variance_loss ▇█▆█▅▃▄▂▁▂▂▄▂▃▁▂▂▂▃▃▂▂▄▄▂▂▁▃▃▃▃▄▂▃▂▂▂▂▃▃
+wandb:         component/identity █▅█▆▅▄▅▅▄▄▃▄▅▄▅▆▄▆▄▅▄▃▄▄▅▂▂▃▂▂▂▁▁▂▂▂▂▂▁▁
+wandb:       component/morphology █▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:                        +14 ...
+wandb: 
+wandb: Run summary:
+wandb:                  best_loss 2.99697
+wandb:              best_val_loss 0.69947
+wandb:      component/correlation 0.2268
+wandb:      component/hr_est_mean 82.88118
+wandb:       component/hr_est_std 36.33983
+wandb:          component/hr_loss 0.41951
+wandb:          component/hr_ramp 1
+wandb: component/hr_variance_loss 2.13203
+wandb:         component/identity 0.10052
+wandb:       component/morphology 0.03694
+wandb:                        +14 ...
+wandb: 
+wandb: 🚀 View run DiT-ECG-B_e500 at: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation/runs/a3hc28s3
+wandb: ⭐️ View project at: https://wandb.ai/tgijayesh-dayananda-sagar-university/CardioEquation
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260323_233811-a3hc28s3/logs
+Epoch 500/500 | Loss: 3.054388 | Val: 0.702545 | Val(EMA): 0.703256 | LR: 9.21e-09 | Time: 783.2s | Step: 66000
+   Components: noise_mse: 0.2639 | signal_mse: 0.3215 | identity: 0.1005 | spectral: 550.9869 | correlation: 0.2268 | morphology: 0.0369 | snr_weight: 0.4992 | hr_loss: 0.4195 | hr_variance_loss: 2.1320 | hr_est_mean: 82.8812 | hr_est_std: 36.3398 | hr_ramp: 1.0000
+   💾 Checkpoint saved: checkpoints/dit_ecg_epoch_500.pt
+
+======================================================================
+✅ Training complete! Best val_loss: 0.699472 | Best train_loss: 2.996968
+💾 EMA model saved: checkpoints/dit_ecg_ema_final.pt
+📋 Config saved: checkpoints/train_config.json
+📊 TensorBoard logs saved.
+📊 W&B run finished.
