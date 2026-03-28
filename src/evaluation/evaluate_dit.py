@@ -139,6 +139,8 @@ def generate_samples(
         print(f"  ⚠️  FE weights not found at {fe_path} — using random encoder")
 
     scheduler = CosineNoiseScheduler(num_train_timesteps=1000)
+    # Move alpha schedule to device once
+    alpha_bar = scheduler.alpha_bar_t.to(device)   # (1000,)
 
     # ── DDIM timestep schedule ─────────────────────────────────────────────
     total_T = scheduler.num_train_timesteps
@@ -150,7 +152,6 @@ def generate_samples(
     batch_size = 16
     N = len(real_signals)
 
-    hr_tensor = torch.tensor([target_hr], dtype=torch.float32, device=device)
 
     print(f"🎨 Generating {N} samples ({ddim_steps} DDIM steps, cfg={guidance_scale})...")
 
@@ -159,37 +160,33 @@ def generate_samples(
         ctx  = torch.from_numpy(real_signals[start:end]).unsqueeze(1).to(device)  # (B,1,T)
         B    = ctx.shape[0]
 
-        # Identity embedding
-        identity = fe(ctx)                                                          # (B, 512)
-        null_id  = torch.zeros_like(identity)
+        # Identity embedding from real context signal
+        identity = fe(ctx)                            # (B, 512)
 
-        # HR conditioning broadcast
-        hr_cond  = hr_tensor.expand(B)
+        # HR conditioning — one value per sample in batch
+        hr_cond = torch.full((B,), target_hr, dtype=torch.float32, device=device)
 
         # Start from pure noise
         x = torch.randn(B, 1, 2500, device=device)
 
         for t_val in timesteps:
-            t_batch = torch.full((B,), t_val, device=device, dtype=torch.long)
+            # t as continuous float [0,1] — matches model.forward signature
+            t_batch = torch.full((B,), t_val / total_T, dtype=torch.float32, device=device)
 
-            # Conditional prediction
-            noise_cond = model(x, t_batch, identity, hr_cond)
-
-            # Unconditional prediction (CFG)
-            noise_uncond = model(x, t_batch, null_id, hr_cond)
-
-            # Guided prediction
-            noise_pred = noise_uncond + guidance_scale * (noise_cond - noise_uncond)
+            # CFG: forward_with_cfg handles cond + null internally
+            noise_pred = model.forward_with_cfg(
+                x, t_batch, identity, hr_bpm=hr_cond, guidance_scale=guidance_scale
+            )
 
             # DDIM step
-            alpha_t  = scheduler.alphas_cumprod[t_val]
-            alpha_t1 = scheduler.alphas_cumprod[max(t_val - step_ratio, 0)]
+            alpha_t  = alpha_bar[t_val]
+            alpha_t1 = alpha_bar[max(t_val - step_ratio, 0)]
 
-            x0_pred  = (x - (1 - alpha_t).sqrt() * noise_pred) / alpha_t.sqrt()
-            x0_pred  = x0_pred.clamp(-4, 4)
+            x0_pred = (x - (1 - alpha_t).sqrt() * noise_pred) / alpha_t.sqrt().clamp(min=1e-8)
+            x0_pred = x0_pred.clamp(-4, 4)
 
-            dir_xt   = (1 - alpha_t1).sqrt() * noise_pred
-            x        = alpha_t1.sqrt() * x0_pred + dir_xt
+            dir_xt = (1 - alpha_t1).clamp(min=0).sqrt() * noise_pred
+            x      = alpha_t1.sqrt() * x0_pred + dir_xt
 
         gen_np = x.squeeze(1).cpu().numpy()   # (B, 2500)
 
