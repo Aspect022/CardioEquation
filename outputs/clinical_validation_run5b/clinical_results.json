@@ -1,0 +1,22 @@
+{
+  "FFD": 91.13518638582104,
+  "MMD": 0.8803423718755347,
+  "ReID_Top1": 0.0,
+  "ReID_Top5": 0.025,
+  "real_morphology": {
+    "hr_mean": 77.75649586723563,
+    "hr_std": 22.512539773058446,
+    "qrs_duration_mean_ms": 110.67111534795043,
+    "qrs_duration_std_ms": 56.99476950559786
+  },
+  "fake_morphology": {
+    "hr_mean": 54.13488067853607,
+    "hr_std": 31.545565731086775,
+    "qrs_duration_mean_ms": 60.41025641025641,
+    "qrs_duration_std_ms": 25.091338733145214
+  },
+  "HR_MAE": 23.621615188699558,
+  "run": "Run5b",
+  "n_samples": 200,
+  "checkpoint": "checkpoints/dit_ecg_best.pt"
+}
