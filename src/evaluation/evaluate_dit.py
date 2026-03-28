@@ -263,6 +263,12 @@ def main():
 
     # ── 3. Evaluate ────────────────────────────────────────────────────────
     print("📏 Computing evaluation metrics...")
+    try:
+        import neurokit2  # noqa: F401
+    except ImportError:
+        print("  ⚠️  neurokit2 not installed — HR/QRS metrics will be N/A")
+        print("      Install with:  pip install neurokit2")
+
     from src.evaluation.eval_metrics import ECGEvaluator
     from src.models.feature_extractor_pt import FeatureExtractorPT
 
@@ -277,32 +283,41 @@ def main():
     evaluator = ECGEvaluator(encoder=encoder, device=device)
     results   = evaluator.evaluate_all(real_signals, generated_signals, fs=500)
 
-    # ── 4. HR Diversity metrics (real vs generated) ────────────────────────
-    from src.evaluation.eval_metrics import compute_morphological_metrics
     real_morph = results.get('real_morphology', {})
     fake_morph = results.get('fake_morphology', {})
+
+    def _fmt(v, fmt='.4f', suffix=''):
+        """Format a metric value safely, returning N/A if unavailable."""
+        if isinstance(v, (int, float)):
+            return f"{v:{fmt}}{suffix}"
+        return 'N/A (install neurokit2)'
 
     # ── 5. Print results ───────────────────────────────────────────────────
     print()
     print("=" * 60)
     print("📊 RUN 5b EVALUATION RESULTS")
     print("=" * 60)
-    print(f"  FFD  (↓ better, Run4=21.7): {results.get('FFD',  'N/A'):.4f}")
-    print(f"  MMD  (↓ better, Run4=0.43): {results.get('MMD',  'N/A'):.6f}")
-    print(f"  HR MAE bpm (↓ better, Run4=31.4): {results.get('HR_MAE', 'N/A'):.2f}")
-    print(f"  ReID Top-1 (↑ better, Run4=11.8%): {results.get('ReID_Top1', 0)*100:.1f}%")
-    print(f"  ReID Top-5 (↑ better, Run4=35.3%): {results.get('ReID_Top5', 0)*100:.1f}%")
+    print(f"  FFD  (↓ better, Run4=21.7): {_fmt(results.get('FFD'), '.4f')}")
+    print(f"  MMD  (↓ better, Run4=0.43): {_fmt(results.get('MMD'), '.6f')}")
+    print(f"  HR MAE bpm (↓ better, Run4=31.4): {_fmt(results.get('HR_MAE'), '.2f')}")
+    reid1 = results.get('ReID_Top1', 0)
+    reid5 = results.get('ReID_Top5', 0)
+    print(f"  ReID Top-1 (↑ better, Run4=11.8%): {reid1*100:.1f}%")
+    print(f"  ReID Top-5 (↑ better, Run4=35.3%): {reid5*100:.1f}%")
     print()
     print("  Real ECG morphology:")
-    print(f"    HR mean: {real_morph.get('hr_mean', 'N/A'):.1f} bpm")
-    print(f"    HR std : {real_morph.get('hr_std',  'N/A'):.1f} bpm  (target >47.4)")
-    print(f"    QRS dur: {real_morph.get('qrs_duration_mean_ms', 'N/A'):.1f} ms")
+    print(f"    HR mean: {_fmt(real_morph.get('hr_mean'), '.1f', ' bpm')}")
+    print(f"    HR std : {_fmt(real_morph.get('hr_std'),  '.1f', ' bpm')}  ← target >47.4")
+    print(f"    QRS dur: {_fmt(real_morph.get('qrs_duration_mean_ms'), '.1f', ' ms')}")
     print()
     print("  Generated ECG morphology:")
-    print(f"    HR mean: {fake_morph.get('hr_mean', 'N/A'):.1f} bpm")
-    print(f"    HR std : {fake_morph.get('hr_std',  'N/A'):.1f} bpm  (target >47.4)")
-    print(f"    QRS dur: {fake_morph.get('qrs_duration_mean_ms', 'N/A'):.1f} ms")
+    print(f"    HR mean: {_fmt(fake_morph.get('hr_mean'), '.1f', ' bpm')}")
+    print(f"    HR std : {_fmt(fake_morph.get('hr_std'),  '.1f', ' bpm')}  ← target >47.4")
+    print(f"    QRS dur: {_fmt(fake_morph.get('qrs_duration_mean_ms'), '.1f', ' ms')}")
     print("=" * 60)
+    if not real_morph:
+        print("  ⚠️  Re-run after: pip install neurokit2  (for HR/QRS metrics)")
+        print("=" * 60)
 
     # ── 6. Save JSON ───────────────────────────────────────────────────────
     results_serialisable = {}
