@@ -12,8 +12,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Symbolic equation generation from parameters
 - Interactive web dashboard for visualization
 - 12-lead ECG support
-- Clinical validation studies
 - Enhanced anomaly detection algorithms
+
+## [2.0.0] - 2026-03-29 (Run 6)
+
+### Added
+- **OT-CFM (Conditional Flow Matching)** — New `src/training/flow_matching.py`
+  - FlowMatchingScheduler: linear interpolation forward, velocity prediction
+  - Euler ODE solver for inference (20 steps vs 50 DDIM)
+  - Midpoint solver (2nd-order Runge-Kutta) for high-accuracy sampling
+  - Replaces DDPM noise prediction with velocity field learning
+
+- **Identity Cross-Attention** — IP-Adapter paradigm for patient identity
+  - IdentityTokenizer: projects 512-dim → 8 virtual tokens (B, 8, D)
+  - IdentityCrossAttention: dedicated cross-attn layer per transformer block
+  - Gated residual (zero-init) for stable training ramp-up
+  - Identity no longer diluted by timestep in AdaLN — separate pathway
+
+- **Soft-DTW Loss** for QRS temporal fidelity
+  - GPU-accelerated via `pysdtw` library on CUDA
+  - Anti-diagonal vectorized fallback for CPU
+  - QRS segment extraction + per-beat DTW alignment
+  - Warmup schedule: 0.0 → 0.3 over first 100 epochs
+
+- **Identity SNR Floor** — identity loss always gets ≥30% gradient
+  even at high-noise timesteps, preventing identity extinction
+
+### Changed
+- **Architecture**: DiT-ECG-B now ~324M params (from ~85M) due to cross-attention
+- **HR Loss**: Weight 0.05 → 0.5 (10×), restricted to low-noise timesteps (t < 0.2)
+- **HR Variance Loss**: Weight 0.2 → 0.5
+- **Identity Loss**: Weight 0.5 → 1.5 (3×)
+- **Spectral Loss**: Weight 1e-4 → 1e-5 (reduced gradient consumption)
+- **CFG Scale**: 3.0 → 2.0 (inference default)
+- **Training**: 750 epochs (from 500), LR 5e-5 (from 1e-4), warmup 3000 (from 5000)
+- **Early stopping**: patience 60 epochs (from 30)
+- **ConditioningProjector**: 2 heads (t, hr) instead of 3 — identity removed from AdaLN
+- **Evaluation**: Auto-detects training mode (FM vs DDPM) from checkpoint
+- **Clinical Validation**: Updated for flow matching + new guidance scale
+- **Pipeline**: ECGPipelineV2 supports `use_flow_matching` parameter
+
+### Dependencies
+- Added `pysdtw>=0.0.5` for GPU-accelerated Soft-DTW
 
 ## [1.0.0] - 2025-01-XX
 

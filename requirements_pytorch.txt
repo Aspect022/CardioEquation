@@ -29,6 +29,7 @@ matplotlib>=3.5.0
 # Training Utilities
 tqdm>=4.62.0
 einops>=0.7.0                 # Tensor rearrangement utilities
+pysdtw>=0.0.5                  # GPU-accelerated Soft-DTW for QRS temporal loss (Run 6)
 
 # Optional: Advanced Training
 # flash-attn>=2.3.0           # FlashAttention (H100/A100 only, install separately)

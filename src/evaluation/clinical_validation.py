@@ -166,7 +166,7 @@ def run_clinical_validation(model_path, fe_path=None, dataset_dir='Dataset', out
         import torch
         from src.inference.pipeline_v2 import ECGPipelineV2
 
-        pipe = ECGPipelineV2(model_path, fe_path)
+        pipe = ECGPipelineV2(model_path, fe_path, use_flow_matching=True)
 
         # 3. For each patient with multiple records, use one as context
         # and compare generated ECG against the other(s)
@@ -178,14 +178,14 @@ def run_clinical_validation(model_path, fe_path=None, dataset_dir='Dataset', out
             if len(signals) < 2:
                 # Only one recording — use it for identity extraction + generate
                 context = signals[0]
-                generated = pipe.generate(context, num_steps=50, guidance_scale=3.0, num_samples=1)
+                generated = pipe.generate(context, num_steps=20, guidance_scale=2.0, num_samples=1)
                 all_real.append(context)
                 all_generated.append(generated[0])
             else:
                 # Multiple recordings — use first as context, validate against rest
                 context = signals[0]
                 for i, real_other in enumerate(signals[1:], 1):
-                    generated = pipe.generate(context, num_steps=50, guidance_scale=3.0, num_samples=1)
+                    generated = pipe.generate(context, num_steps=20, guidance_scale=2.0, num_samples=1)
                     all_real.append(real_other)
                     all_generated.append(generated[0])
 
