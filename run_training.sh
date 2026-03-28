@@ -1,8 +1,15 @@
 #!/bin/bash
 # ============================================================
-# CardioEquation V2: Full Training Pipeline
+# CardioEquation V2: Full Training Pipeline — Run 6
 # ============================================================
 # Run this script on the GPU server after cloning the repo.
+#
+# Run 6 Changes:
+# - OT-CFM (Conditional Flow Matching) replaces DDPM
+# - Identity cross-attention (IP-Adapter paradigm)
+# - HR loss with timestep gating + 10× weight increase
+# - Soft-DTW loss for QRS temporal fidelity
+# - 750 epochs, LR=5e-5, CFG=2.0
 #
 # Usage:
 #   chmod +x run_training.sh
@@ -38,7 +45,8 @@ elif [ "$1" == "validate" ]; then
 fi
 
 echo "============================================================"
-echo "  CardioEquation V2: Training Pipeline"
+echo "  CardioEquation V2: Training Pipeline — Run 6"
+echo "  OT-CFM + Cross-Attention Identity + Soft-DTW"
 echo "============================================================"
 
 # ── 0. Virtual Environment Setup ─────────────────────────
@@ -127,20 +135,22 @@ python verify_datasets.py || {
 
 # ── 4. Model Shape Check ─────────────────────────────────
 echo ""
-echo "🧪 Step 3: Verifying model shapes..."
+echo "🧪 Step 3: Verifying model shapes (Run 6 cross-attention)..."
 python -c "
 import torch, sys
 sys.path.insert(0, '.')
 from src.models.dit_ecg import dit_ecg_b
 from src.models.feature_extractor_pt import FeatureExtractorPT
+from src.training.flow_matching import FlowMatchingScheduler
 
 model = dit_ecg_b()
 fe = FeatureExtractorPT()
 x = torch.randn(2, 1, 2500)
 t = torch.rand(2)
 c = torch.randn(2, 512)
+hr = torch.tensor([72.0, 85.0])
 
-out = model(x, t, c)
+out = model(x, t, c, hr_bpm=hr)
 z = fe(x)
 
 dit_p = sum(p.numel() for p in model.parameters()) / 1e6
@@ -148,15 +158,23 @@ fe_p = sum(p.numel() for p in fe.parameters()) / 1e6
 
 assert out.shape == (2, 1, 2500), f'DiT shape error: {out.shape}'
 assert z.shape == (2, 512), f'FE shape error: {z.shape}'
-print(f'   ✅ DiT-ECG-B: {dit_p:.1f}M params, output {out.shape}')
+print(f'   ✅ DiT-ECG-B (Run 6): {dit_p:.1f}M params, output {out.shape}')
 print(f'   ✅ FeatureExtractor: {fe_p:.1f}M params, output {z.shape}')
-print(f'   ✅ All shapes verified!')
+
+# Test flow matching scheduler
+fm = FlowMatchingScheduler()
+x0 = torch.randn(2, 1, 2500)
+x1 = torch.randn(2, 1, 2500)
+t_fm = torch.tensor([0.0, 0.5])
+x_t, v = fm.interpolate(x0, x1, t_fm)
+print(f'   ✅ FlowMatching: x_t={x_t.shape}, v={v.shape}')
+print(f'   ✅ All shapes verified (Run 6)!')
 "
 
 # Create directories
 mkdir -p checkpoints
 mkdir -p data
-mkdir -p outputs/clinical_validation
+mkdir -p outputs/clinical_validation_run6
 
 # ── 3. Contrastive Pre-Training (Stage 0) ────────────────
 if [ "$RUN_CONTRASTIVE" = true ]; then
@@ -180,11 +198,11 @@ if [ "$RUN_CONTRASTIVE" = true ]; then
     fi
 fi
 
-# ── 4. DiT-ECG Training (Main) ───────────────────────────
+# ── 4. DiT-ECG Training (Main — Run 6) ──────────────────
 if [ "$RUN_DIT" = true ]; then
     echo ""
     echo "============================================================"
-    echo "🚀 Step 3: DiT-ECG Diffusion Training"
+    echo "🚀 Step 3: DiT-ECG Training (Run 6: OT-CFM + CrossAttn)"
     echo "============================================================"
 
     if [ "$SMOKE_MODE" = true ]; then
@@ -196,20 +214,24 @@ if [ "$RUN_DIT" = true ]; then
             --dataset synthetic \
             --output_dir checkpoints \
             --save_every 1 \
-            --warmup_steps 10
+            --warmup_steps 10 \
+            --guidance_scale 2.0 \
+            --no_wandb
     else
         python src/training/train_dit.py \
-            --epochs 500 \
+            --epochs 750 \
             --batch_size 32 \
             --accum_steps 8 \
             --model_size B \
             --dataset mitbih \
             --output_dir checkpoints \
             --save_every 10 \
-            --lr 1e-4 \
-            --warmup_steps 5000 \
-            --patience 30 \
-            --val_split 0.1
+            --lr 5e-5 \
+            --warmup_steps 3000 \
+            --patience 60 \
+            --val_split 0.1 \
+            --guidance_scale 2.0 \
+            --wandb_run "Run6-OT-CFM-CrossAttn"
     fi
 fi
 
@@ -217,25 +239,22 @@ fi
 if [ "$RUN_VALIDATION" = true ]; then
     echo ""
     echo "============================================================"
-    echo "🏥 Step 4: Clinical Validation (Hospital ECG PDFs)"
+    echo "🏥 Step 4: Clinical Validation (Run 6)"
     echo "============================================================"
 
-    if [ -d "Dataset" ]; then
-        set +e  # Don't exit on error for validation
-        python src/evaluation/clinical_validation.py \
-            --model_path checkpoints/dit_ecg_ema_final.pt \
-            --fe_path checkpoints/feature_extractor_contrastive.pt \
-            --dataset_dir Dataset \
-            --output_dir outputs/clinical_validation
-        VALIDATION_EXIT=$?
-        set -e  # Restore exit-on-error
-        if [ $VALIDATION_EXIT -ne 0 ]; then
-            echo "   ⚠️  Clinical validation had errors but training is complete."
-            echo "   Re-run later with: ./run_training.sh validate"
-        fi
-    else
-        echo "   ⚠️  Dataset/ folder not found — skipping clinical validation"
-        echo "   Copy hospital ECG PDFs to Dataset/ and re-run with: ./run_training.sh validate"
+    set +e  # Don't exit on error for validation
+    python src/evaluation/evaluate_dit.py \
+        --checkpoint checkpoints/dit_ecg_best.pt \
+        --fe_path checkpoints/feature_extractor_contrastive.pt \
+        --output_dir outputs/clinical_validation_run6 \
+        --n_samples 200 \
+        --guidance 2.0
+    VALIDATION_EXIT=$?
+    set -e
+
+    if [ $VALIDATION_EXIT -ne 0 ]; then
+        echo "   ⚠️  Clinical validation had errors but training is complete."
+        echo "   Re-run later with: ./run_training.sh validate"
     fi
 fi
 
@@ -247,9 +266,10 @@ echo "============================================================"
 
 # Save a training summary log
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-echo "CardioEquation V2 Training Run" > checkpoints/training_log.txt
+echo "CardioEquation Run 6 Training" > checkpoints/training_log.txt
 echo "==============================" >> checkpoints/training_log.txt
 echo "Timestamp: $TIMESTAMP" >> checkpoints/training_log.txt
+echo "Run: Run 6 (OT-CFM + CrossAttn Identity + Soft-DTW)" >> checkpoints/training_log.txt
 echo "GPU: $(python -c 'import torch; print(torch.cuda.get_device_name(0))' 2>/dev/null || echo 'N/A')" >> checkpoints/training_log.txt
 echo "Smoke Mode: $SMOKE_MODE" >> checkpoints/training_log.txt
 echo "" >> checkpoints/training_log.txt
@@ -262,10 +282,10 @@ ls -lhR outputs/ >> checkpoints/training_log.txt 2>/dev/null
 # Git add, commit, and push
 set +e  # Don't fail if git push has issues
 git add checkpoints/train_config.json checkpoints/training_log.txt 2>/dev/null
-git add outputs/clinical_validation/ 2>/dev/null
+git add outputs/clinical_validation_run6/ 2>/dev/null
 git add -u  # Stage any modified tracked files
 
-COMMIT_MSG="🏁 Training complete ($TIMESTAMP) — $(python -c 'import torch; print(torch.cuda.get_device_name(0))' 2>/dev/null || echo 'GPU')"
+COMMIT_MSG="🏁 Run 6 complete ($TIMESTAMP) — OT-CFM + CrossAttn — $(python -c 'import torch; print(torch.cuda.get_device_name(0))' 2>/dev/null || echo 'GPU')"
 git commit -m "$COMMIT_MSG" && {
     echo "   📤 Pushing to GitHub..."
     git push origin main
@@ -280,10 +300,10 @@ set -e
 # ── Done ──────────────────────────────────────────────────
 echo ""
 echo "============================================================"
-echo "  ✅ Pipeline Complete!"
+echo "  ✅ Run 6 Pipeline Complete!"
 echo "  Timestamp: $TIMESTAMP"
 echo "  Checkpoints:  checkpoints/"
-echo "  Validation:   outputs/clinical_validation/"
+echo "  Validation:   outputs/clinical_validation_run6/"
 echo "  Training Log: checkpoints/training_log.txt"
 echo "  GitHub:       Check your repo for pushed results!"
 echo "  Deactivate:   deactivate"
