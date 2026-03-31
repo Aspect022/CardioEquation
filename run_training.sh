@@ -109,15 +109,32 @@ if [ "$SMOKE_MODE" = true ]; then
     echo "   Smoke mode: using synthetic data, skipping downloads"
 else
     # Download and process ALL datasets (MIT-BIH + PTB-XL + Chapman-Shaoxing)
-    # Each download function skips if data already exists
-    echo "📦 Downloading MIT-BIH + PTB-XL + Chapman-Shaoxing..."
-    python download_all_datasets.py --mitbih
-    python download_all_datasets.py --ptbxl
-    python download_all_datasets.py --chapman
+    # Skip download if processed .npz already exists (saves 30+ min)
 
-    # Process all downloaded datasets
+    if [ -f "data/mitbih_forecasting.npz" ]; then
+        echo "   ✅ MIT-BIH already processed, skipping download"
+    else
+        echo "📦 Downloading MIT-BIH..."
+        python download_all_datasets.py --mitbih
+    fi
+
+    if [ -f "data/ptbxl_processed.npz" ]; then
+        echo "   ✅ PTB-XL already processed, skipping download"
+    else
+        echo "📦 Downloading PTB-XL..."
+        python download_all_datasets.py --ptbxl
+    fi
+
+    if [ -f "data/chapman_processed.npz" ]; then
+        echo "   ✅ Chapman-Shaoxing already processed, skipping download"
+    else
+        echo "📦 Downloading Chapman-Shaoxing..."
+        python download_all_datasets.py --chapman
+    fi
+
+    # Process any unprocessed datasets (each function skips internally if .npz exists)
     echo ""
-    echo "⚙️  Processing all datasets into training format..."
+    echo "⚙️  Processing datasets (skips already-processed)..."
     python download_all_datasets.py --process
 fi
 
