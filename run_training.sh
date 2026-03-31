@@ -125,12 +125,14 @@ else
         python download_all_datasets.py --ptbxl
     fi
 
-    if [ -f "data/chapman_processed.npz" ]; then
-        echo "   ✅ Chapman-Shaoxing already processed, skipping download"
-    else
-        echo "📦 Downloading Chapman-Shaoxing..."
-        python download_all_datasets.py --chapman
-    fi
+    # Chapman-Shaoxing is optional and currently causing slow down/redundant downloads.
+    # Skipping for Run 6 to start training immediately.
+    # if [ -f "data/chapman_processed.npz" ]; then
+    #     echo "   ✅ Chapman-Shaoxing already processed, skipping download"
+    # else
+    #     echo "📦 Downloading Chapman-Shaoxing..."
+    #     python download_all_datasets.py --chapman
+    # fi
 
     # Process any unprocessed datasets (each function skips internally if .npz exists)
     echo ""
