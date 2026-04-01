@@ -225,36 +225,14 @@ def load_dataset(args):
                 future = np.pad(future, ((0, 0), (0, 0), (0, pad)), mode='constant')
                 print(f"   📏 Padded to {target_len} samples")
 
-        # ── Combine with PTB-XL if available ──
-        ptbxl_path = 'data/ptbxl_processed.npz'
-        if os.path.exists(ptbxl_path):
-            print(f"   + Loading PTB-XL from {ptbxl_path}")
-            ptbxl = np.load(ptbxl_path)
-            ptbxl_signals = ptbxl['signals']  # (N, 1, 2500)
-            context = np.concatenate([context, ptbxl_signals], axis=0)
-            future = np.concatenate([future, ptbxl_signals], axis=0)
-            # Append HR labels
-            if hr_labels is not None and 'hr_labels' in ptbxl:
-                hr_labels = np.concatenate([hr_labels, ptbxl['hr_labels']], axis=0)
-            elif 'hr_labels' in ptbxl:
-                hr_labels = ptbxl['hr_labels']
-
-        # ── Combine with Chapman-Shaoxing if available ──
-        chapman_path = 'data/chapman_processed.npz'
-        if os.path.exists(chapman_path):
-            print(f"   + Loading Chapman-Shaoxing from {chapman_path}")
-            chapman = np.load(chapman_path)
-            chapman_signals = chapman['signals']  # (N, 1, 2500)
-            context = np.concatenate([context, chapman_signals], axis=0)
-            future = np.concatenate([future, chapman_signals], axis=0)
-            # Append HR labels
-            if hr_labels is not None and 'hr_labels' in chapman:
-                hr_labels = np.concatenate([hr_labels, chapman['hr_labels']], axis=0)
-            elif 'hr_labels' in chapman:
-                hr_labels = chapman['hr_labels']
+        # ── NOTE (Run 6 optimization): PTB-XL and Chapman-Shaoxing are NOT ──
+        # ── concatenated here. They only have single snapshots (context=future), ──
+        # ── which trains a trivial copy task and inflates epoch time 9×.          ──
+        # ── Identity diversity is fully handled by contrastive pre-training.       ──
+        # ── MIT-BIH has real context→future temporal pairs (10s→10s forecasting). ──
 
         n_mitbih = len(data['context'])
-        print(f"   = Combined dataset: {len(context)} samples (MIT-BIH: {n_mitbih})")
+        print(f"   = Dataset: {len(context)} samples (MIT-BIH forecasting pairs)")
 
         # Build HR labels tensor (default to 75 bpm if not available)
         if hr_labels is not None and len(hr_labels) == len(context):

@@ -231,55 +231,59 @@ def _detect_r_peaks_simple(signal, fs=500.0, min_distance_ms=300):
 
 def qrs_segment_dtw_loss(clean, recon, fs=500.0, gamma=0.1, window_ms=100):
     """
-    Extract QRS segments from clean signal, apply Soft-DTW against
-    corresponding segments in generated signal.
+    GPU-only Soft-DTW loss on fixed-stride QRS-width windows.
 
-    Directly addresses Run 5b's 45% QRS temporal compression by
-    penalizing misalignment at the beat level.
+    Run 6 optimization: Instead of per-sample CPU R-peak detection
+    (which causes GPU→CPU sync stalls), we extract overlapping windows
+    at fixed cardiac intervals and compute DTW on a random subset.
+
+    This stays entirely on GPU and eliminates the CPU bottleneck.
 
     Args:
         clean: (B, 1, T) — ground truth clean ECG
         recon: (B, 1, T) — reconstructed/predicted ECG (x_0_pred)
         fs: sampling frequency
         gamma: Soft-DTW smoothing parameter
-        window_ms: window around R-peak in ms (±window_ms)
+        window_ms: window width in ms (±window_ms around center)
     Returns:
-        loss: scalar DTW loss averaged across valid QRS pairs
+        loss: scalar DTW loss averaged across sampled windows
     """
-    B = clean.shape[0]
-    window_samples = int(fs * window_ms / 1000)
-    total_loss = torch.tensor(0.0, device=clean.device)
-    n_pairs = 0
+    B, _, T = clean.shape
+    window_samples = int(fs * window_ms / 1000)  # 50 samples for 100ms
+    window_size = 2 * window_samples  # 100 samples total
+    stride = int(fs * 0.2)  # 200ms stride ≈ half a typical QRS interval
 
-    for b in range(B):
-        sig_clean = clean[b, 0]  # (T,)
-        sig_recon = recon[b, 0]  # (T,)
-        T = sig_clean.shape[0]
+    if T < window_size + stride:
+        return torch.tensor(0.0, device=clean.device)
 
-        # Detect R-peaks in clean signal (no gradient needed)
-        peaks = _detect_r_peaks_simple(sig_clean, fs)
+    # Extract all windows using unfold (stays on GPU, no CPU sync)
+    clean_1d = clean[:, 0, :]  # (B, T)
+    recon_1d = recon[:, 0, :]  # (B, T)
 
-        for peak in peaks:
-            start = max(0, peak - window_samples)
-            end = min(T, peak + window_samples)
+    # Unfold into overlapping windows: (B, num_windows, window_size)
+    clean_windows = clean_1d.unfold(1, window_size, stride)  # (B, W, L)
+    recon_windows = recon_1d.unfold(1, window_size, stride)
 
-            if end - start < 20:  # Skip very short segments
-                continue
+    num_windows = clean_windows.shape[1]
 
-            qrs_clean = sig_clean[start:end].unsqueeze(0)  # (1, L)
-            qrs_recon = sig_recon[start:end].unsqueeze(0)  # (1, L)
+    # Subsample to limit compute: max 4 windows per sample
+    max_windows = min(4, num_windows)
+    if num_windows > max_windows:
+        indices = torch.randperm(num_windows, device=clean.device)[:max_windows]
+        clean_windows = clean_windows[:, indices, :]  # (B, 4, L)
+        recon_windows = recon_windows[:, indices, :]
 
-            # Normalize segments for fair comparison
-            qrs_clean = (qrs_clean - qrs_clean.mean()) / (qrs_clean.std() + 1e-8)
-            qrs_recon = (qrs_recon - qrs_recon.mean()) / (qrs_recon.std() + 1e-8)
+    # Reshape to batch all windows together: (B*W, L)
+    Bw = clean_windows.shape[0] * clean_windows.shape[1]
+    clean_flat = clean_windows.reshape(Bw, window_size)
+    recon_flat = recon_windows.reshape(Bw, window_size)
 
-            pair_loss = soft_dtw_loss(qrs_recon, qrs_clean, gamma=gamma)
-            total_loss = total_loss + pair_loss
-            n_pairs += 1
+    # Normalize each window
+    clean_flat = (clean_flat - clean_flat.mean(dim=-1, keepdim=True)) / (clean_flat.std(dim=-1, keepdim=True) + 1e-8)
+    recon_flat = (recon_flat - recon_flat.mean(dim=-1, keepdim=True)) / (recon_flat.std(dim=-1, keepdim=True) + 1e-8)
 
-    if n_pairs > 0:
-        return total_loss / n_pairs
-    return total_loss
+    # Single batched Soft-DTW call
+    return soft_dtw_loss(recon_flat, clean_flat, gamma=gamma)
 
 
 def combined_diffusion_loss(
