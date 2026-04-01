@@ -225,14 +225,39 @@ def load_dataset(args):
                 future = np.pad(future, ((0, 0), (0, 0), (0, pad)), mode='constant')
                 print(f"   📏 Padded to {target_len} samples")
 
-        # ── NOTE (Run 6 optimization): PTB-XL and Chapman-Shaoxing are NOT ──
-        # ── concatenated here. They only have single snapshots (context=future), ──
-        # ── which trains a trivial copy task and inflates epoch time 9×.          ──
-        # ── Identity diversity is fully handled by contrastive pre-training.       ──
-        # ── MIT-BIH has real context→future temporal pairs (10s→10s forecasting). ──
+        # ── Combine with PTB-XL if available (subsampled for epoch speed) ──
+        ptbxl_path = 'data/ptbxl_processed.npz'
+        if os.path.exists(ptbxl_path):
+            ptbxl = np.load(ptbxl_path)
+            ptbxl_signals = ptbxl['signals']  # (N, 1, 2500)
+            # Subsample to cap epoch inflation — keep diversity, not volume
+            max_ptbxl = min(4000, len(ptbxl_signals))
+            rng = np.random.RandomState(42)
+            idx = rng.choice(len(ptbxl_signals), max_ptbxl, replace=False)
+            ptbxl_signals = ptbxl_signals[idx]
+            context = np.concatenate([context, ptbxl_signals], axis=0)
+            future = np.concatenate([future, ptbxl_signals], axis=0)
+            print(f"   + PTB-XL: {max_ptbxl}/{len(ptbxl['signals'])} samples (subsampled)")
+            if hr_labels is not None and 'hr_labels' in ptbxl:
+                hr_labels = np.concatenate([hr_labels, ptbxl['hr_labels'][idx]], axis=0)
+
+        # ── Combine with Chapman-Shaoxing if available (subsampled) ──
+        chapman_path = 'data/chapman_processed.npz'
+        if os.path.exists(chapman_path):
+            chapman = np.load(chapman_path)
+            chapman_signals = chapman['signals']  # (N, 1, 2500)
+            max_chapman = min(4000, len(chapman_signals))
+            rng = np.random.RandomState(43)
+            idx = rng.choice(len(chapman_signals), max_chapman, replace=False)
+            chapman_signals = chapman_signals[idx]
+            context = np.concatenate([context, chapman_signals], axis=0)
+            future = np.concatenate([future, chapman_signals], axis=0)
+            print(f"   + Chapman: {max_chapman}/{len(chapman['signals'])} samples (subsampled)")
+            if hr_labels is not None and 'hr_labels' in chapman:
+                hr_labels = np.concatenate([hr_labels, chapman['hr_labels'][idx]], axis=0)
 
         n_mitbih = len(data['context'])
-        print(f"   = Dataset: {len(context)} samples (MIT-BIH forecasting pairs)")
+        print(f"   = Total: {len(context)} samples (MIT-BIH: {n_mitbih}, +PTB-XL/Chapman subsampled)")
 
         # Build HR labels tensor (default to 75 bpm if not available)
         if hr_labels is not None and len(hr_labels) == len(context):
