@@ -448,8 +448,11 @@ def train(args):
 
     # ── Soft-DTW warmup schedule ──
     soft_dtw_target_weight = 0.3
-    soft_dtw_warmup_epochs = 100
-    print(f"   📐 Soft-DTW: target weight={soft_dtw_target_weight}, warmup={soft_dtw_warmup_epochs} epochs")
+    soft_dtw_start_epoch = 20      # Don't compute DTW at all before this
+    soft_dtw_warmup_epochs = 100   # Ramp from 0→target over 100 epochs after start
+    soft_dtw_batch_prob = 0.1      # Only compute DTW on 10% of batches (amortize CUDA kernel)
+    print(f"   📐 Soft-DTW: target={soft_dtw_target_weight}, start=epoch {soft_dtw_start_epoch}, "
+          f"warmup={soft_dtw_warmup_epochs}ep, batch_prob={soft_dtw_batch_prob}")
 
     # ── Optimizer & Scheduler ─────────────────────────────────
     all_params = list(model.parameters())
@@ -511,8 +514,12 @@ def train(args):
         # Per-component accumulators for epoch logging
         epoch_components = {}
 
-        # Soft-DTW weight warmup
-        soft_dtw_weight = min(1.0, epoch / max(1, soft_dtw_warmup_epochs)) * soft_dtw_target_weight
+        # Soft-DTW weight warmup (deferred start + stochastic batches)
+        if epoch < soft_dtw_start_epoch:
+            soft_dtw_weight = 0.0  # Completely skip DTW computation
+        else:
+            ramp = min(1.0, (epoch - soft_dtw_start_epoch) / max(1, soft_dtw_warmup_epochs))
+            soft_dtw_weight = ramp * soft_dtw_target_weight
 
         for batch_idx, batch_data in enumerate(train_loader):
             context = batch_data[0].to(device)
@@ -553,11 +560,15 @@ def train(args):
                     x_0_pred = fm_scheduler.predict_x0(x_t, v_pred, t)
 
                     # Compute multi-component loss
+                    # Stochastic DTW: only compute on batch_prob fraction of batches
+                    dtw_w_this_batch = soft_dtw_weight if (
+                        soft_dtw_weight > 0 and torch.rand(1).item() < soft_dtw_batch_prob
+                    ) else 0.0
                     loss, loss_dict = combined_diffusion_loss(
                         v_target, v_pred, future, x_0_pred,
                         feature_extractor=feature_extractor if args.use_identity_loss else None,
                         t_normalized=t,
-                        w_soft_dtw=soft_dtw_weight,
+                        w_soft_dtw=dtw_w_this_batch,
                         use_flow_matching=True,
                     )
 
@@ -584,11 +595,14 @@ def train(args):
                     alpha_bar_t = scheduler.alpha_bar_t.to(device)[t].view(-1, 1, 1)
                     x_0_pred = (x_t - (1 - alpha_bar_t).sqrt() * noise_pred) / alpha_bar_t.sqrt().clamp(min=1e-8)
 
+                    dtw_w_this_batch = soft_dtw_weight if (
+                        soft_dtw_weight > 0 and torch.rand(1).item() < soft_dtw_batch_prob
+                    ) else 0.0
                     loss, loss_dict = combined_diffusion_loss(
                         noise, noise_pred, future, x_0_pred,
                         feature_extractor=feature_extractor if args.use_identity_loss else None,
                         alpha_bar_t=alpha_bar_t.squeeze(),
-                        w_soft_dtw=soft_dtw_weight,
+                        w_soft_dtw=dtw_w_this_batch,
                         use_flow_matching=False,
                     )
 
